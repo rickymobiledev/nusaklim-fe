@@ -8,7 +8,7 @@ import { fetchJson } from "@/lib/api/client-fetch";
 
 /** `companyId` TIDAK dikirim dari sini — Route Handler yang menentukan
  *  dari sesi server-side (`resolveCompanyId()`), supaya tidak bisa
- *  dispoof lewat query string. Lihat CLAUDE.md "companyId (multi-tenant)". */
+ *  dispoof lewat query string. */
 export function useStations(params: Omit<GetStationsParams, "companyId"> = {}) {
   return useQuery({
     queryKey: ["stations", params],

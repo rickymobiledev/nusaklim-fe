@@ -7,8 +7,8 @@ import { API_V2_URL } from "@/constants";
  * data per-perusahaan/multi-tenant — dikonfirmasi dari Postman collection).
  *
  * SERVER-ONLY — WAJIB hanya dipanggil dari Route Handler di bawah
- * `app/api/**` (lihat CLAUDE.md "Batas arsitektur data"), TIDAK PERNAH
- * dari `"use client"` hook/komponen. Ini yang membuat `API_BASE_URL` dan
+ * `app/api/**`, TIDAK PERNAH dari `"use client"` hook/komponen. Ini yang
+ * membuat `API_BASE_URL` dan
  * `API_KEY` (server-only, tidak diprefix `NEXT_PUBLIC_`, lihat
  * .env.example) aman — keduanya tidak pernah ke-bundle ke browser.
  *

@@ -6,8 +6,9 @@ import eslintConfigPrettier from "eslint-config-prettier";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Batas styling (lihat CLAUDE.md "Batas styling"): components/ui/** harus
-  // tetap primitif Tailwind/shadcn murni, tidak boleh styled-components.
+  // Batas styling: components/ui/** harus tetap primitif Tailwind/shadcn
+  // murni, tidak boleh styled-components (lihat rule di bawah untuk
+  // components/{shared,layout,domain}/** yang sebaliknya).
   {
     files: ["src/components/ui/**"],
     rules: {

@@ -9,7 +9,7 @@ import { USE_MOCK } from "@/constants";
 
 /** `companyId` TIDAK dikirim dari sini — Route Handler yang menentukan
  *  dari sesi server-side (`resolveCompanyId()`), supaya tidak bisa
- *  dispoof lewat query string. Lihat CLAUDE.md "companyId (multi-tenant)". */
+ *  dispoof lewat query string. */
 export function useDownloadData(params: Omit<GetDownloadDataParams, "companyId">) {
   return useQuery({
     queryKey: ["download-data", params],

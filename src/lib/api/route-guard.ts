@@ -38,8 +38,7 @@ const CROSS_COMPANY_ROLES: UserRole[] = ["ADMINISTRATOR", "RESEARCHER"];
  * DIABAIKAN buat role ini, apapun isinya. `ADMINISTRATOR`/`RESEARCHER`
  * SEMENTARA boleh lintas company (`requestedCompanyId` dipakai kalau ada,
  * `undefined` = tanpa filter/semua company) — **ini belum keputusan final
- * dari PM**, lihat CLAUDE.md bagian "companyId (multi-tenant)" sebelum
- * menganggap perilaku ini permanen.
+ * dari PM**, jangan anggap perilaku ini permanen tanpa konfirmasi ulang.
  */
 export function resolveCompanyId(
   user: { companyCode: string; role: UserRole },
