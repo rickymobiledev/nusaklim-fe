@@ -1,13 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { StationSelect } from "@/components/weather/station-select";
-import { useKeseimbanganAir } from "@/hooks/use-weather-snapshot";
+import { useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { StationSelect } from "@/components/shared/StationSelect";
+import { DataTable } from "@/components/shared/DataTable";
+import { DataState } from "@/components/shared/DataState";
+import { useWaterBalance } from "@/hooks/use-water-balance";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const BULAN_LABEL: Record<string, string> = {
+  jan: "Januari",
+  feb: "Februari",
+  mar: "Maret",
+  apr: "April",
+  may: "Mei",
+  jun: "Juni",
+  jul: "Juli",
+  aug: "Agustus",
+  sep: "September",
+  oct: "Oktober",
+  nov: "November",
+  dec: "Desember",
+};
+
+type DisplayRow = {
+  bulan: string;
+  curahHujan: string;
+  defisitAir: string;
+  hariHujan: string;
+  kelebihanAir: string;
+};
+
+const columns: ColumnDef<DisplayRow>[] = [
+  { accessorKey: "bulan", header: "Bulan" },
+  { accessorKey: "curahHujan", header: "Curah Hujan" },
+  { accessorKey: "defisitAir", header: "Defisit Air" },
+  { accessorKey: "hariHujan", header: "Hari Hujan" },
+  { accessorKey: "kelebihanAir", header: "Kelebihan Air" },
+];
+
+function fmt(value: number | null) {
+  return value == null ? "--" : String(value);
+}
 
 export default function KeseimbanganAirPage() {
   const [stationId, setStationId] = useState<string>();
-  const { data, isLoading } = useKeseimbanganAir(stationId);
+  const { data, isLoading, isError, error } = useWaterBalance({ stationId });
+
+  const rows = useMemo<DisplayRow[]>(() => {
+    if (!data) return [];
+    // Panjang tabel ikut apa adanya array bulanan dari API — jangan hardcode 12.
+    return data.bulanan.map((bulan) => ({
+      bulan: BULAN_LABEL[bulan.bulan] ?? bulan.bulan,
+      curahHujan: fmt(bulan.curahHujan),
+      defisitAir: fmt(bulan.defisitAir),
+      hariHujan: fmt(bulan.hariHujan),
+      kelebihanAir: fmt(bulan.kelebihanAir),
+    }));
+  }, [data]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -15,30 +65,20 @@ export default function KeseimbanganAirPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Laporan Keseimbangan Air — {data?.periode ?? "—"}</CardTitle>
+          <CardTitle>Keseimbangan Air — {data?.tahun ?? "—"}</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[
-            ["Curah Hujan", data?.curahHujan],
-            ["Defisit Air", data?.defisitAir],
-            ["Hari Hujan", data?.hariHujan],
-            ["Kelebihan Air", data?.kelebihanAir],
-          ].map(([label, value]) => (
-            <div key={label as string}>
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <p className="tabular-data text-xl font-semibold">
-                {isLoading ? "…" : (value as number | null) ?? "--"}
-              </p>
-            </div>
-          ))}
+        <CardContent>
+          <DataState
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            isEmpty={rows.length === 0}
+            emptyMessage="Pilih stasiun untuk melihat keseimbangan air"
+          >
+            <DataTable columns={columns} data={rows} />
+          </DataState>
         </CardContent>
       </Card>
-
-      <p className="text-sm text-muted-foreground">
-        Catatan: periode monitoring diambil dari data bulan sebelumnya (mengikuti
-        perilaku app existing). Tambahkan grafik tren bulanan di sini pakai{" "}
-        <code>WeatherTrendChart</code> setelah endpoint historis dari Backend siap.
-      </p>
     </div>
   );
 }

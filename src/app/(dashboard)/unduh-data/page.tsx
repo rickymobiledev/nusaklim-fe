@@ -3,22 +3,22 @@
 import { useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Download, Search } from "lucide-react";
-import { StationSelect } from "@/components/weather/station-select";
-import { DataTable } from "@/components/data-table/data-table";
+import { StationSelect } from "@/components/shared/StationSelect";
+import { DataTable } from "@/components/shared/DataTable";
+import { DataState } from "@/components/shared/DataState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { DATA_GRANULARITY } from "@/lib/constants";
-import { useWeatherDataTable } from "@/hooks/use-forecast";
+import { DATA_GRANULARITY } from "@/constants";
+import { useDownloadData } from "@/hooks/use-download-data";
 import type { DataGranularity } from "@/types/domain";
 
 type DisplayRow = {
   tanggal: string;
-  rerataTemperaturUdaraMin: string;
-  rerataTemperaturUdaraMax: string;
+  rerataTemperatur: string;
   totalCurahHujan: string;
-  totalRadiasiMatahari: string;
+  totalRadiasi: string;
   rerataTekananUdara: string;
   rerataKecepatanAngin: string;
   arahMataAngin: string;
@@ -26,10 +26,9 @@ type DisplayRow = {
 
 const columns: ColumnDef<DisplayRow>[] = [
   { accessorKey: "tanggal", header: "Tanggal" },
-  { accessorKey: "rerataTemperaturUdaraMin", header: "Rerata Temperatur Udara (Min)" },
-  { accessorKey: "rerataTemperaturUdaraMax", header: "Rerata Temperatur Udara (Maks)" },
+  { accessorKey: "rerataTemperatur", header: "Rerata Temperatur" },
   { accessorKey: "totalCurahHujan", header: "Total Curah Hujan" },
-  { accessorKey: "totalRadiasiMatahari", header: "Total Radiasi Matahari" },
+  { accessorKey: "totalRadiasi", header: "Total Radiasi" },
   { accessorKey: "rerataTekananUdara", header: "Rerata Tekanan Udara" },
   { accessorKey: "rerataKecepatanAngin", header: "Rerata Kecepatan Angin" },
   { accessorKey: "arahMataAngin", header: "Arah Mata Angin" },
@@ -41,25 +40,26 @@ function fmt(value: number | null, unit: string) {
 
 export default function UnduhDataPage() {
   const [stationId, setStationId] = useState<string>();
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [granularity, setGranularity] = useState<DataGranularity>("harian");
+  const [page, setPage] = useState(1);
 
-  const { data, isFetching, refetch } = useWeatherDataTable({
+  const { data, isLoading, isFetching, isError, error, refetch } = useDownloadData({
     stationId,
-    from,
-    to,
+    dateFrom,
+    dateTo,
     granularity,
+    page,
   });
 
   const rows = useMemo<DisplayRow[]>(
     () =>
-      (data ?? []).map((r) => ({
+      (data?.data ?? []).map((r) => ({
         tanggal: r.tanggal,
-        rerataTemperaturUdaraMin: fmt(r.rerataTemperaturUdaraMin, "°C"),
-        rerataTemperaturUdaraMax: fmt(r.rerataTemperaturUdaraMax, "°C"),
+        rerataTemperatur: fmt(r.rerataTemperatur, "°C"),
         totalCurahHujan: fmt(r.totalCurahHujan, "mm"),
-        totalRadiasiMatahari: fmt(r.totalRadiasiMatahari, "MJ/m²"),
+        totalRadiasi: fmt(r.totalRadiasi, "MJ/m²"),
         rerataTekananUdara: fmt(r.rerataTekananUdara, "hPa"),
         rerataKecepatanAngin: fmt(r.rerataKecepatanAngin, "m/s"),
         arahMataAngin: r.arahMataAngin ?? "--",
@@ -74,12 +74,22 @@ export default function UnduhDataPage() {
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="from">Dari Tanggal</Label>
-          <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          <Input
+            id="from"
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="to">Sampai Tanggal</Label>
-          <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <Input
+            id="to"
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+          />
         </div>
 
         <Button onClick={() => refetch()}>
@@ -87,7 +97,7 @@ export default function UnduhDataPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 border-b border-border">
+      <div className="border-border flex gap-1 border-b">
         {DATA_GRANULARITY.map((g) => (
           <button
             key={g.value}
@@ -95,7 +105,7 @@ export default function UnduhDataPage() {
             className={cn(
               "px-3 py-2 text-sm font-medium transition-colors",
               granularity === g.value
-                ? "border-b-2 border-primary text-primary"
+                ? "border-primary text-primary border-b-2"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -113,11 +123,20 @@ export default function UnduhDataPage() {
         </Button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={rows}
+      <DataState
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        isEmpty={!isFetching && rows.length === 0}
         emptyMessage={isFetching ? "Memuat data..." : "Data Tidak Tersedia"}
-      />
+      >
+        <DataTable
+          columns={columns}
+          data={rows}
+          meta={data?.meta}
+          onPageChange={setPage}
+        />
+      </DataState>
     </div>
   );
 }

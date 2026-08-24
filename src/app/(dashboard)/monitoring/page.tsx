@@ -10,7 +10,7 @@ const items = [
     icon: Scale,
   },
   {
-    href: "/monitoring/deret-hari-tidak-hujan",
+    href: "/monitoring/dry-spell",
     title: "Deret Terpanjang Hari Tidak Hujan",
     desc: "Periksa laporan tentang deret terpanjang hari tidak hujan",
     icon: TreeDeciduous,
@@ -38,12 +38,12 @@ export default function MonitoringPage() {
           <Link key={item.href} href={item.href}>
             <Card className="h-full transition-shadow hover:shadow-md">
               <CardContent className="flex gap-4 p-5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <div className="bg-accent text-accent-foreground flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
                   <Icon className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="font-semibold">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  <p className="text-muted-foreground text-sm">{item.desc}</p>
                 </div>
               </CardContent>
             </Card>

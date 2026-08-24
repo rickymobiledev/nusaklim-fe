@@ -1,38 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  AuthHeading,
+  AuthLink,
+  AuthSubmitButton,
+  AuthSubtext,
+} from "@/components/domain/auth/AuthCopy";
+import { AuthFormField, AuthIconButton } from "@/components/domain/auth/AuthFormField";
+import { detectLoginMethod } from "@/lib/auth/detect-login-method";
 
 const loginSchema = z.object({
-  email: z.string().email("Email tidak valid"),
+  identifier: z.string().min(1, "NIK SAP, Email, atau Username wajib diisi"),
   password: z.string().min(1, "Password wajib diisi"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
 
+const METHOD_LABEL: Record<string, string> = {
+  nik_sap: "NIK SAP",
+  email: "Email",
+  username: "Username",
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+
+  const identifier = watch("identifier");
+  const detectedMethod = useMemo(
+    () => (identifier ? METHOD_LABEL[detectLoginMethod(identifier)] : null),
+    [identifier],
+  );
 
   async function onSubmit(values: LoginForm) {
     setFormError(null);
@@ -42,7 +55,7 @@ export default function LoginPage() {
     });
 
     if (!result || result.error) {
-      setFormError("Email atau password salah.");
+      setFormError("NIK SAP/Email/Username atau password salah.");
       return;
     }
 
@@ -51,43 +64,63 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Masuk</CardTitle>
-        <CardDescription>
-          PT Riset Perkebunan Nusantara — Monitoring Cuaca
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" autoComplete="email" {...register("email")} />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
+    <div className="flex w-full flex-col gap-10">
+      <div className="flex flex-col gap-2.5">
+        <AuthHeading>Selamat Datang Kembali</AuthHeading>
+        <AuthSubtext>Masukkan kredensial untuk masuk ke akun kami</AuthSubtext>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
+        <div className="flex flex-col gap-4">
+          <AuthFormField
+            id="identifier"
+            label="NIK SAP/Email/Username"
+            icon={User}
+            type="text"
+            autoComplete="username"
+            placeholder="Masukkan NIK SAP/Email/Username"
+            hint={detectedMethod ? `Terdeteksi sebagai: ${detectedMethod}` : undefined}
+            error={errors.identifier?.message}
+            {...register("identifier")}
+          />
+
+          <AuthFormField
+            id="password"
+            label="Kata Sandi"
+            icon={Lock}
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="Masukkan Kata Sandi"
+            error={errors.password?.message}
+            trailing={
+              <AuthIconButton
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                aria-label={
+                  showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+                }
+              >
+                {showPassword ? (
+                  <EyeOff size={24} strokeWidth={1.5} />
+                ) : (
+                  <Eye size={24} strokeWidth={1.5} />
+                )}
+              </AuthIconButton>
+            }
+            {...register("password")}
+          />
+
+          <div className="flex justify-end">
+            <AuthLink type="button">Lupa Password</AuthLink>
           </div>
+        </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
+        {formError && <p className="text-destructive text-sm">{formError}</p>}
 
-          {formError && <p className="text-sm text-destructive">{formError}</p>}
-
-          <Button type="submit" disabled={isSubmitting} className="mt-2">
-            {isSubmitting ? "Memproses..." : "Masuk"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <AuthSubmitButton type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Memproses..." : "Masuk"}
+        </AuthSubmitButton>
+      </form>
+    </div>
   );
 }

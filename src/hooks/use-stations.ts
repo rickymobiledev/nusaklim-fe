@@ -1,19 +1,21 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useApiClient } from "./use-api-client";
-import { MOCK_STATIONS, MOCK_STATION_SUMMARY, USE_MOCK } from "@/lib/mock-data";
+import type { ApiItemResponse, ApiListResponse } from "@/types/api";
 import type { Station, StationSummary } from "@/types/domain";
+import type { GetStationsParams } from "@/lib/api/station-api";
+import { fetchJson } from "@/lib/api/client-fetch";
 
-export function useStations() {
-  const api = useApiClient();
-
-  return useQuery<Station[]>({
-    queryKey: ["stations"],
+/** `companyId` TIDAK dikirim dari sini — Route Handler yang menentukan
+ *  dari sesi server-side (`resolveCompanyId()`), supaya tidak bisa
+ *  dispoof lewat query string. Lihat CLAUDE.md "companyId (multi-tenant)". */
+export function useStations(params: Omit<GetStationsParams, "companyId"> = {}) {
+  return useQuery({
+    queryKey: ["stations", params],
     queryFn: async () => {
-      if (USE_MOCK) return MOCK_STATIONS;
-      const { data } = await api.get<Station[]>("/stations");
-      return data;
+      const qs = new URLSearchParams();
+      if (params.status) qs.set("status", params.status);
+      return fetchJson<ApiListResponse<Station>>(`/api/stations?${qs}`);
     },
     // Status stasiun (aktif/tidak aktif) berubah dari sinkronisasi IoT —
     // polling ringan tiap 5 menit sudah cukup, tidak perlu WebSocket.
@@ -22,15 +24,11 @@ export function useStations() {
 }
 
 export function useStationSummary() {
-  const api = useApiClient();
-
-  return useQuery<StationSummary>({
+  return useQuery({
     queryKey: ["stations", "summary"],
-    queryFn: async () => {
-      if (USE_MOCK) return MOCK_STATION_SUMMARY;
-      const { data } = await api.get<StationSummary>("/stations/summary");
-      return data;
-    },
+    queryFn: async () =>
+      fetchJson<ApiItemResponse<StationSummary>>("/api/stations/summary"),
+    select: (res) => res.data,
     refetchInterval: 5 * 60 * 1000,
   });
 }

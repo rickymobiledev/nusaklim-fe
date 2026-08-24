@@ -5,17 +5,22 @@
  * berdasarkan tampilan existing app supaya tim FE bisa mulai duluan.
  */
 
-export type StationStatus = "aktif" | "tidak_aktif";
+/** Nilai persis dari API asli (`GET /devices/status`) — bukan "aktif"/"tidak_aktif". */
+export type StationStatus = "on" | "off";
 
+/** Field mengikuti `GET /devices`/`GET /devices/status` API asli. Tidak ada
+ *  `kode`/`provinsi` di sana — jangan tambahkan lagi tanpa data BE yang
+ *  benar-benar menyediakannya. */
 export interface Station {
   id: string;
   nama: string;
-  lokasi: string;
-  provinsi: string;
-  latitude: number;
-  longitude: number;
+  brand: string;
+  companyCode: string;
+  companyName: string;
+  lat: number;
+  long: number;
   status: StationStatus;
-  sinkronisasiTerakhir: string | null; // ISO date string
+  sinkronisasiTerakhir: string | null; // dari field `updated_at` API asli
 }
 
 export interface StationSummary {
@@ -32,8 +37,8 @@ export interface WeatherMetricRange {
 }
 
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
-export interface WeatherSnapshot {
-  stasiunId: string;
+export interface WeatherMetric {
+  stationId: string;
   diperbaruiPada: string | null;
   temperaturUdara: WeatherMetricRange;
   radiasiMatahari: WeatherMetricRange;
@@ -43,62 +48,98 @@ export interface WeatherSnapshot {
   kecepatanAngin: WeatherMetricRange;
 }
 
-/** Panel "Monitoring" di sidebar Beranda + halaman Monitoring. */
-export interface KeseimbanganAir {
+export type BulanKey =
+  | "jan"
+  | "feb"
+  | "mar"
+  | "apr"
+  | "may"
+  | "jun"
+  | "jul"
+  | "aug"
+  | "sep"
+  | "oct"
+  | "nov"
+  | "dec";
+
+/** Urutan `BulanKey` — dipakai untuk generate 12 baris & mapping index bulan. */
+export const BULAN_ORDER: BulanKey[] = [
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "may",
+  "jun",
+  "jul",
+  "aug",
+  "sep",
+  "oct",
+  "nov",
+  "dec",
+];
+
+/** Satu baris bulan dari tabel `GET /water_deficit` asli (pivot dari 4 baris
+ *  per-parameter x kolom jan..dec ke bentuk per-bulan yang gampang dirender
+ *  sebagai tabel/chart). */
+export interface WaterBalanceMonth {
+  bulan: BulanKey;
   curahHujan: number | null;
   defisitAir: number | null;
   hariHujan: number | null;
   kelebihanAir: number | null;
-  periode: string; // contoh: "Juli 2026" (diambil dari bulan sebelumnya)
 }
 
-export interface DeretHariTidakHujan {
-  tanggalMulai: string | null;
-  durasiHari: number | null;
+/** Panel "Monitoring" di sidebar Beranda + halaman Monitoring — data
+ *  SETAHUN penuh per stasiun (bukan 1 periode), sesuai `GET /water_deficit?device_id=&year=`. */
+export interface WaterBalance {
+  stationId: string;
+  tahun: number;
+  bulanan: WaterBalanceMonth[];
 }
 
-export interface LamaPenyinaran {
-  batasBawahJam: number | null;
-  batasAtasJam: number | null;
+/** Satu baris dari `GET /dry_spell` — bisa lebih dari satu periode dry-spell
+ *  dalam rentang tanggal, jadi ini item list, bukan objek tunggal. */
+export interface DrySpellReport {
+  stasiun: string;
+  tanggal: string;
+  totalHariKering: number;
+  tanggalMulai: string;
+  tanggalSelesai: string;
 }
 
-export interface VpdIndex {
-  nilai: number | null;
-  kategori: "rendah" | "sedang" | "tinggi" | null;
+/** Satu baris per-hari dari `GET /solar_sunshine`. */
+export interface SunshineDuration {
+  stasiun: string;
+  tanggal: string;
+  lamaPenyinaranJam: number;
+  batasBawahJam: number;
+}
+
+/** Satu baris per-hari dari `GET /vpd`. API asli tidak punya field
+ *  "kategori" — `kategori` di sini DERIVED dari `vpd`/`batasAman`
+ *  (threshold sementara: <=70% "rendah", <=100% "sedang", >100% "tinggi"),
+ *  bukan nilai dari Backend. Konfirmasi ke tim Data Analyst/BE sebelum
+ *  dianggap final. */
+export interface VPDReport {
+  stasiun: string;
+  tanggal: string;
+  temperaturUdara: number;
+  kelembabanUdara: number;
+  svp: number;
+  vpd: number;
+  batasAman: number;
+  kategori: "rendah" | "sedang" | "tinggi";
 }
 
 /** Baris tabel "Unduh Data". */
-export interface WeatherDataRow {
+export interface DownloadDataRow {
   tanggal: string;
-  rerataTemperaturUdaraMin: number | null;
-  rerataTemperaturUdaraMax: number | null;
+  rerataTemperatur: number | null;
   totalCurahHujan: number | null;
-  totalRadiasiMatahari: number | null;
+  totalRadiasi: number | null;
   rerataTekananUdara: number | null;
   rerataKecepatanAngin: number | null;
   arahMataAngin: string | null;
 }
 
-export type DataGranularity =
-  | "harian"
-  | "10menit"
-  | "pagi"
-  | "siang"
-  | "malam";
-
-/** Baris tabel "Ramalan Cuaca" — hasil model DL dari tim Data Analyst. */
-export interface ForecastRow {
-  tanggal: string;
-  temperaturUdara: number | null;
-  kelembabanUdara: number | null;
-  curahHujan: number | null;
-  radiasiMatahari: number | null;
-  tekananUdara: number | null;
-  kecepatanAngin: number | null;
-  arahMataAngin: string | null;
-}
-
-export interface ApiError {
-  message: string;
-  code?: string;
-}
+export type DataGranularity = "harian" | "10menit" | "pagi" | "siang" | "malam";

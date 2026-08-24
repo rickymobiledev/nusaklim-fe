@@ -1,12 +1,12 @@
 "use client";
 
-import { DynamicIndonesiaMap } from "@/components/map/dynamic-indonesia-map";
+import { DynamicStationMap } from "@/components/domain/peta/dynamic-station-map";
 import { useStations } from "@/hooks/use-stations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function PetaPage() {
-  const { data: stations, isLoading } = useStations();
+  const { data: stationsResponse, isLoading } = useStations();
 
   return (
     <div className="flex flex-col gap-4">
@@ -15,11 +15,11 @@ export default function PetaPage() {
           {isLoading ? (
             <Skeleton className="h-[520px] w-full" />
           ) : (
-            <DynamicIndonesiaMap stations={stations ?? []} />
+            <DynamicStationMap stations={stationsResponse?.data ?? []} />
           )}
         </CardContent>
       </Card>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-xs">
         Titik hijau = stasiun aktif, titik merah = stasiun tidak aktif.
       </p>
     </div>

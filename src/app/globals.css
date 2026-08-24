@@ -1,14 +1,17 @@
 @import "tailwindcss";
+@config "../../tailwind.config.mts";
 @plugin "tailwindcss-animate";
 
 /*
  * Token warna sementara untuk boilerplate ini — bukan hasil final UI/UX.
  * Rasional: aplikasi ini adalah dashboard riset cuaca perkebunan, padat data,
- * dipakai berjam-jam oleh peneliti. Primary = biru-teal ("langit/atmosfer"),
- * bukan biru generik Bootstrap. Success = hijau daun (status "aktif"),
- * Warning = amber panen (untuk early warning), Destructive = merah untuk
- * status "tidak aktif" / error. Ganti nilai di bawah begitu tim UI/UX selesai
- * menetapkan token warna dari Figma — struktur variabelnya tidak perlu berubah.
+ * dipakai berjam-jam oleh peneliti. Primary = biru (#175FE2, dikonfirmasi
+ * user), skala penuhnya ada di `src/lib/design-tokens.ts` — dipakai bareng
+ * oleh Tailwind (`tailwind.config.ts`) & styled-components (`lib/theme.ts`).
+ * Success = hijau daun (status "aktif"), Warning = amber panen (untuk early
+ * warning), Destructive = merah untuk status "tidak aktif" / error. Ganti
+ * nilai di bawah begitu tim UI/UX selesai menetapkan token warna dari Figma —
+ * struktur variabelnya tidak perlu berubah.
  */
 :root {
   --background: #f8fafc;
@@ -20,8 +23,8 @@
   --popover: #ffffff;
   --popover-foreground: #0f172a;
 
-  --primary: #0e7490;
-  --primary-foreground: #f0fdfa;
+  --primary: #175fe2;
+  --primary-foreground: #f1f5fd;
 
   --secondary: #eef2f7;
   --secondary-foreground: #0f172a;
@@ -29,8 +32,8 @@
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
 
-  --accent: #ecfeff;
-  --accent-foreground: #0e7490;
+  --accent: #dfe9fb;
+  --accent-foreground: #175fe2;
 
   --success: #15803d;
   --success-foreground: #f0fdf4;
@@ -43,7 +46,7 @@
 
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #0e7490;
+  --ring: #175fe2;
 
   --radius: 0.625rem;
 }
@@ -58,8 +61,8 @@
   --popover: #111a2c;
   --popover-foreground: #e2e8f0;
 
-  --primary: #22d3ee;
-  --primary-foreground: #052e33;
+  --primary: #5e90ed;
+  --primary-foreground: #0a275c;
 
   --secondary: #1a2338;
   --secondary-foreground: #e2e8f0;
@@ -67,8 +70,8 @@
   --muted: #16213a;
   --muted-foreground: #93a2b8;
 
-  --accent: #0e2f36;
-  --accent-foreground: #67e8f9;
+  --accent: #0a275c;
+  --accent-foreground: #8cb0f2;
 
   --success: #4ade80;
   --success-foreground: #052e14;
@@ -81,7 +84,7 @@
 
   --border: #1e293b;
   --input: #1e293b;
-  --ring: #22d3ee;
+  --ring: #5e90ed;
 }
 
 @theme inline {
@@ -116,6 +119,11 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Font dari Figma (login redesign) */
+  --font-heading: var(--font-manrope);
+  --font-body: var(--font-plus-jakarta-sans);
+  --font-caption: var(--font-nunito-sans);
 }
 
 body {
