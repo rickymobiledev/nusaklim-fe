@@ -1,23 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import {
+  AuthCheckboxLabel,
   AuthHeading,
   AuthLink,
   AuthSubmitButton,
   AuthSubtext,
 } from "@/components/domain/auth/AuthCopy";
 import { AuthFormField, AuthIconButton } from "@/components/domain/auth/AuthFormField";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const loginSchema = z.object({
   username: z.string().min(1, "NIK SAP, Email, atau Username wajib diisi"),
   password: z.string().min(1, "Password wajib diisi"),
+  rememberMe: z.boolean(),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -29,20 +32,35 @@ export default function LoginPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { rememberMe: false },
+  });
 
   async function onSubmit(values: LoginForm) {
     setFormError(null);
     const result = await signIn("credentials", {
-      ...values,
+      username: values.username,
+      password: values.password,
       redirect: false,
     });
 
     if (!result || result.error) {
       setFormError("NIK SAP/Email/Username atau password salah.");
       return;
+    }
+
+    try {
+      await fetch("/api/auth/remember-me", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rememberMe: values.rememberMe }),
+      });
+    } catch {
+      // Best-effort — gagalnya penyesuaian durasi sesi tidak boleh menggagalkan login.
     }
 
     router.push("/");
@@ -95,7 +113,21 @@ export default function LoginPage() {
             {...register("password")}
           />
 
-          <div className="flex justify-end">
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Controller
+                control={control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <Checkbox
+                    id="rememberMe"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+              <AuthCheckboxLabel htmlFor="rememberMe">Ingat Saya</AuthCheckboxLabel>
+            </div>
             <AuthLink type="button">Lupa Password</AuthLink>
           </div>
         </div>

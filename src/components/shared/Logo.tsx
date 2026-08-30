@@ -22,7 +22,6 @@ const Wrapper = styled.div`
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid #ecefed;
-  padding: 16.5px 0px;
 `;
 
 const TextBlock = styled.div`
@@ -49,5 +48,4 @@ const Tagline = styled.p`
   font-weight: 500;
   line-height: 16px;
   color: #8b9c90;
-  margin-top: 4px;
 `;

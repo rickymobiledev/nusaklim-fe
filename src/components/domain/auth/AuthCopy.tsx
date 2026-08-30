@@ -14,7 +14,6 @@ export function AuthFooter() {
 
 const FooterWrapper = styled.footer`
   border-top: 1px solid #ecefed;
-  padding-top: ${(p) => p.theme.spacing.md};
 `;
 
 const FooterVersion = styled.p`
@@ -47,6 +46,15 @@ export const AuthSubtext = styled.p`
   font-weight: 400;
   line-height: 24px;
   color: #000000;
+`;
+
+export const AuthCheckboxLabel = styled.label`
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #1d2520;
+  cursor: pointer;
 `;
 
 export const AuthLink = styled.button`
