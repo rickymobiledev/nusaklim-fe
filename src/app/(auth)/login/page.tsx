@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,20 +14,13 @@ import {
   AuthSubtext,
 } from "@/components/domain/auth/AuthCopy";
 import { AuthFormField, AuthIconButton } from "@/components/domain/auth/AuthFormField";
-import { detectLoginMethod } from "@/lib/auth/detect-login-method";
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, "NIK SAP, Email, atau Username wajib diisi"),
+  username: z.string().min(1, "NIK SAP, Email, atau Username wajib diisi"),
   password: z.string().min(1, "Password wajib diisi"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
-
-const METHOD_LABEL: Record<string, string> = {
-  nik_sap: "NIK SAP",
-  email: "Email",
-  username: "Username",
-};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,15 +30,8 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
-
-  const identifier = watch("identifier");
-  const detectedMethod = useMemo(
-    () => (identifier ? METHOD_LABEL[detectLoginMethod(identifier)] : null),
-    [identifier],
-  );
 
   async function onSubmit(values: LoginForm) {
     setFormError(null);
@@ -73,15 +59,14 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
         <div className="flex flex-col gap-4">
           <AuthFormField
-            id="identifier"
+            id="username"
             label="NIK SAP/Email/Username"
             icon={User}
             type="text"
             autoComplete="username"
             placeholder="Masukkan NIK SAP/Email/Username"
-            hint={detectedMethod ? `Terdeteksi sebagai: ${detectedMethod}` : undefined}
-            error={errors.identifier?.message}
-            {...register("identifier")}
+            error={errors.username?.message}
+            {...register("username")}
           />
 
           <AuthFormField

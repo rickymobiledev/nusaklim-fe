@@ -2,8 +2,6 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { API_V2_URL } from "./constants";
-import { detectLoginMethod } from "./lib/auth/detect-login-method";
-import { MOCK_USERS } from "./lib/api/mock/auth";
 import type { BackendUserProfile, UserRole } from "./types/auth";
 
 /**
@@ -15,10 +13,10 @@ import type { BackendUserProfile, UserRole } from "./types/auth";
  */
 function mapProfileToUser(profile: BackendUserProfile) {
   return {
-    id: profile.nik_sap,
+    id: profile.id,
     name: profile.name,
     image: profile.image_url,
-    nikSap: profile.nik_sap,
+    nikSap: profile.id,
     role: profile.user_role_code,
     roleName: profile.user_role_name,
     companyCode: profile.company_code,
@@ -31,30 +29,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        identifier: { label: "NIK SAP / Email / Username", type: "text" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.identifier || !credentials?.password) return null;
+        if (!credentials?.username || !credentials?.password) return null;
 
-        const identifier = String(credentials.identifier);
-        const method = detectLoginMethod(identifier);
+        const username = String(credentials.username);
 
-        // Mode mock: supaya tim FE bisa `pnpm dev` dan langsung login tanpa
-        // menunggu backend siap. Set NEXT_PUBLIC_USE_MOCK_API=false di
-        // .env.local begitu backend sungguhan sudah bisa dipanggil.
-        if (process.env.NEXT_PUBLIC_USE_MOCK_API === "true") {
-          const mockUser = MOCK_USERS.find((u) => u[method] === identifier);
-          if (!mockUser) return null;
-          return mapProfileToUser(mockUser);
-        }
-
+        // Login SELALU ke backend asli — tidak ada jalur mock (dihapus
+        // sengaja supaya tidak ada risiko demo/produksi ke-toggle balik
+        // ke kredensial contoh). Domain data lain (weather/monitoring/dst)
+        // masih mock, lihat lib/api/index.ts.
         // Backend expose 3 cara login (NIK SAP / Email / Username) ke satu
-        // endpoint yang sama — body-nya yang beda tergantung metode. Endpoint
-        // asli expect x-www-form-urlencoded (dikonfirmasi Postman), bukan JSON.
-        // Header "api-key" wajib — di collection Postman ini di-set sebagai
-        // auth level collection (berlaku ke semua endpoint termasuk login),
-        // bukan cuma endpoint data lain.
+        // endpoint yang sama, body field beda per mode — app ini fix pakai
+        // mode "Username" (dikonfirmasi Postman). Endpoint asli expect
+        // x-www-form-urlencoded, bukan JSON. Header "api-key" wajib — di
+        // collection Postman ini di-set sebagai auth level collection
+        // (berlaku ke semua endpoint termasuk login), bukan cuma endpoint
+        // data lain.
         const res = await fetch(`${API_V2_URL}/authentications`, {
           method: "POST",
           headers: {
@@ -62,15 +55,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             "api-key": process.env.API_KEY ?? "",
           },
           body: new URLSearchParams({
-            [method]: identifier,
+            username,
             password: credentials.password as string,
           }),
         });
 
         if (!res.ok) return null;
 
-        const profile = (await res.json()) as BackendUserProfile;
-        return mapProfileToUser(profile);
+        // Response asli dibungkus envelope { status, message, data } —
+        // BUKAN flat BackendUserProfile langsung (dikonfirmasi dari sample
+        // response asli, sama pola dengan /devices/status).
+        const body = (await res.json()) as {
+          status: boolean;
+          message: string;
+          data: BackendUserProfile;
+        };
+        if (!body.status) return null; // login ditolak BE meski HTTP 200
+
+        return mapProfileToUser(body.data);
       },
     }),
   ],

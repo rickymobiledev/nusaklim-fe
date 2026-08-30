@@ -2,31 +2,53 @@
 
 import Link from "next/link";
 import styled from "styled-components";
-import type { LucideIcon } from "lucide-react";
+import type { SidebarIconProps } from "@/components/shared/SidebarIcons";
+import type { ComponentType } from "react";
+
+export function SidebarItem({
+  href,
+  icon: Icon,
+  label,
+  active,
+  collapsed,
+}: {
+  href: string;
+  icon: ComponentType<SidebarIconProps>;
+  label: string;
+  active: boolean;
+  collapsed: boolean;
+}) {
+  return (
+    <StyledLink href={href} title={label} $active={active} $collapsed={collapsed}>
+      <Icon size={20} color={active ? "#FFFFFF" : "#8B9C90"} className="shrink-0" />
+      <Label $collapsed={collapsed}>{label}</Label>
+    </StyledLink>
+  );
+}
 
 const StyledLink = styled(Link)<{ $active: boolean; $collapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: ${(p) => p.theme.spacing.sm};
-  height: calc(${(p) => p.theme.spacing.xl} + ${(p) => p.theme.spacing.md});
-  padding: 0 ${(p) => p.theme.spacing.md};
-  border-radius: ${(p) => p.theme.radius.md};
+  flex-shrink: 0;
+  gap: 8px;
+  width: ${(p) => (p.$collapsed ? "50px" : "100%")};
+  height: 50px;
+  padding: 8px 16px;
+  border-radius: 9999px;
   justify-content: ${(p) => (p.$collapsed ? "center" : "flex-start")};
-  background: ${(p) => (p.$active ? p.theme.colors.primary[600] : "transparent")};
-  color: ${(p) => (p.$active ? p.theme.colors.primary[50] : p.theme.colors.neutral[500])};
+  background: ${(p) =>
+    p.$active ? "linear-gradient(269.39deg, #175FE2 3.66%, #1045A8 97.9%)" : "#ffffff"};
+  color: ${(p) => (p.$active ? "#ffffff" : "#667A6C")};
   transition:
     background-color 0.15s,
     color 0.15s;
-
-  &:hover {
-    background: ${(p) => (p.$active ? p.theme.colors.primary[600] : p.theme.colors.neutral[100])};
-    color: ${(p) => (p.$active ? p.theme.colors.primary[50] : p.theme.colors.neutral[900])};
-  }
 `;
 
 const Label = styled.span<{ $collapsed: boolean }>`
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,24 +67,3 @@ const Label = styled.span<{ $collapsed: boolean }>`
     border: 0;
   `}
 `;
-
-export function SidebarItem({
-  href,
-  icon: Icon,
-  label,
-  active,
-  collapsed,
-}: {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  active: boolean;
-  collapsed: boolean;
-}) {
-  return (
-    <StyledLink href={href} title={label} $active={active} $collapsed={collapsed}>
-      <Icon size={20} className="shrink-0" />
-      <Label $collapsed={collapsed}>{label}</Label>
-    </StyledLink>
-  );
-}

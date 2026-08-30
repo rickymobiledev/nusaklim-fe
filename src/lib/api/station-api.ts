@@ -1,5 +1,5 @@
 import type { ApiItemResponse, ApiListResponse, PaginationParams } from "@/types/api";
-import type { Station, StationStatus, StationSummary } from "@/types/domain";
+import type { Station, StationStatus } from "@/types/domain";
 
 /** `companyId` di sini HARUS datang dari `resolveCompanyId()`
  * (`lib/api/route-guard.ts`) di Route Handler — jangan pernah diisi
@@ -18,5 +18,4 @@ export interface StationApi {
    *  company, implementasi HARUS throw `STATION_NOT_FOUND` (bukan
    *  bocorkan bahwa stasiunnya ada tapi bukan milik company kamu). */
   getStationDetail(id: string, companyId?: string): Promise<ApiItemResponse<Station>>;
-  getStationSummary(companyId?: string): Promise<ApiItemResponse<StationSummary>>;
 }

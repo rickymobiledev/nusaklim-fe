@@ -5,7 +5,9 @@
  * berdasarkan tampilan existing app supaya tim FE bisa mulai duluan.
  */
 
-/** Nilai persis dari API asli (`GET /devices/status`) — bukan "aktif"/"tidak_aktif". */
+/** API asli (`GET /devices/status`) balikin `"ON"/"OFF"` (uppercase) — nilai
+ *  di sini sudah dinormalisasi lowercase oleh
+ *  `lib/api/adapters/station-adapter.ts`, bukan "aktif"/"tidak_aktif". */
 export type StationStatus = "on" | "off";
 
 /** Field mengikuti `GET /devices`/`GET /devices/status` API asli. Tidak ada
@@ -20,13 +22,7 @@ export interface Station {
   lat: number;
   long: number;
   status: StationStatus;
-  sinkronisasiTerakhir: string | null; // dari field `updated_at` API asli
-}
-
-export interface StationSummary {
-  totalStasiun: number;
-  stasiunAktif: number;
-  stasiunTidakAktif: number;
+  sinkronisasiTerakhir: string | null; // dari field `last_sync_time` API asli — BUKAN `updated_at` (field beda, updated_at cuma timestamp record berubah)
 }
 
 export interface WeatherMetricRange {

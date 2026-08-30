@@ -1,6 +1,13 @@
-import type { LucideIcon } from "lucide-react";
-import { Home, Globe2, MonitorSmartphone, CloudDownload, Sparkles } from "lucide-react";
+import type { ComponentType } from "react";
 import type { UserRole } from "@/types/auth";
+import {
+  DashboardIcon,
+  MapIcon,
+  MonitoringIcon,
+  DownloadIcon,
+  ForecastIcon,
+  type SidebarIconProps,
+} from "@/components/shared/SidebarIcons";
 
 /** Origin polos backend Nusaklim (BE team), TANPA path — sama seperti
  *  {{BASE_URL}} di Postman collection mereka. Server-only (tanpa prefix
@@ -20,7 +27,7 @@ export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
 export type NavItem = {
   label: string;
   href: string;
-  icon: LucideIcon;
+  icon: ComponentType<SidebarIconProps>;
   /** Kalau diisi, menu cuma tampil untuk role yang disebut. Kosong = semua role. */
   roles?: UserRole[];
 };
@@ -28,11 +35,11 @@ export type NavItem = {
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data)
  *  plus the new Ramalan Cuaca (DL forecast) menu from the redesign scope. */
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Beranda", href: "/", icon: Home },
-  { label: "Peta", href: "/peta", icon: Globe2 },
-  { label: "Monitoring", href: "/monitoring", icon: MonitorSmartphone },
-  { label: "Unduh Data", href: "/unduh-data", icon: CloudDownload },
-  { label: "Ramalan Cuaca", href: "/ramalan-cuaca", icon: Sparkles },
+  { label: "Beranda", href: "/", icon: DashboardIcon },
+  { label: "Peta", href: "/peta", icon: MapIcon },
+  { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
+  { label: "Unduh Data", href: "/unduh-data", icon: DownloadIcon },
+  { label: "Ramalan Cuaca", href: "/ramalan-cuaca", icon: ForecastIcon },
 ];
 
 export const DATA_GRANULARITY = [

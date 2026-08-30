@@ -1,7 +1,7 @@
 import type { ApiItemResponse } from "@/types/api";
 import type { ForecastDay, ForecastResult } from "@/types/ramalan-cuaca";
 import type { RamalanCuacaApi } from "../ramalan-cuaca-api";
-import { mockStationApi } from "./station-api";
+import { stationApi } from "../station-client";
 import { delay } from "./delay";
 
 /** Nilai contoh mengikuti pola response BE existing (lihat Postman
@@ -111,10 +111,10 @@ export const mockRamalanCuacaApi: RamalanCuacaApi = {
       };
     }
 
-    // Reuse data stasiun dari mockStationApi (juga otomatis throw
+    // Reuse data stasiun dari stationApi (juga otomatis throw
     // STATION_NOT_FOUND untuk id yang tidak valid ATAU beda company)
     // supaya tidak duplikasi data stasiun / guard company di sini.
-    const { data: station } = await mockStationApi.getStationDetail(stationId, companyId);
+    const { data: station } = await stationApi.getStationDetail(stationId, companyId);
 
     return {
       data: {

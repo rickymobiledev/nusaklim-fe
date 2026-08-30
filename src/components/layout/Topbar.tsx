@@ -1,32 +1,33 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import { getPageTitle } from "@/constants";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import styled from "styled-components";
+import { Logo } from "@/components/shared/Logo";
+import { NotificationButton } from "@/components/shared/NotificationButton";
+import { UserMenu } from "@/components/layout/UserMenu";
 
 export function Topbar() {
-  const { data: session } = useSession();
-  const pathname = usePathname();
-  const title = getPageTitle(pathname);
-  const name = session?.user?.name ?? "Guest";
-
   return (
-    <header className="border-border bg-card flex h-16 items-center justify-between border-b px-6">
-      <h1 className="text-foreground text-lg font-semibold">{title}</h1>
-
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="text-sm font-medium leading-tight">{name}</p>
-          <p className="text-muted-foreground text-xs leading-tight">
-            {session?.user?.email ?? ""}
-          </p>
-        </div>
-        <Avatar>
-          <AvatarImage src={session?.user?.image ?? undefined} alt={name} />
-          <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
-        </Avatar>
-      </div>
-    </header>
+    <HeaderRoot>
+      <Logo showTagline={false} />
+      <RightSection>
+        <NotificationButton />
+        <UserMenu />
+      </RightSection>
+    </HeaderRoot>
   );
 }
+
+const HeaderRoot = styled.header`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px;
+  border-bottom: 1px solid #bbd3ff;
+`;
+
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14.5px 0;
+`;

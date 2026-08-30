@@ -7,6 +7,6 @@ interface SidebarState {
 
 /** State UI ringan, client-only — tidak perlu ikut React Query/server state. */
 export const useSidebarStore = create<SidebarState>((set) => ({
-  collapsed: false,
+  collapsed: true,
   toggle: () => set((state) => ({ collapsed: !state.collapsed })),
 }));

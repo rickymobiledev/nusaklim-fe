@@ -3,7 +3,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 
-export function Logo() {
+export function Logo({ showTagline = true }: { showTagline?: boolean }) {
   return (
     <Wrapper>
       <Image src="/brand/logo-mark.svg" alt="" width={24} height={39} />
@@ -11,7 +11,7 @@ export function Logo() {
         <Wordmark>
           NUSA<span>KLIM</span>
         </Wordmark>
-        <Tagline>Empowering Your Climate Data</Tagline>
+        {showTagline && <Tagline>Empowering Your Climate Data</Tagline>}
       </TextBlock>
     </Wrapper>
   );
@@ -22,7 +22,7 @@ const Wrapper = styled.div`
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid #ecefed;
-  padding-bottom: ${(p) => p.theme.spacing.sm};
+  padding: 16.5px 0px;
 `;
 
 const TextBlock = styled.div`

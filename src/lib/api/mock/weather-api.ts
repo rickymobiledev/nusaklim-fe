@@ -2,7 +2,7 @@ import type { ApiItemResponse } from "@/types/api";
 import type { WeatherMetric } from "@/types/domain";
 import type { WeatherApi } from "../weather-api";
 import { normalizeWeatherByBrand } from "../adapters/weather-brand-adapter";
-import { mockStationApi } from "./station-api";
+import { stationApi } from "../station-client";
 import { delay } from "./delay";
 
 /** Payload mentah contoh persis nilai dari Postman "Nusaklim" > Weathers >
@@ -47,7 +47,7 @@ export const mockWeatherApi: WeatherApi = {
     }
 
     // getStationDetail sudah throw STATION_NOT_FOUND kalau companyId beda.
-    const { data: station } = await mockStationApi.getStationDetail(stationId, companyId);
+    const { data: station } = await stationApi.getStationDetail(stationId, companyId);
     const raw = RAW_WEATHER_BY_BRAND[station.brand] ?? {};
 
     return { data: normalizeWeatherByBrand(station.brand, raw, station.id) };

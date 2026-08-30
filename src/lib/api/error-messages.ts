@@ -3,6 +3,7 @@ import { ApiError } from "@/types/api";
 const ERROR_MESSAGES: Record<string, string> = {
   STATION_NOT_FOUND: "Stasiun tidak ditemukan.",
   STATION_INACTIVE: "Stasiun sedang tidak aktif, data tidak tersedia.",
+  STATION_FETCH_FAILED: "Gagal mengambil data stasiun dari server.",
   NETWORK_ERROR: "Gagal terhubung ke server. Periksa koneksi internet.",
 };
 

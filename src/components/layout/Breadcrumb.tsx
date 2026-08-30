@@ -18,7 +18,7 @@ export function Breadcrumb() {
   const trail = getBreadcrumbTrail(pathname);
 
   return (
-    <div className="border-border bg-card border-b px-6 py-2">
+    <div className="px-6 py-2">
       <BreadcrumbRoot>
         <BreadcrumbList>
           {trail.map((crumb, index) => {
