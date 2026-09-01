@@ -35,7 +35,7 @@ export type NavItem = {
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data)
  *  plus the new Ramalan Cuaca (DL forecast) menu from the redesign scope. */
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Beranda", href: "/", icon: DashboardIcon },
+  { label: "Dashboard", href: "/", icon: DashboardIcon },
   { label: "Peta", href: "/peta", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/unduh-data", icon: DownloadIcon },

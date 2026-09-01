@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { media } from "@/lib/breakpoints";
 
 export function UserMenu() {
   const { user } = useCurrentUser();
@@ -24,11 +25,13 @@ export function UserMenu() {
           <AvatarImage src={user?.image ?? undefined} alt={name} />
           <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
         </StyledAvatar>
-        <TextBlock>
-          <Name>{name}</Name>
-          <Role>{roleName}</Role>
-        </TextBlock>
-        <ChevronDown size={16} color="#6D717F" strokeWidth={1.5} />
+        <DetailsGroup>
+          <TextBlock>
+            <Name>{name}</Name>
+            <Role>{roleName}</Role>
+          </TextBlock>
+          <ChevronDown size={16} color="#6D717F" strokeWidth={1.5} />
+        </DetailsGroup>
       </Trigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
@@ -51,11 +54,25 @@ const Trigger = styled(DropdownMenuTrigger)`
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px 4px 4px;
+  padding: 4px;
   border: none;
   border-radius: 9999px;
   background: #ffffff;
   cursor: pointer;
+
+  ${media.desktop} {
+    padding: 4px 12px 4px 4px;
+  }
+`;
+
+const DetailsGroup = styled.span`
+  display: none;
+
+  ${media.desktop} {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 `;
 
 const TextBlock = styled.div`

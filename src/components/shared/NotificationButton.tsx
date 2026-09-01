@@ -2,6 +2,7 @@
 
 import { Bell } from "lucide-react";
 import styled from "styled-components";
+import { media } from "@/lib/breakpoints";
 
 export function NotificationButton({ hasUnread = true }: { hasUnread?: boolean }) {
   return (
@@ -17,12 +18,17 @@ const IconButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 9999px;
   background: #ffffff;
   cursor: pointer;
+
+  ${media.desktop} {
+    width: 40px;
+    height: 40px;
+  }
 `;
 
 const Badge = styled.span`
