@@ -3,8 +3,8 @@ import styled from "styled-components";
 import { Card, CardContent } from "@/components/ui/card";
 import type { WeatherMetricRange } from "@/types/domain";
 
-function fmt(value: number | null, satuan: string) {
-  return value === null ? "--" : `${value} ${satuan}`;
+function fmt(value: number | null, unit: string) {
+  return value === null ? "--" : `${value} ${unit}`;
 }
 
 const Content = styled(CardContent)`
@@ -68,13 +68,13 @@ export function MetricCard({
       <Content>
         <div>
           <Label>{label}</Label>
-          <Value>{fmt(data.nilai, data.satuan)}</Value>
+          <Value>{fmt(data.value, data.unit)}</Value>
           <RangeRow>
             <span>
-              Min <RangeValue>{fmt(data.min, data.satuan)}</RangeValue>
+              Min <RangeValue>{fmt(data.min, data.unit)}</RangeValue>
             </span>
             <span>
-              Maks <RangeValue>{fmt(data.maks, data.satuan)}</RangeValue>
+              Maks <RangeValue>{fmt(data.max, data.unit)}</RangeValue>
             </span>
           </RangeRow>
         </div>

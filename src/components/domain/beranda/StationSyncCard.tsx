@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import styled, { keyframes } from "styled-components";
 import { useStations } from "@/hooks/use-stations";
+import { media } from "@/lib/breakpoints";
 import { RefreshDoubleIcon } from "@/components/shared/DashboardIcons";
 import {
   Select,
@@ -22,8 +23,6 @@ export function StationSyncCard({
   const { data: stationsResponse, isLoading, isFetching, refetch } = useStations();
   const stations = stationsResponse?.data;
   const selectedStation = stations?.find((s) => s.id === value);
-
-  console.log({stations, value})
 
   const syncText = selectedStation?.sinkronisasiTerakhir
     ? `${format(new Date(selectedStation.sinkronisasiTerakhir), "dd-MM-yyyy HH:mm")}.`
@@ -52,7 +51,8 @@ export function StationSyncCard({
       <SyncBlock>
         <SyncText>
           Sinkronisasi terakhir
-          <br />
+          {' '}
+          <br className="hidden lg:block" />
           {syncText}
         </SyncText>
         <RefreshButton type="button" onClick={() => refetch()} disabled={isFetching}>
@@ -67,24 +67,37 @@ export function StationSyncCard({
 const Card = styled.div`
   box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 20px;
   flex: 1 1 480px;
   min-width: 0;
-  padding: 24px;
+  padding: 16px;
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid #ecefed;
   border-radius: 16px;
+  order: 1;
+
+  ${media.desktop} {
+    order: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+  }
 `;
 
 const Field = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1 1 auto;
-  min-width: 0;
+  width: 100%;
+
+  ${media.desktop} {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 `;
 
 const Label = styled.label`
@@ -92,7 +105,7 @@ const Label = styled.label`
   font-size: 14px;
   font-weight: 600;
   line-height: 16px;
-  color: #1d2520;
+  color: #ffffff;
   white-space: nowrap;
 `;
 
@@ -111,17 +124,36 @@ const Trigger = styled(SelectTrigger)`
 `;
 
 const SyncBlock = styled.div`
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 20px;
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+
+  ${media.desktop} {
+    width: auto;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+  }
 `;
 
 const SyncText = styled.p`
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 13px;
   font-weight: 400;
   line-height: 20px;
-  color: #667a6c;
+  color: #ffffff;
+
+  ${media.desktop} {
+    flex: none;
+    min-width: auto;
+  }
 `;
 
 const spin = keyframes`
@@ -138,6 +170,7 @@ const RefreshButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   gap: 8px;
   padding: 8px 12px;
   background: #ffffff;

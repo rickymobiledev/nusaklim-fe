@@ -1,12 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
-import {
-  StationActiveIcon,
-  StationIcon,
-  StationInactiveIcon,
-} from "@/components/shared/DashboardIcons";
+import { media } from "@/lib/breakpoints";
 
 /** Sengaja baca dari `useStations()` (query yang sama dengan
  *  `StationSyncCard`, bukan query/endpoint ringkasan terpisah) — supaya
@@ -23,11 +20,10 @@ export function StationStatsCard() {
 
   return (
     <Card>
-      <Glow aria-hidden />
       <Content>
         <Stat>
-          <IconBadge $bg="#C3DFFA">
-            <StationIcon size={24} color="#175FE2" />
+          <IconBadge $bg="#BBD3FF" $desktopBg="#C3DFFA">
+            <StatIcon src="/brand/station-total.png" alt="" width={42} height={42} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Total Stasiun</StatLabel>
@@ -36,8 +32,8 @@ export function StationStatsCard() {
         </Stat>
 
         <Stat>
-          <IconBadge $bg="#ECF8EF">
-            <StationActiveIcon size={24} color="#43B75D" />
+          <IconBadge $bg="#A9DEB4" $desktopBg="#ECF8EF">
+            <StatIcon src="/brand/station-active.png" alt="" width={42} height={42} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Stasiun Aktif</StatLabel>
@@ -46,8 +42,8 @@ export function StationStatsCard() {
         </Stat>
 
         <Stat>
-          <IconBadge $bg="#FDECEC">
-            <StationInactiveIcon size={24} color="#EE443F" />
+          <IconBadge $bg="#F7A9A7" $desktopBg="#FDECEC">
+            <StatIcon src="/brand/station-inactive.png" alt="" width={42} height={42} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Tidak Aktif</StatLabel>
@@ -66,21 +62,16 @@ const Card = styled.div`
   flex: 1 1 380px;
   min-width: 0;
   max-width: 468px;
-  padding: 8px 24px;
+  padding: 24px 16px 20px;
   border-radius: 20px;
   overflow: hidden;
-  background: #658ed5;
-`;
+  background: #0d3787;
+  order: 0;
 
-const Glow = styled.div`
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  left: -100px;
-  top: -140px;
-  background: linear-gradient(276.6deg, #175fe2 15.24%, #1045a8 72.24%);
-  filter: blur(60px);
-  z-index: 0;
+  ${media.desktop} {
+    padding: 8px 24px;
+    order: 1;
+  }
 `;
 
 const Content = styled.div`
@@ -88,18 +79,32 @@ const Content = styled.div`
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
   gap: 12px 24px;
   width: 100%;
+
+  ${media.desktop} {
+    justify-content: flex-start;
+  }
 `;
 
 const Stat = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  padding: 0 16.83px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0;
+  }
 `;
 
-const IconBadge = styled.div<{ $bg: string }>`
+const IconBadge = styled.div<{ $bg: string; $desktopBg: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,12 +113,31 @@ const IconBadge = styled.div<{ $bg: string }>`
   border-radius: 50%;
   background: ${(p) => p.$bg};
   flex-shrink: 0;
+
+  ${media.desktop} {
+    background: ${(p) => p.$desktopBg};
+  }
+`;
+
+const StatIcon = styled(Image)`
+  width: 42px;
+  height: 42px;
+
+  ${media.desktop} {
+    width: 36px;
+    height: 36px;
+  }
 `;
 
 const TextBlock = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
+
+  ${media.desktop} {
+    align-items: flex-start;
+  }
 `;
 
 const StatLabel = styled.span`
@@ -122,7 +146,12 @@ const StatLabel = styled.span`
   font-weight: 500;
   line-height: 16px;
   color: #ffffff;
+  text-align: center;
   white-space: nowrap;
+
+  ${media.desktop} {
+    text-align: left;
+  }
 `;
 
 const StatValue = styled.span`
@@ -131,4 +160,9 @@ const StatValue = styled.span`
   font-weight: 700;
   line-height: 34px;
   color: #ffffff;
+  text-align: center;
+
+  ${media.desktop} {
+    text-align: left;
+  }
 `;

@@ -42,10 +42,10 @@ async function fetchDevices(companyCode?: string): Promise<Station[]> {
 }
 
 /** Satu-satunya implementasi Stasiun — dipakai `lib/api/index.ts` (sebagai
- *  `stationApi`) DAN sebagai sumber lookup stasiun untuk domain lain yang
- *  masih pakai data contoh (`mock/weather-api.ts`,
- *  `mock/ramalan-cuaca-api.ts` — lihat pemakaian `getStationDetail` di
- *  sana), supaya tidak ada 2 sumber data stasiun yang beda. */
+ *  `stationApi`) DAN sebagai sumber lookup stasiun untuk domain lain
+ *  (`weather-client.ts` yang sudah real, `mock/ramalan-cuaca-api.ts` yang
+ *  masih data contoh — lihat pemakaian `getStationDetail` di sana),
+ *  supaya tidak ada 2 sumber data stasiun yang beda. */
 export const stationApi: StationApi = {
   async getStations(params: GetStationsParams = {}): Promise<ApiListResponse<Station>> {
     const all = await fetchDevices(params.companyId);
@@ -76,6 +76,7 @@ export const stationApi: StationApi = {
     companyId?: string,
   ): Promise<ApiItemResponse<Station>> {
     const all = await fetchDevices(companyId);
+    console.log({all})
     const station = all.find((s) => s.id === id);
 
     if (!station) {

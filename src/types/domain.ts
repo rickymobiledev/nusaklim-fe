@@ -25,23 +25,49 @@ export interface Station {
   sinkronisasiTerakhir: string | null; // dari field `last_sync_time` API asli — BUKAN `updated_at` (field beda, updated_at cuma timestamp record berubah)
 }
 
+/** PENGECUALIAN sengaja dari konvensi "kontrak Indonesia" di docblock
+ *  atas file ini — field grup tipe Weather (`WeatherMetricRange`,
+ *  `WeatherChartPoint`, `WeatherMetric`) di Bahasa Inggris atas
+ *  permintaan eksplisit, TIDAK berlaku untuk tipe domain lain di file
+ *  ini (semuanya tetap Indonesia). Jangan "diperbaiki balik" ke
+ *  Indonesia demi konsistensi tanpa konfirmasi ulang. */
 export interface WeatherMetricRange {
-  nilai: number | null;
+  value: number | null;
   min: number | null;
-  maks: number | null;
-  satuan: string;
+  max: number | null;
+  unit: string;
+}
+
+export interface WeatherChartPoint {
+  date: string; // label pendek "01 Jan"
+  value: number;
+}
+
+export interface WeatherStatus {
+  tone: "success" | "warning";
+  message: string;
+}
+
+/** Data tambahan khusus kartu Curah Hujan (chart 7 hari + status
+ *  pemupukan). DERIVED di mock layer dari threshold sementara — status
+ *  "belum final" sama seperti VPDReport.kategori, butuh konfirmasi Data
+ *  Analyst/BE sebelum dianggap final. */
+export interface RainfallDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
 }
 
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;
-  diperbaruiPada: string | null;
-  temperaturUdara: WeatherMetricRange;
-  radiasiMatahari: WeatherMetricRange;
-  kelembabanUdara: WeatherMetricRange;
-  curahHujan: WeatherMetricRange;
-  tekananUdara: WeatherMetricRange;
-  kecepatanAngin: WeatherMetricRange;
+  updatedAt: string | null;
+  airTemperature: WeatherMetricRange;
+  solarRadiation: WeatherMetricRange;
+  airHumidity: WeatherMetricRange;
+  rainfall: WeatherMetricRange;
+  airPressure: WeatherMetricRange;
+  windSpeed: WeatherMetricRange;
+  rainfallDetail?: RainfallDetail;
 }
 
 export type BulanKey =
