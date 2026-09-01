@@ -76,7 +76,6 @@ export const stationApi: StationApi = {
     companyId?: string,
   ): Promise<ApiItemResponse<Station>> {
     const all = await fetchDevices(companyId);
-    console.log({all})
     const station = all.find((s) => s.id === id);
 
     if (!station) {

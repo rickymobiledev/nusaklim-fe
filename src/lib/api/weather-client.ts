@@ -53,8 +53,6 @@ export const weatherClient: WeatherApi = {
         fetchRainfallChart(station.id, companyId),
       ]);
 
-      console.log({ raw });
-
       const metric = normalizeWeather(raw, station.id);
       metric.rainfallDetail = {
         chart,

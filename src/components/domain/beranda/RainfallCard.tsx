@@ -44,8 +44,6 @@ export function RainfallCard({
   const yTicks = computeYAxisTicks(chart);
   const axisMax = yTicks[0];
 
-  console.log({ chart });
-
   return (
     <Card>
       <Header>
