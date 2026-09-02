@@ -3,8 +3,9 @@ import type { ApiItemResponse } from "@/types/api";
 import type { WeatherMetric } from "@/types/domain";
 import { createApiClient } from "./fetcher";
 import { normalizeWeather } from "./adapters/weather-adapter";
-import { fetchRainfallChart } from "./rainfall-client";
+import { fetchWeatherDailyChart } from "./weather-daily-client";
 import { deriveRainfallStatus } from "./rainfall-status";
+import { deriveHumidityStatus } from "./humidity-status";
 import { stationApi } from "./station-client";
 import type { WeatherApi } from "./weather-api";
 
@@ -33,9 +34,10 @@ async function fetchRawLatest(
  *  cabang mock lagi (persis presedan Stasiun). `normalizeWeather()`
  *  (`weather-adapter.ts`) tidak lagi peduli `station.brand` — field yang
  *  tidak tersedia di raw payload device jadi `null` (UI render "--"), itu
- *  keterbatasan sensor device asli, bukan bug. Curah Hujan dapat data
- *  tambahan (`rainfallDetail`: chart 7 hari + status pemupukan) dari
- *  `/weathers/daily` — lihat `rainfall-client.ts`/`rainfall-status.ts`. */
+ *  keterbatasan sensor device asli, bukan bug. Curah Hujan & Kelembapan
+ *  Relatif dapat data tambahan (`rainfallDetail`/`humidityDetail`: chart
+ *  7 hari + status) dari `/weathers/daily` (satu call gabungan) — lihat
+ *  `weather-daily-client.ts`/`rainfall-status.ts`/`humidity-status.ts`. */
 export const weatherClient: WeatherApi = {
   async getWeatherMetrics(
     stationId: string,
@@ -48,15 +50,19 @@ export const weatherClient: WeatherApi = {
     try {
       const { data: station } = await stationApi.getStationDetail(stationId, companyId);
 
-      const [raw, chart] = await Promise.all([
+      const [raw, dailyChart] = await Promise.all([
         fetchRawLatest(station.id, companyId),
-        fetchRainfallChart(station.id, companyId),
+        fetchWeatherDailyChart(station.id, companyId),
       ]);
 
       const metric = normalizeWeather(raw, station.id);
       metric.rainfallDetail = {
-        chart,
+        chart: dailyChart.rainfall,
         status: deriveRainfallStatus(metric.rainfall.value),
+      };
+      metric.humidityDetail = {
+        chart: dailyChart.humidity,
+        status: deriveHumidityStatus(metric.airHumidity.value),
       };
 
       return { data: metric };

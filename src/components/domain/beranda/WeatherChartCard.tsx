@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, YAxis } from "recharts";
 import { WarningTriangleIcon } from "@/components/shared/DashboardIcons";
 import type { WeatherChartPoint, WeatherStatus } from "@/types/domain";
 
-interface RainfallCardProps {
-  iconSrc: string;
+interface WeatherChartCardProps {
+  icon: { src: string } | { node: ReactNode };
   label: string;
   value: number | null;
   min: number | null;
@@ -15,15 +16,20 @@ interface RainfallCardProps {
   unit: string;
   chart: WeatherChartPoint[];
   status: WeatherStatus;
+  chartColor?: string;
+  headerBorderColor?: string;
 }
 
 /** Sumbu-Y auto-scale ke data chart (bukan fixed 0-3mm) — curah hujan
  *  real bisa jauh di atas contoh Figma (dikonfirmasi uji langsung ke
  *  backend, ada hari dengan >19mm). 4 tick selalu: top = nilai maksimum
  *  dibulatkan ke atas, turun rata ke 0 — untuk data kecil (≤3mm) hasilnya
- *  kebetulan identik [3,2,1,0] seperti spec Figma. */
+ *  kebetulan identik [3,2,1,0] seperti spec Figma. Titik `null` (hari
+ *  tanpa data, mis. kelembapan) di-filter dulu biar tidak merusak
+ *  Math.max. */
 function computeYAxisTicks(chart: WeatherChartPoint[]): number[] {
-  const maxValue = Math.max(0, ...chart.map((p) => p.value));
+  const values = chart.map((p) => p.value).filter((v): v is number => v !== null);
+  const maxValue = Math.max(0, ...values);
   const axisMax = Math.max(1, Math.ceil(maxValue));
   const step = axisMax / 3;
   return [axisMax, axisMax - step, axisMax - step * 2, 0].map(
@@ -31,8 +37,8 @@ function computeYAxisTicks(chart: WeatherChartPoint[]): number[] {
   );
 }
 
-export function RainfallCard({
-  iconSrc,
+export function WeatherChartCard({
+  icon,
   label,
   value,
   min,
@@ -40,15 +46,21 @@ export function RainfallCard({
   unit,
   chart,
   status,
-}: RainfallCardProps) {
+  chartColor = "#175FE2",
+  headerBorderColor = "#C3DFFA",
+}: WeatherChartCardProps) {
   const yTicks = computeYAxisTicks(chart);
   const axisMax = yTicks[0];
 
   return (
     <Card>
-      <Header>
+      <Header $borderColor={headerBorderColor}>
         <IconLabel>
-          <IconSlot src={iconSrc} alt="" width={54} height={54} />
+          {"src" in icon ? (
+            <IconSlot src={icon.src} alt="" width={54} height={54} />
+          ) : (
+            <IconNodeSlot>{icon.node}</IconNodeSlot>
+          )}
           <LabelValueStack>
             <Label>{label}</Label>
             <Value>
@@ -101,7 +113,7 @@ export function RainfallCard({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#175FE2"
+                  stroke={chartColor}
                   strokeWidth={1}
                   dot={false}
                 />
@@ -139,13 +151,13 @@ const Card = styled.div`
   border-radius: 20px;
 `;
 
-const Header = styled.div`
+const Header = styled.div<{ $borderColor: string }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px;
   gap: 24px;
-  border: 1px solid #c3dffa;
+  border: 1px solid ${(p) => p.$borderColor};
   border-radius: 16px;
 `;
 
@@ -159,6 +171,15 @@ const IconSlot = styled(Image)`
   width: 54px;
   height: 54px;
   object-fit: contain;
+`;
+
+const IconNodeSlot = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
 `;
 
 const LabelValueStack = styled.div`

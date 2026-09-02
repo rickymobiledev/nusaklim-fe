@@ -40,7 +40,9 @@ export interface WeatherMetricRange {
 
 export interface WeatherChartPoint {
   date: string; // label pendek "01 Jan"
-  value: number;
+  // null = hari tanpa data (bukan 0) — lihat WeatherChartCard, Recharts
+  // otomatis putus garis chart di titik null (connectNulls default false).
+  value: number | null;
 }
 
 export interface WeatherStatus {
@@ -57,6 +59,15 @@ export interface RainfallDetail {
   status: WeatherStatus;
 }
 
+/** Data tambahan kartu Kelembapan Relatif (chart 7 hari + status ambang
+ *  lembab). Threshold di humidity-status.ts BELUM final (butuh konfirmasi
+ *  Data Analyst/BE). Field harian sumber chart JUGA belum dikonfirmasi
+ *  ada di payload /weathers/daily asli — lihat weather-daily-client.ts. */
+export interface HumidityDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;
@@ -68,6 +79,7 @@ export interface WeatherMetric {
   airPressure: WeatherMetricRange;
   windSpeed: WeatherMetricRange;
   rainfallDetail?: RainfallDetail;
+  humidityDetail?: HumidityDetail;
 }
 
 export type BulanKey =
