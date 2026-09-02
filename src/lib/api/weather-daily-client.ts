@@ -16,9 +16,7 @@ interface RawWeatherDaily {
   // kelembapan belum diverifikasi (beda dgn sum_rainfall yang sudah
   // dikonfirmasi). Coba beberapa alias umum, fallback null kalau semua
   // tidak ada. TODO: konfirmasi ke tim BE/Data Analyst.
-  avg_humidity?: number | string | null;
-  humidity?: number | string | null;
-  mean_humidity?: number | string | null;
+  average_humidity?: number | string | null;
 }
 
 function parseNumeric(raw: unknown): number | null {
@@ -28,7 +26,7 @@ function parseNumeric(raw: unknown): number | null {
 }
 
 function parseHumidity(row: RawWeatherDaily): number | null {
-  return parseNumeric(row.avg_humidity ?? row.humidity ?? row.mean_humidity);
+  return parseNumeric(row.average_humidity);
 }
 
 /** Sumber chart 7 hari kartu Curah Hujan & Kelembapan Relatif — SATU-
