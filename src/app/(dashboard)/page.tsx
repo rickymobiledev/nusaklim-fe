@@ -44,6 +44,7 @@ export default function BerandaPage() {
         ) : snapshot ? (
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
               <WeatherChartCard
                 icon={{ src: "/brand/rainy.png" }}
                 label="Curah Hujan"
@@ -71,6 +72,7 @@ export default function BerandaPage() {
                 chartColor="#0039FF"
                 headerBorderColor="#C3FAFA"
               />
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <MetricCard
                   icon={Thermometer}
