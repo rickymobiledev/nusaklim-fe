@@ -3,20 +3,16 @@
 import styled from "styled-components";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
-import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const Trigger = styled(Button)`
-  display: flex;
-  align-items: center;
-  gap: ${(p) => p.theme.spacing.xs};
-  color: ${(p) => p.theme.colors.neutral[900]};
-`;
-
-/** Placeholder kerangka — belum dikabelin ke halaman manapun (lihat
- *  catatan di unduh-data/page.tsx). */
+/** Pertama kali dipakai nyata di halaman `/air-temperature`
+ *  (`AirTemperatureFilters.tsx`) — sebelumnya "placeholder kerangka" yang
+ *  belum dikabelin ke halaman manapun. Format label Indonesia
+ *  ("01 Agt 2026 – 21 Agt 2026", en dash) sesuai Figma, bukan
+ *  dd/MM/yyyy generik. */
 export function DateRangePicker({
   value,
   onChange,
@@ -26,16 +22,16 @@ export function DateRangePicker({
 }) {
   const label = value?.from
     ? value.to
-      ? `${format(value.from, "dd/MM/yyyy")} - ${format(value.to, "dd/MM/yyyy")}`
-      : format(value.from, "dd/MM/yyyy")
+      ? `${format(value.from, "dd MMM yyyy", { locale: id })} – ${format(value.to, "dd MMM yyyy", { locale: id })}`
+      : format(value.from, "dd MMM yyyy", { locale: id })
     : "Pilih rentang tanggal";
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Trigger variant="outline">
-          <CalendarIcon className="h-4 w-4" />
+        <Trigger type="button">
           {label}
+          <CalendarIcon size={20} color="#9EA2AE" />
         </Trigger>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -44,3 +40,19 @@ export function DateRangePicker({
     </Popover>
   );
 }
+
+const Trigger = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  height: 48px;
+  background: #f6f8f7;
+  border: 1.5px solid #d6dcd8;
+  border-radius: 12px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1d2520;
+  white-space: nowrap;
+`;

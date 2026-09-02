@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
-import { NAV_ITEMS } from "@/constants";
+import { NAV_ITEMS, getActiveNavHref } from "@/constants";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { media } from "@/lib/breakpoints";
@@ -16,6 +16,7 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user?.role && item.roles.includes(user.role)),
   );
+  const activeHref = getActiveNavHref(pathname);
 
   return (
     <>
@@ -38,7 +39,7 @@ export function Sidebar() {
               href={item.href}
               icon={item.icon}
               label={item.label}
-              active={pathname === item.href}
+              active={item.href === activeHref}
               onNavigate={closeMobile}
             />
           ))}

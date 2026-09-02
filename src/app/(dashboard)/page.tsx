@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Thermometer, Sun, Gauge, Wind } from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { DashboardTitle } from "@/components/domain/beranda/DashboardTitle";
@@ -45,40 +46,42 @@ export default function BerandaPage() {
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
-              <WeatherChartCard
-                icon={{ src: "/brand/rainy.png" }}
-                label="Curah Hujan"
-                value={snapshot.rainfall.value}
-                min={snapshot.rainfall.min}
-                max={snapshot.rainfall.max}
-                unit={snapshot.rainfall.unit}
-                chart={snapshot.rainfallDetail?.chart ?? []}
-                status={
-                  snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
-                }
-                chartColor="#175FE2"
-              />
-              <WeatherChartCard
-                icon={{ src: "/brand/humidity.png" }}
-                label="Kelembapan Relatif"
-                value={snapshot.airHumidity.value}
-                min={snapshot.airHumidity.min}
-                max={snapshot.airHumidity.max}
-                unit={snapshot.airHumidity.unit}
-                chart={snapshot.humidityDetail?.chart ?? []}
-                status={
-                  snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
-                }
-                chartColor="#0039FF"
-                headerBorderColor="#C3FAFA"
-              />
+                <WeatherChartCard
+                  icon={{ src: "/brand/rainy.png" }}
+                  label="Curah Hujan"
+                  value={snapshot.rainfall.value}
+                  min={snapshot.rainfall.min}
+                  max={snapshot.rainfall.max}
+                  unit={snapshot.rainfall.unit}
+                  chart={snapshot.rainfallDetail?.chart ?? []}
+                  status={
+                    snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
+                  }
+                  chartColor="#175FE2"
+                />
+                <WeatherChartCard
+                  icon={{ src: "/brand/humidity.png" }}
+                  label="Kelembapan Relatif"
+                  value={snapshot.airHumidity.value}
+                  min={snapshot.airHumidity.min}
+                  max={snapshot.airHumidity.max}
+                  unit={snapshot.airHumidity.unit}
+                  chart={snapshot.humidityDetail?.chart ?? []}
+                  status={
+                    snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
+                  }
+                  chartColor="#0039FF"
+                  headerBorderColor="#C3FAFA"
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <MetricCard
-                  icon={Thermometer}
-                  label="Temperatur Udara"
-                  data={snapshot.airTemperature}
-                />
+                <Link href="/air-temperature">
+                  <MetricCard
+                    icon={Thermometer}
+                    label="Temperatur Udara"
+                    data={snapshot.airTemperature}
+                  />
+                </Link>
                 <MetricCard
                   icon={Sun}
                   label="Radiasi Matahari"

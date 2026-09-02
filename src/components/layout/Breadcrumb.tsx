@@ -3,6 +3,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import { getBreadcrumbTrail } from "@/constants";
 import {
   Breadcrumb as BreadcrumbRoot,
@@ -18,23 +19,36 @@ export function Breadcrumb() {
   const trail = getBreadcrumbTrail(pathname);
 
   return (
-    <div className="px-6 py-2">
+    <div className="py-3">
       <BreadcrumbRoot>
-        <BreadcrumbList>
+        <BreadcrumbList className="gap-2 sm:gap-2">
           {trail.map((crumb, index) => {
             const isLast = index === trail.length - 1;
             return (
               <Fragment key={crumb.href}>
                 <BreadcrumbItem>
                   {isLast ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="font-body text-primary text-xs font-semibold">
+                      {crumb.label}
+                    </BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink asChild>
+                    <BreadcrumbLink
+                      asChild
+                      className="font-body hover:text-primary text-xs font-semibold text-[#8B9C90]"
+                    >
                       <Link href={crumb.href}>{crumb.label}</Link>
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
+                {!isLast && (
+                  <BreadcrumbSeparator>
+                    <ChevronRight
+                      size={16}
+                      strokeWidth={1.5}
+                      className="text-[#8B9C90]"
+                    />
+                  </BreadcrumbSeparator>
+                )}
               </Fragment>
             );
           })}

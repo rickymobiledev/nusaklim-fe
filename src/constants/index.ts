@@ -57,19 +57,37 @@ const EXTRA_TITLES: Record<string, string> = {
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "/monitoring/lama-penyinaran": "Lama Penyinaran",
   "/monitoring/vpd": "VPD",
+  "/air-temperature": "Temperatur Udara",
   "/login": "Masuk",
 };
+
+/** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan
+ *  by prefix terpanjang, mengecualikan "/" (supaya "/" tidak match SEMUA
+ *  path). Dipakai bareng oleh `getPageTitle()`, `getBreadcrumbTrail()`,
+ *  DAN `getActiveNavHref()` — satu sumber kebenaran, jangan duplikasi
+ *  logic ini di tempat lain. */
+function resolveTopLevelNavItem(pathname: string): NavItem | undefined {
+  return NAV_ITEMS.filter(
+    (item) => item.href !== "/" && pathname.startsWith(item.href),
+  ).sort((a, b) => b.href.length - a.href.length)[0];
+}
 
 /** Dipakai Topbar untuk menentukan judul halaman otomatis dari pathname. */
 export function getPageTitle(pathname: string): string {
   if (EXTRA_TITLES[pathname]) return EXTRA_TITLES[pathname];
   const exact = NAV_ITEMS.find((item) => item.href === pathname);
   if (exact) return exact.label;
-  // fallback: cocokkan prefix terpanjang (misal /monitoring/xyz -> "Monitoring")
-  const prefixMatch = NAV_ITEMS.filter(
-    (item) => item.href !== "/" && pathname.startsWith(item.href),
-  ).sort((a, b) => b.href.length - a.href.length)[0];
-  return prefixMatch?.label ?? "Beranda";
+  return resolveTopLevelNavItem(pathname)?.label ?? "Beranda";
+}
+
+/** Dipakai HeaderNav & Sidebar buat nentuin pill/item mana yang "aktif" —
+ *  bukan exact match `pathname === item.href` (itu bikin halaman drill-
+ *  down seperti /air-temperature atau sub-halaman Monitoring tidak
+ *  nyalain apapun), tapi ikut induk konsepnya sama seperti
+ *  `getPageTitle`/`getBreadcrumbTrail` ("/" sendiri otomatis fallback
+ *  ke "/" karena tidak ada NAV_ITEM lain yang match). */
+export function getActiveNavHref(pathname: string): string {
+  return resolveTopLevelNavItem(pathname)?.href ?? "/";
 }
 
 export type BreadcrumbCrumb = { label: string; href: string };
@@ -80,11 +98,15 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
 
   const crumbs: BreadcrumbCrumb[] = [{ label: "Beranda", href: "/" }];
 
-  const topLevel = NAV_ITEMS.filter(
-    (item) => item.href !== "/" && pathname.startsWith(item.href),
-  ).sort((a, b) => b.href.length - a.href.length)[0];
+  const topLevel = resolveTopLevelNavItem(pathname);
 
-  if (!topLevel) return crumbs;
+  if (!topLevel) {
+    // Halaman top-level di luar NAV_ITEMS (mis. drill-down dari Beranda
+    // seperti /air-temperature) — trail-nya cuma "Beranda > <judul>".
+    const subLabel = EXTRA_TITLES[pathname];
+    if (subLabel) crumbs.push({ label: subLabel, href: pathname });
+    return crumbs;
+  }
 
   crumbs.push({ label: topLevel.label, href: topLevel.href });
 

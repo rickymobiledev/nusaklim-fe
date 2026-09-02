@@ -68,6 +68,15 @@ export interface HumidityDetail {
   status: WeatherStatus;
 }
 
+/** Satu deret temperatur harian satu stasiun untuk rentang tanggal yang
+ *  diminta — item `ApiListResponse` dari `GET /api/air-temperature/daily`
+ *  (halaman detail `/air-temperature`, bukan kartu ringkasan Beranda). */
+export interface AirTemperatureStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;
