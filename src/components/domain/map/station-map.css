@@ -1,0 +1,54 @@
+/* Override class DOM yang dibuat Leaflet secara imperatif (di luar
+ * jangkauan React/styled-components) — popup marker Peta dibuat menyerupai
+ * kartu "glass" gelap sesuai Figma, menggantikan bubble putih default
+ * Leaflet + tip segitiga bawaan (Figma tidak punya tip). Ini pengecualian
+ * yang wajar dari aturan styled-components di CLAUDE.md, bukan pelanggaran
+ * — batasnya nyata dari cara library pihak ketiga merender DOM-nya sendiri.
+ * Class `.map-popup` di-scope lewat prop `className` di <Popup>. */
+
+.map-popup .leaflet-popup-content-wrapper {
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(12px);
+  box-shadow: 9px 13px 19px rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px;
+  gap: 12px;
+}
+
+.map-popup .leaflet-popup-content {
+  margin: 0px;
+  width: auto !important;
+}
+
+.map-popup .leaflet-popup-tip-container {
+  display: none;
+}
+
+/* Label nama provinsi (`getProvinceLabelIcon` di station-map.tsx) — teks
+ * murni, non-interactive, dengan outline putih tipis biar kebaca di atas
+ * fill hijau pulau (meniru `border: 0.5px solid #FFFFFF` di spec Figma,
+ * yang sebenarnya cuma outline teks, bukan border kotak). */
+.province-label-icon {
+  pointer-events: none;
+}
+
+.province-label-icon span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-family: var(--font-body), sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 14px;
+  color: #000000;
+  text-shadow:
+    -1px -1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px 1px 0 #fff;
+}

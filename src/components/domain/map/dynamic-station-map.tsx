@@ -8,6 +8,6 @@ export const DynamicStationMap = dynamic(
   () => import("./station-map").then((mod) => mod.StationMap),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-[520px] w-full" />,
+    loading: () => <Skeleton className="h-[560px] w-full rounded-[20px]" />,
   },
 );

@@ -1,3 +1,8 @@
 .next
 node_modules
 pnpm-lock.yaml
+
+# Data GeoJSON hasil generate (mapshaper), bukan source tulisan tangan —
+# di-minify sengaja (lihat lib/indonesia-provinces.ts), jangan di-pretty-print
+# ulang (bisa dobel ukurannya cuma gara-gara whitespace).
+src/data/geo/*.json

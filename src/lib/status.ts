@@ -13,6 +13,6 @@ export const STATION_STATUS_BADGE: Record<
   "aktif" | "tidak_aktif",
   { label: string; tone: "success" | "destructive"; color: string }
 > = {
-  aktif: { label: "Aktif", tone: "success", color: "#15803d" },
+  aktif: { label: "Aktif", tone: "success", color: "#43b75d" },
   tidak_aktif: { label: "Tidak Aktif", tone: "destructive", color: "#b91c1c" },
 };
