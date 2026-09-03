@@ -58,6 +58,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/monitoring/lama-penyinaran": "Lama Penyinaran",
   "/monitoring/vpd": "VPD",
   "/air-temperature": "Temperatur Udara",
+  "/solar-radiation": "Radiasi Matahari",
   "/login": "Masuk",
 };
 

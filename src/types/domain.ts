@@ -77,6 +77,15 @@ export interface AirTemperatureStationSeries {
   points: WeatherChartPoint[];
 }
 
+/** Satu deret radiasi matahari harian satu stasiun untuk rentang tanggal
+ *  yang diminta — item `ApiListResponse` dari `GET /api/solar-radiation/daily`
+ *  (halaman detail `/solar-radiation`, bukan kartu ringkasan Beranda). */
+export interface SolarRadiationStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;

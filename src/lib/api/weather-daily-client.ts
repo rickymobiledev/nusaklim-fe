@@ -9,7 +9,9 @@ const CHART_DAYS = 7;
  *  lintas brand utk `sum_rainfall` (field ada di raw payload semua brand).
  *  Field kelembapan (avg_humidity dkk) BELUM dikonfirmasi ada di payload
  *  asli — lihat parseHumidity(). Field temperatur JUGA belum dikonfirmasi
- *  (dipakai halaman /air-temperature) — lihat parseTemperature(). */
+ *  (dipakai halaman /air-temperature) — lihat parseTemperature(). Field
+ *  radiasi matahari JUGA belum dikonfirmasi (dipakai halaman
+ *  /solar-radiation) — lihat parseRadiation(). */
 interface RawWeatherDaily {
   date: string; // "YYYY-MM-DD"
   sum_rainfall: number | string | null;
@@ -26,6 +28,12 @@ interface RawWeatherDaily {
   average_temperature?: number | string | null;
   avg_temperature?: number | string | null;
   mean_temperature?: number | string | null;
+  // UNCONFIRMED terhadap backend asli — nama field agregat harian radiasi
+  // matahari belum diverifikasi (situasi sama seperti average_temperature
+  // di atas). Coba beberapa alias umum, fallback null kalau semua tidak
+  // ada. TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend
+  // real tersedia.
+  sum_solar_radiation?: number | string | null;
 }
 
 function parseNumeric(raw: unknown): number | null {
@@ -42,6 +50,10 @@ function parseTemperature(row: RawWeatherDaily): number | null {
   return parseNumeric(
     row.average_temperature ?? row.avg_temperature ?? row.mean_temperature,
   );
+}
+
+function parseRadiation(row: RawWeatherDaily): number | null {
+  return parseNumeric(row.sum_solar_radiation);
 }
 
 /** Request mentah ke `/weathers/daily` untuk SATU device — dipakai baik
@@ -135,6 +147,32 @@ export async function fetchTemperatureRange(
 ): Promise<WeatherChartPoint[]> {
   const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
   const byDate = new Map(data.map((row) => [row.date, parseTemperature(row)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? null });
+  }
+
+  return points;
+}
+
+/** Sumber chart radiasi matahari harian halaman `/solar-radiation` — pola
+ *  identik `fetchTemperatureRange()` (rentang tanggal dipilih user, fan-out
+ *  multi-stasiun di `solar-radiation-client.ts`). Hari tanpa data =
+ *  null/gap (bukan 0) — sama alasannya seperti temperatur. */
+export async function fetchRadiationRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parseRadiation(row)]));
 
   const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
   const points: WeatherChartPoint[] = [];

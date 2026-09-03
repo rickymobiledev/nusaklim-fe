@@ -82,11 +82,13 @@ export default function BerandaPage() {
                     data={snapshot.airTemperature}
                   />
                 </Link>
-                <MetricCard
-                  icon={Sun}
-                  label="Radiasi Matahari"
-                  data={snapshot.solarRadiation}
-                />
+                <Link href="/solar-radiation">
+                  <MetricCard
+                    icon={Sun}
+                    label="Radiasi Matahari"
+                    data={snapshot.solarRadiation}
+                  />
+                </Link>
                 <MetricCard
                   icon={Gauge}
                   label="Tekanan Udara"

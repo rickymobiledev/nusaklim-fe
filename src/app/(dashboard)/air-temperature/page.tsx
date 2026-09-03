@@ -1,7 +1,6 @@
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { AirTemperatureTitle } from "@/components/domain/air-temperature/AirTemperatureTitle";
 import { AirTemperatureSection } from "@/components/domain/air-temperature/AirTemperatureSection";
-import { DashboardFooter } from "@/components/shared/DashboardFooter";
 
 export default function AirTemperaturePage() {
   return (
@@ -9,7 +8,6 @@ export default function AirTemperaturePage() {
       <Breadcrumb />
       <AirTemperatureTitle />
       <AirTemperatureSection />
-      <DashboardFooter />
     </div>
   );
 }

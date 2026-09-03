@@ -13,12 +13,17 @@ export function DashboardFooter() {
 }
 
 const Wrapper = styled.footer`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-top: 16px;
-  padding-top: 24px;
-  border-top: 1px solid #8ACEFF;
+  padding: 24px;
+  background: #f5f7fb;
+  border-top: 1px solid #8aceff;
 `;
 
 const Version = styled.span`
