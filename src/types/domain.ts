@@ -95,6 +95,15 @@ export interface AirPressureStationSeries {
   points: WeatherChartPoint[];
 }
 
+/** Satu deret kelembapan relatif harian satu stasiun untuk rentang tanggal
+ *  yang diminta — item `ApiListResponse` dari `GET /api/relative-humidity/daily`
+ *  (halaman detail `/relative-humidity`, bukan kartu ringkasan Beranda). */
+export interface RelativeHumidityStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;

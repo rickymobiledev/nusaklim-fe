@@ -197,6 +197,34 @@ export async function fetchRadiationRange(
   return points;
 }
 
+/** Sumber chart kelembapan relatif harian halaman `/relative-humidity` —
+ *  pola identik `fetchTemperatureRange()`/`fetchRadiationRange()`/
+ *  `fetchPressureRange()` (rentang tanggal dipilih user, fan-out multi-
+ *  stasiun di `relative-humidity-client.ts`), reuse `parseHumidity()` yang
+ *  sudah ada untuk kartu Beranda. Hari tanpa data = null/gap (bukan 0) —
+ *  sama alasannya seperti temperatur. */
+export async function fetchHumidityRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parseHumidity(row)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? null });
+  }
+
+  return points;
+}
+
 /** Sumber chart tekanan udara harian halaman `/air-pressure` — pola
  *  identik `fetchTemperatureRange()`/`fetchRadiationRange()` (rentang
  *  tanggal dipilih user, fan-out multi-stasiun di `air-pressure-client.ts`).

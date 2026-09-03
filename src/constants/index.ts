@@ -60,6 +60,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/air-temperature": "Temperatur Udara",
   "/solar-radiation": "Radiasi Matahari",
   "/air-pressure": "Tekanan Udara",
+  "/relative-humidity": "Kelembapan Relatif",
   "/login": "Masuk",
 };
 
