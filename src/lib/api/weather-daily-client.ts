@@ -34,6 +34,12 @@ interface RawWeatherDaily {
   // ada. TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend
   // real tersedia.
   sum_solar_radiation?: number | string | null;
+  // UNCONFIRMED terhadap backend asli — nama field agregat harian tekanan
+  // udara belum diverifikasi (situasi sama seperti average_temperature di
+  // atas). Coba beberapa alias umum, fallback null kalau semua tidak ada.
+  // TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend real
+  // tersedia.
+  average_air_pressure?: number | string | null;
 }
 
 function parseNumeric(raw: unknown): number | null {
@@ -54,6 +60,10 @@ function parseTemperature(row: RawWeatherDaily): number | null {
 
 function parseRadiation(row: RawWeatherDaily): number | null {
   return parseNumeric(row.sum_solar_radiation);
+}
+
+function parsePressure(row: RawWeatherDaily): number | null {
+  return parseNumeric(row.average_air_pressure);
 }
 
 /** Request mentah ke `/weathers/daily` untuk SATU device — dipakai baik
@@ -173,6 +183,32 @@ export async function fetchRadiationRange(
 ): Promise<WeatherChartPoint[]> {
   const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
   const byDate = new Map(data.map((row) => [row.date, parseRadiation(row)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? null });
+  }
+
+  return points;
+}
+
+/** Sumber chart tekanan udara harian halaman `/air-pressure` — pola
+ *  identik `fetchTemperatureRange()`/`fetchRadiationRange()` (rentang
+ *  tanggal dipilih user, fan-out multi-stasiun di `air-pressure-client.ts`).
+ *  Hari tanpa data = null/gap (bukan 0) — sama alasannya seperti temperatur. */
+export async function fetchPressureRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parsePressure(row)]));
 
   const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
   const points: WeatherChartPoint[] = [];

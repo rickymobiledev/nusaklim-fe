@@ -86,6 +86,15 @@ export interface SolarRadiationStationSeries {
   points: WeatherChartPoint[];
 }
 
+/** Satu deret tekanan udara harian satu stasiun untuk rentang tanggal yang
+ *  diminta — item `ApiListResponse` dari `GET /api/air-pressure/daily`
+ *  (halaman detail `/air-pressure`, bukan kartu ringkasan Beranda). */
+export interface AirPressureStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;

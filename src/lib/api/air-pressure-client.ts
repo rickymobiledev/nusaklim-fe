@@ -1,14 +1,14 @@
 import { ApiError } from "@/types/api";
 import type { ApiListResponse } from "@/types/api";
-import type { AirTemperatureStationSeries } from "@/types/domain";
+import type { AirPressureStationSeries } from "@/types/domain";
 import { stationApi } from "./station-client";
-import { fetchTemperatureRange } from "./weather-daily-client";
+import { fetchPressureRange } from "./weather-daily-client";
 
-/** Server-only, dipanggil HANYA dari `app/api/air-temperature/daily/route.ts`
+/** Server-only, dipanggil HANYA dari `app/api/air-pressure/daily/route.ts`
  *  — bukan domain mock/real toggle spt `lib/api/index.ts` (halaman
- *  `/air-temperature` belum tercantum di daftar domain CLAUDE.md, jadi
- *  ini helper internal seperti `weather-daily-client.ts`, bukan `XxxApi`
- *  interface baru).
+ *  `/air-pressure` belum tercantum di daftar domain CLAUDE.md, jadi ini
+ *  helper internal seperti `weather-daily-client.ts`, bukan `XxxApi`
+ *  interface baru). Pola identik `air-temperature-client.ts`.
  *
  *  Guard company: ambil daftar stasiun milik company SEKALI lewat
  *  `stationApi.getStations({ companyId })`, filter `stationIds` yang
@@ -16,12 +16,12 @@ import { fetchTemperatureRange } from "./weather-daily-client";
  *  bukan milik company (atau tidak ada) DIAM-DIAM di-drop, bukan
  *  dibocorkan "ada tapi bukan company kamu" (konsisten kebijakan
  *  `getStationDetail` di `station-client.ts`). */
-export async function getTemperatureSeries(
+export async function getPressureSeries(
   stationIds: string[],
   startDate: Date,
   endDate: Date,
   companyId?: string,
-): Promise<ApiListResponse<AirTemperatureStationSeries>> {
+): Promise<ApiListResponse<AirPressureStationSeries>> {
   if (stationIds.length === 0) {
     return { data: [], meta: { page: 1, pageSize: 0, total: 0 } };
   }
@@ -35,7 +35,7 @@ export async function getTemperatureSeries(
       stations.map(async (station) => ({
         stationId: station.id,
         stationName: station.nama,
-        points: await fetchTemperatureRange(station.id, startDate, endDate, companyId),
+        points: await fetchPressureRange(station.id, startDate, endDate, companyId),
       })),
     );
 

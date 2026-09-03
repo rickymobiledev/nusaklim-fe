@@ -89,11 +89,13 @@ export default function BerandaPage() {
                     data={snapshot.solarRadiation}
                   />
                 </Link>
-                <MetricCard
-                  icon={Gauge}
-                  label="Tekanan Udara"
-                  data={snapshot.airPressure}
-                />
+                <Link href="/air-pressure">
+                  <MetricCard
+                    icon={Gauge}
+                    label="Tekanan Udara"
+                    data={snapshot.airPressure}
+                  />
+                </Link>
                 <MetricCard
                   icon={Wind}
                   label="Kecepatan Angin"
