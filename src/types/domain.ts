@@ -201,6 +201,48 @@ export interface VPDReport {
   kategori: "rendah" | "sedang" | "tinggi";
 }
 
+/** Level kategori defisit air untuk warna marker/legend Peta > Keseimbangan
+ *  Air — bukan field dari BE, threshold ambang (>200mm) ikut teks alert
+ *  di Figma. Lihat `lib/water-deficit-level.ts`. */
+export type WaterDeficitLevel = "tidak_ada" | "rendah" | "tinggi";
+
+/** Snapshot SATU BULAN (bukan "hari ini") untuk SATU stasiun, tab Peta >
+ *  Keseimbangan Air — company-wide (list semua stasiun sekaligus untuk
+ *  `year`+`month` yang sama, lihat `ApiListResponse` di route-nya), BEDA
+ *  dari `WaterBalance` (data SETAHUN per SATU stasiun via `stationId`,
+ *  dipakai halaman Monitoring).
+ *
+ *  Field `curahHujan`/`defisitAir`/`hariHujan`/`kelebihanAir` sudah
+ *  DI-PIVOT di sini dari bentuk asli endpoint (dikonfirmasi lewat Postman
+ *  collection tim BE, folder "Maps" > "Water Deficit",
+ *  `GET /devices/water_deficit?company_code=&year=&month=` — `year` &
+ *  `month` WAJIB, ini snapshot 1 bulan tertentu, bukan otomatis "hari
+ *  ini"): tiap device di `data[]` asli punya array
+ *  `water_deficit: [{ component: "CURAH_HUJAN"|"DEFISIT_AIR"|
+ *  "HARI_HUJAN"|"KELEBIHAN_AIR", value: string | null }]` — "tidak ada
+ *  data" muncul 2 bentuk: array KOSONG (`[]`) ATAU array ADA tapi semua
+ *  `value` null, keduanya harus di-treat sama (jadi `null` di sini).
+ *  `stationId`/`nama`/`brand`/`lat`/`long`/`companyCode`/`companyName`
+ *  sebenarnya SUDAH ikut menempel di tiap device response asli (endpoint
+ *  ini independen, tidak perlu join manual ke `/devices/status`) — TAPI
+ *  `sinkronisasiTerakhir` di sini TETAP dari join ke `Station` (lihat
+ *  `lib/api/mock/water-deficit-api.ts`), karena endpoint asli
+ *  `water_deficit` TIDAK punya field `last_sync_time`. */
+export interface StationWaterDeficit {
+  stationId: string;
+  nama: string;
+  brand: string;
+  lat: number;
+  long: number;
+  companyCode: string;
+  companyName: string;
+  curahHujan: number | null;
+  defisitAir: number | null;
+  hariHujan: number | null;
+  kelebihanAir: number | null;
+  sinkronisasiTerakhir: string | null;
+}
+
 /** Baris tabel "Unduh Data". */
 export interface DownloadDataRow {
   tanggal: string;

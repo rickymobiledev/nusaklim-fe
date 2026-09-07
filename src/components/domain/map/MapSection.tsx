@@ -3,15 +3,21 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
+import { useWaterDeficit } from "@/hooks/use-water-deficit";
+import { useWaterDeficitComparison } from "@/hooks/use-water-deficit-comparison";
 import { Skeleton } from "@/components/ui/skeleton";
 import { media } from "@/lib/breakpoints";
 import { MapTabs, type MapTab } from "./MapTabs";
 import { ComingSoonCard } from "./ComingSoonCard";
 import { MapStationList } from "./MapStationList";
 import { DynamicStationMap } from "./dynamic-station-map";
+import { DynamicWaterDeficitMap } from "./dynamic-water-deficit-map";
+import { WaterDeficitPanel } from "./WaterDeficitPanel";
 
-const COMING_SOON_LABEL: Record<Exclude<MapTab, "status-stasiun">, string> = {
-  "keseimbangan-air": "Keseimbangan Air",
+const COMING_SOON_LABEL: Record<
+  Exclude<MapTab, "status-stasiun" | "keseimbangan-air">,
+  string
+> = {
   "dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "curah-hujan-hari-ini": "Curah Hujan Hari Ini",
 };
@@ -19,6 +25,13 @@ const COMING_SOON_LABEL: Record<Exclude<MapTab, "status-stasiun">, string> = {
 export function MapSection() {
   const { data: stationsResponse, isLoading } = useStations();
   const stations = useMemo(() => stationsResponse?.data ?? [], [stationsResponse]);
+
+  const { data: waterDeficitRows = [], isLoading: isWaterDeficitLoading } =
+    useWaterDeficit();
+  // TODO: panel "Perbandingan Defisit Air" masih mock, beda sumber dari
+  // peta di atas — lihat catatan di use-water-deficit-comparison.ts.
+  const { data: waterDeficitComparisonRows = [], isLoading: isComparisonLoading } =
+    useWaterDeficitComparison();
 
   const [activeTab, setActiveTab] = useState<MapTab>("status-stasiun");
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
@@ -32,9 +45,9 @@ export function MapSection() {
         isLoading ? (
           <ContentRow>
             <MapColumn>
-              <Skeleton className="h-[560px] w-full rounded-[20px]" />
+              <Skeleton className="h-140 w-full rounded-[20px]" />
             </MapColumn>
-            <Skeleton className="h-[560px] w-full shrink-0 rounded-[20px] xl:w-[300px]" />
+            <Skeleton className="h-140 w-full shrink-0 rounded-[20px] xl:w-75" />
           </ContentRow>
         ) : (
           <ContentRow>
@@ -53,6 +66,23 @@ export function MapSection() {
               selectedStationId={selectedStationId}
               onSelectStation={setSelectedStationId}
             />
+          </ContentRow>
+        )
+      ) : activeTab === "keseimbangan-air" ? (
+        isWaterDeficitLoading || isComparisonLoading ? (
+          <ContentRow>
+            <MapColumn>
+              <Skeleton className="h-140 w-full rounded-[20px]" />
+            </MapColumn>
+            <Skeleton className="h-140 w-full shrink-0 rounded-[20px] xl:w-75" />
+          </ContentRow>
+        ) : (
+          <ContentRow>
+            <MapColumn>
+              <DynamicWaterDeficitMap rows={waterDeficitRows} />
+            </MapColumn>
+
+            <WaterDeficitPanel rows={waterDeficitComparisonRows} />
           </ContentRow>
         )
       ) : (

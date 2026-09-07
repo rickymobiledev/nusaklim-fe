@@ -2,12 +2,15 @@ import { weatherClient } from "./weather-client";
 import { mockMonitoringApi } from "./mock/monitoring-api";
 import { mockDownloadApi } from "./mock/download-api";
 import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
+import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
+import { waterDeficitClient } from "./water-deficit-client";
 import { stationApi as stationClient } from "./station-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
 import type { MonitoringApi } from "./monitoring-api";
 import type { DownloadApi } from "./download-api";
 import type { RamalanCuacaApi } from "./ramalan-cuaca-api";
+import type { WaterDeficitApi } from "./water-deficit-api";
 
 /**
  * Satu titik wiring — hooks import instance dari sini, bukan dari
@@ -23,3 +26,9 @@ export const weatherApi: WeatherApi = weatherClient;
 export const monitoringApi: MonitoringApi = mockMonitoringApi;
 export const downloadApi: DownloadApi = mockDownloadApi;
 export const ramalanCuacaApi: RamalanCuacaApi = mockRamalanCuacaApi;
+export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
+// TODO: belum ada endpoint BE terkonfirmasi untuk panel "Perbandingan
+// Defisit Air" (WaterDeficitPanel.tsx) — beda dari `waterDeficitApi` di
+// atas (peta, sudah real). Ganti begitu kontraknya ada, lihat catatan di
+// mock/water-deficit-comparison-api.ts.
+export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;

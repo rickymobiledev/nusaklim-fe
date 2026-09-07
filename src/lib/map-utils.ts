@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { Station } from "@/types/domain";
+import type { Station, StationWaterDeficit } from "@/types/domain";
 import { mapDeviceStatus, STATION_STATUS_BADGE } from "@/lib/status";
 
 function csvEscape(value: string): string {
@@ -34,6 +34,25 @@ export function buildStationsCsv(stations: Station[]): string {
       csvEscape(sync),
     ].join(",");
   });
+
+  return [header.join(","), ...lines].join("\n");
+}
+
+/** CSV "Perbandingan Defisit Air" dari data yang sudah ke-fetch
+ *  (`useWaterDeficit()`) — dipakai tombol "Unduh" di toolbar peta tab
+ *  Keseimbangan Air, semangatnya sama seperti `buildStationsCsv`. */
+export function buildWaterDeficitCsv(rows: StationWaterDeficit[]): string {
+  const header = ["Nama", "Curah Hujan", "Defisit Air", "Hari Hujan", "Kelebihan Air"];
+
+  const lines = rows.map((row) =>
+    [
+      csvEscape(row.nama),
+      row.curahHujan ?? "",
+      row.defisitAir ?? "",
+      row.hariHujan ?? "",
+      row.kelebihanAir ?? "",
+    ].join(","),
+  );
 
   return [header.join(","), ...lines].join("\n");
 }

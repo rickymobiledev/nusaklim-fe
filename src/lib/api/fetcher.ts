@@ -17,10 +17,12 @@ import { API_V2_URL } from "@/constants";
  * bareng oleh `src/auth.ts` (login). Jangan concat "/api/v2" manual di
  * tempat lain.
  *
- * Belum benar-benar dipakai (`lib/api/index.ts` masih 100% mock — belum
- * ada `real/*` implementation, menunggu akses BE sungguhan), tapi begitu
- * dibuat, header `api-key` di bawah sudah siap (dikonfirmasi wajib lewat
- * Postman collection — auth level collection, bukan cuma opsional).
+ * Dipakai `station-client.ts` (`stationApi`), `weather-client.ts`
+ * (`weatherApi`), dan `water-deficit-client.ts` (`waterDeficitApi`) —
+ * domain lain (`monitoringApi`/`downloadApi`/`ramalanCuacaApi`) masih
+ * mock, belum pindah ke sini. Header `api-key` di bawah wajib
+ * (dikonfirmasi lewat Postman collection — auth level collection, bukan
+ * cuma opsional).
  */
 export function createApiClient(companyCode?: string): AxiosInstance {
   const instance = axios.create({
