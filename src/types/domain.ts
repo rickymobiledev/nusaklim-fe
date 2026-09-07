@@ -224,10 +224,14 @@ export type WaterDeficitLevel = "tidak_ada" | "rendah" | "tinggi";
  *  `value` null, keduanya harus di-treat sama (jadi `null` di sini).
  *  `stationId`/`nama`/`brand`/`lat`/`long`/`companyCode`/`companyName`
  *  sebenarnya SUDAH ikut menempel di tiap device response asli (endpoint
- *  ini independen, tidak perlu join manual ke `/devices/status`) — TAPI
- *  `sinkronisasiTerakhir` di sini TETAP dari join ke `Station` (lihat
- *  `lib/api/mock/water-deficit-api.ts`), karena endpoint asli
- *  `water_deficit` TIDAK punya field `last_sync_time`. */
+ *  ini independen, tidak perlu join manual ke `/devices/status`).
+ *  `sinkronisasiTerakhir` di sini BUKAN nilai asli device (endpoint
+ *  `water_deficit` TIDAK punya field `last_sync_time`) — DULU di-join ke
+ *  `stationApi.getStations()` (`lib/api/water-deficit-client.ts`), TAPI
+ *  join itu sudah dilepas, diganti waktu-request-sekarang
+ *  (`new Date().toISOString()`) — sama pola & alasan persis
+ *  `StationDrySpell` (mengurangi request bersamaan ke `/devices/status`,
+ *  lihat `CLAUDE.md`). */
 export interface StationWaterDeficit {
   stationId: string;
   nama: string;
@@ -281,11 +285,11 @@ export type DrySpellLevel = "rendah" | "sedang" | "tinggi";
  *  di sini BUKAN nilai asli device (endpoint `dry_spell` TIDAK punya
  *  field `last_sync_time`) — SENGAJA diisi waktu-request-sekarang oleh
  *  `mapRawDeviceToDrySpell` (`lib/api/adapters/dry-spell-adapter.ts`),
- *  BEDA dari `StationWaterDeficit` yang join ke `stationApi.getStations()`
- *  demi field ini. Keputusan sadar: field ini di UI cuma dipakai sebagai
- *  info sekunder di popup peta, dan join tadi menambah 1 request
- *  bersamaan ke `/devices/status` yang terbukti lambat kalau kena
- *  concurrency (lihat `CLAUDE.md`). */
+ *  bukan hasil join ke `stationApi.getStations()` (pola & alasan yang
+ *  sama juga dipakai `StationWaterDeficit`). Keputusan sadar: field ini
+ *  di UI cuma dipakai sebagai info sekunder di popup peta, dan join tadi
+ *  menambah 1 request bersamaan ke `/devices/status` yang terbukti
+ *  lambat kalau kena concurrency (lihat `CLAUDE.md`). */
 export interface StationDrySpell {
   stationId: string;
   nama: string;

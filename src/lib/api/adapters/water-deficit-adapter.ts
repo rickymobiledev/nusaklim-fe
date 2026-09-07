@@ -29,13 +29,16 @@ function parseComponentValue(value: string | null | undefined): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-/** `sinkronisasiTerakhir` TIDAK ada di payload `water_deficit` asli — harus
- *  dioper dari luar (join ke `stationApi.getStations()`, lihat
- *  `water-deficit-client.ts`), sama seperti kenapa `WaterDeficitApi` butuh
- *  1 call tambahan ke domain Stasiun. */
+/** `sinkronisasiTerakhir` TIDAK ada di payload `water_deficit` asli.
+ *  DULU di-join dari `stationApi.getStations()` (lihat
+ *  `water-deficit-client.ts`), TAPI diganti jadi waktu-request-sekarang
+ *  (`new Date().toISOString()`) — sama persis alasan & pola di
+ *  `dry-spell-adapter.ts` (`mapRawDeviceToDrySpell`): menghilangkan 1
+ *  request bersamaan ke `/devices/status`, endpoint yang terbukti lambat
+ *  kalau kena concurrency (lihat `CLAUDE.md`). Konsekuensi: field ini
+ *  BUKAN waktu sync asli device, cuma timestamp saat data di-fetch. */
 export function mapRawDeviceToWaterDeficit(
   raw: RawWaterDeficitDevice,
-  sinkronisasiTerakhir: string | null,
 ): StationWaterDeficit {
   const byComponent = new Map(raw.water_deficit.map((c) => [c.component, c.value]));
 
@@ -51,6 +54,6 @@ export function mapRawDeviceToWaterDeficit(
     defisitAir: parseComponentValue(byComponent.get("DEFISIT_AIR")),
     hariHujan: parseComponentValue(byComponent.get("HARI_HUJAN")),
     kelebihanAir: parseComponentValue(byComponent.get("KELEBIHAN_AIR")),
-    sinkronisasiTerakhir,
+    sinkronisasiTerakhir: new Date().toISOString(),
   };
 }

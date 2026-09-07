@@ -1,7 +1,6 @@
 import { ApiError, type ApiListResponse } from "@/types/api";
 import type { StationWaterDeficit } from "@/types/domain";
 import { createApiClient } from "./fetcher";
-import { stationApi } from "./station-client";
 import {
   mapRawDeviceToWaterDeficit,
   type RawWaterDeficitDevice,
@@ -11,26 +10,26 @@ import type { WaterDeficitApi, WaterDeficitParams } from "./water-deficit-api";
 /** Satu-satunya implementasi Water Deficit (Peta > Keseimbangan Air) —
  *  pola identik `station-client.ts`: `createApiClient(companyId)` inject
  *  `company_code` otomatis, cek `res.data.status`, `ApiError` kalau
- *  gagal, TIDAK ada fallback diam-diam ke mock. `sinkronisasiTerakhir`
- *  tidak ada di payload `/devices/water_deficit` asli, jadi di-join dari
- *  `stationApi.getStations()` (real, sudah ada) lewat `Map` per id. */
+ *  gagal, TIDAK ada fallback diam-diam ke mock. TIDAK join ke
+ *  `stationApi.getStations()` (dulu iya, demi `sinkronisasiTerakhir`) —
+ *  sudah dilepas, sama alasan & pola persis `dry-spell-client.ts`:
+ *  `nama`/`brand`/`lat`/`long`/dst sudah ikut di payload asli, dan
+ *  `sinkronisasiTerakhir` sekarang diisi waktu-request-sekarang di
+ *  adapter, bukan hasil join — mengurangi request bersamaan ke
+ *  `/devices/status` (lihat `CLAUDE.md`). */
 export const waterDeficitClient: WaterDeficitApi = {
   async getStationWaterDeficit(
     params: WaterDeficitParams,
   ): Promise<ApiListResponse<StationWaterDeficit>> {
     try {
       const client = createApiClient(params.companyId);
-      const [res, stationsResponse] = await Promise.all([
-        client.get<{
-          status: boolean;
-          message: string;
-          data: RawWaterDeficitDevice[];
-        }>("/devices/water_deficit", {
-          params: { year: params.year, month: params.month },
-        }),
-        stationApi.getStations({ companyId: params.companyId }),
-      ]);
-
+      const res = await client.get<{
+        status: boolean;
+        message: string;
+        data: RawWaterDeficitDevice[];
+      }>("/devices/water_deficit", {
+        params: { year: params.year, month: params.month },
+      });
 
       if (!res.data.status) {
         throw new ApiError(
@@ -39,13 +38,7 @@ export const waterDeficitClient: WaterDeficitApi = {
         );
       }
 
-      const sinkronisasiByStationId = new Map(
-        stationsResponse.data.map((s) => [s.id, s.sinkronisasiTerakhir]),
-      );
-
-      const data = res.data.data.map((raw) =>
-        mapRawDeviceToWaterDeficit(raw, sinkronisasiByStationId.get(raw.id) ?? null),
-      );
+      const data = res.data.data.map((raw) => mapRawDeviceToWaterDeficit(raw));
 
       return { data, meta: { page: 1, pageSize: data.length, total: data.length } };
     } catch (err) {

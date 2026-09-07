@@ -45,13 +45,13 @@ function pickMostRecentDrySpell(entries: RawDrySpellEntry[]): RawDrySpellEntry |
   );
 }
 
-/** `sinkronisasiTerakhir` TIDAK ada di payload `dry_spell` asli. BEDA dari
- *  `StationWaterDeficit` (yang join ke `stationApi.getStations()` demi
- *  field ini): di sini SENGAJA diisi waktu request saat ini
- *  (`new Date().toISOString()`), BUKAN join — keputusan sadar supaya
+/** `sinkronisasiTerakhir` TIDAK ada di payload `dry_spell` asli — SENGAJA
+ *  diisi waktu request saat ini (`new Date().toISOString()`), BUKAN hasil
+ *  join ke `stationApi.getStations()` — keputusan sadar supaya
  *  `dry-spell-client.ts` tidak perlu manggil `stationApi.getStations()`
  *  sama sekali (mengurangi request BERSAMAAN ke `/devices/status`, yang
- *  terbukti lambat kalau kena concurrency — lihat `CLAUDE.md`). Konsekuensi:
+ *  terbukti lambat kalau kena concurrency — lihat `CLAUDE.md`; pola &
+ *  alasan yang sama juga dipakai `water-deficit-adapter.ts`). Konsekuensi:
  *  nilai ini BUKAN waktu sync asli device, cuma timestamp saat data
  *  di-fetch — popup peta akan selalu menampilkan "baru saja" untuk field
  *  ini, bukan riwayat sync sebenarnya. */
