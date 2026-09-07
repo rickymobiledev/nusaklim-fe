@@ -1,5 +1,17 @@
+import https from "node:https";
 import axios, { type AxiosInstance } from "axios";
 import { API_V2_URL } from "@/constants";
+
+/** Agent HTTPS di-share ACROSS semua `createApiClient()` call (module-level
+ *  singleton, bukan dibuat ulang tiap request) — `keepAlive: true` supaya
+ *  koneksi TCP+TLS ke backend Nusaklim DIPAKAI ULANG antar-request dalam
+ *  proses Next.js server yang sama, bukan negosiasi handshake dari nol
+ *  tiap kali. Tanpa ini, tiap request bayar "pajak koneksi baru" penuh
+ *  (DNS + TCP connect + TLS handshake, ~100-250ms sendiri dari testing
+ *  manual) di atas waktu request/response asli — kelihatan jelas waktu
+ *  dibandingkan Postman/browser (yang biasa reuse koneksi) untuk endpoint
+ *  yang sama. */
+const keepAliveHttpsAgent = new https.Agent({ keepAlive: true });
 
 /**
  * Membuat instance axios yang otomatis menyisipkan `company_code` sebagai
@@ -27,6 +39,7 @@ import { API_V2_URL } from "@/constants";
 export function createApiClient(companyCode?: string): AxiosInstance {
   const instance = axios.create({
     baseURL: API_V2_URL,
+    httpsAgent: keepAliveHttpsAgent,
     headers: {
       "Content-Type": "application/json",
       "api-key": process.env.API_KEY ?? "",

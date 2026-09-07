@@ -32,8 +32,6 @@ export const waterDeficitClient: WaterDeficitApi = {
       ]);
 
 
-      console.log(res.data.data)
-
       if (!res.data.status) {
         throw new ApiError(
           "WATER_DEFICIT_FETCH_FAILED",

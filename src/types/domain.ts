@@ -243,6 +243,63 @@ export interface StationWaterDeficit {
   sinkronisasiTerakhir: string | null;
 }
 
+/** Level kategori durasi deret hari tidak hujan untuk warna marker/legend
+ *  Peta > Deret Terpanjang Hari Tidak Hujan — bukan field dari BE,
+ *  threshold ikut label yang ditampilkan di Figma (<10/>10/>20 hari).
+ *  TIDAK ADA level "tidak ada data" terpisah — array `dry_spell` kosong
+ *  di-treat SAMA seperti `rendah` (dikonfirmasi dari dashboard Nusaklim
+ *  produksi/ground truth: stasiun tanpa periode tercatat ditampilkan
+ *  "< 10 hari", bukan "tidak ada data"). Lihat `lib/dry-spell-level.ts`. */
+export type DrySpellLevel = "rendah" | "sedang" | "tinggi";
+
+/** Snapshot SATU TAHUN (bukan 1 bulan) untuk SATU stasiun, tab Peta >
+ *  Deret Terpanjang Hari Tidak Hujan — company-wide (list semua stasiun
+ *  sekaligus untuk `year` yang sama). Dikonfirmasi user lewat contoh
+ *  response `GET /devices/dry_spell?company_code=&year=` — response-nya
+ *  dibungkus `{status, message, data}` SAMA seperti `/devices/water_deficit`
+ *  (sempat salah diasumsikan "array mentah" dari contoh awal, sudah
+ *  dikoreksi setelah dicek langsung ke backend asli). BEDA dari
+ *  `/devices/water_deficit`: tiap device punya array `dry_spell:
+ *  [{ device_id, duration, start_date, end_date }]` yang bisa berisi
+ *  BANYAK periode kekeringan dalam setahun (bukan 1 angka per komponen
+ *  seperti Water Deficit).
+ *
+ *  `durasiTerakhir`/`tanggalMulai`/`tanggalSelesai` di sini adalah hasil
+ *  pilih entri dengan `end_date` PALING BARU dari array `dry_spell`
+ *  tahun itu — BUKAN durasi terbesar (nama field awalnya
+ *  `durasiTerpanjang`/"terbesar", tapi dikoreksi jadi "periode paling
+ *  baru" setelah dibandingkan langsung ke dashboard Nusaklim produksi,
+ *  ground truth-nya ternyata pilih periode PALING BARU, bukan yang
+ *  paling panjang — meski nama tab "Deret TERPANJANG Hari Tidak Hujan"
+ *  sendiri tidak diubah). Array kosong (`[]`) = tidak ada periode
+ *  kekeringan tercatat tahun itu, di-treat sebagai `null` (bukan 0) —
+ *  TAPI secara visual/kategori tetap masuk level `rendah` ("< 10 Hari"),
+ *  lihat `getDrySpellLevel` di `lib/dry-spell-level.ts`.
+ *  `stationId`/`nama`/`brand`/`lat`/`long`/`companyCode`/`companyName`
+ *  menempel langsung di tiap device response asli (endpoint ini
+ *  independen, TIDAK PERNAH join ke `/devices/status`). `sinkronisasiTerakhir`
+ *  di sini BUKAN nilai asli device (endpoint `dry_spell` TIDAK punya
+ *  field `last_sync_time`) — SENGAJA diisi waktu-request-sekarang oleh
+ *  `mapRawDeviceToDrySpell` (`lib/api/adapters/dry-spell-adapter.ts`),
+ *  BEDA dari `StationWaterDeficit` yang join ke `stationApi.getStations()`
+ *  demi field ini. Keputusan sadar: field ini di UI cuma dipakai sebagai
+ *  info sekunder di popup peta, dan join tadi menambah 1 request
+ *  bersamaan ke `/devices/status` yang terbukti lambat kalau kena
+ *  concurrency (lihat `CLAUDE.md`). */
+export interface StationDrySpell {
+  stationId: string;
+  nama: string;
+  brand: string;
+  lat: number;
+  long: number;
+  companyCode: string;
+  companyName: string;
+  durasiTerakhir: number | null;
+  tanggalMulai: string | null;
+  tanggalSelesai: string | null;
+  sinkronisasiTerakhir: string | null;
+}
+
 /** Baris tabel "Unduh Data". */
 export interface DownloadDataRow {
   tanggal: string;

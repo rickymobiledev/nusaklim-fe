@@ -2,10 +2,11 @@
 
 import styled from "styled-components";
 
-/** Placeholder untuk 3 tab Peta yang belum ada data-nya (endpoint
- *  `water_deficit`/`dry_spell`/`rainfall_today` belum diimplementasi sama
- *  sekali di layer manapun — lihat docs/ARCHITECTURE.md bagian 2 & TODO).
- *  Jangan bikin hook/route/type kosong cuma buat "isi" tab ini. */
+/** Placeholder untuk tab Peta "Curah Hujan Hari Ini" — endpoint
+ *  `rainfall_today` belum diimplementasi sama sekali di layer manapun
+ *  (lihat docs/ARCHITECTURE.md bagian 2 & TODO). `water_deficit` dan
+ *  `dry_spell` sudah real, tidak pakai placeholder ini lagi. Jangan bikin
+ *  hook/route/type kosong cuma buat "isi" tab ini. */
 export function ComingSoonCard({ label }: { label: string }) {
   return (
     <Card>

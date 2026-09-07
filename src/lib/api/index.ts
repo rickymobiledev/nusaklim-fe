@@ -4,6 +4,7 @@ import { mockDownloadApi } from "./mock/download-api";
 import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
 import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
 import { waterDeficitClient } from "./water-deficit-client";
+import { drySpellClient } from "./dry-spell-client";
 import { stationApi as stationClient } from "./station-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
@@ -11,6 +12,7 @@ import type { MonitoringApi } from "./monitoring-api";
 import type { DownloadApi } from "./download-api";
 import type { RamalanCuacaApi } from "./ramalan-cuaca-api";
 import type { WaterDeficitApi } from "./water-deficit-api";
+import type { DrySpellApi } from "./dry-spell-api";
 
 /**
  * Satu titik wiring — hooks import instance dari sini, bukan dari
@@ -32,3 +34,4 @@ export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 // atas (peta, sudah real). Ganti begitu kontraknya ada, lihat catatan di
 // mock/water-deficit-comparison-api.ts.
 export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;
+export const drySpellApi: DrySpellApi = drySpellClient;

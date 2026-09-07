@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
 import { useWaterDeficit } from "@/hooks/use-water-deficit";
 import { useWaterDeficitComparison } from "@/hooks/use-water-deficit-comparison";
+import { useDrySpellMap } from "@/hooks/use-dry-spell-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import { media } from "@/lib/breakpoints";
 import { MapTabs, type MapTab } from "./MapTabs";
@@ -13,12 +14,13 @@ import { MapStationList } from "./MapStationList";
 import { DynamicStationMap } from "./dynamic-station-map";
 import { DynamicWaterDeficitMap } from "./dynamic-water-deficit-map";
 import { WaterDeficitPanel } from "./WaterDeficitPanel";
+import { DynamicDrySpellMap } from "./dynamic-dry-spell-map";
+import { DrySpellPanel } from "./DrySpellPanel";
 
 const COMING_SOON_LABEL: Record<
-  Exclude<MapTab, "status-stasiun" | "keseimbangan-air">,
+  Exclude<MapTab, "status-stasiun" | "keseimbangan-air" | "dry-spell">,
   string
 > = {
-  "dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "curah-hujan-hari-ini": "Curah Hujan Hari Ini",
 };
 
@@ -32,6 +34,8 @@ export function MapSection() {
   // peta di atas — lihat catatan di use-water-deficit-comparison.ts.
   const { data: waterDeficitComparisonRows = [], isLoading: isComparisonLoading } =
     useWaterDeficitComparison();
+
+  const { data: drySpellRows = [], isLoading: isDrySpellLoading } = useDrySpellMap();
 
   const [activeTab, setActiveTab] = useState<MapTab>("status-stasiun");
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
@@ -47,7 +51,7 @@ export function MapSection() {
             <MapColumn>
               <Skeleton className="h-140 w-full rounded-[20px]" />
             </MapColumn>
-            <Skeleton className="h-140 w-full shrink-0 rounded-[20px] xl:w-75" />
+            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
           </ContentRow>
         ) : (
           <ContentRow>
@@ -74,7 +78,7 @@ export function MapSection() {
             <MapColumn>
               <Skeleton className="h-140 w-full rounded-[20px]" />
             </MapColumn>
-            <Skeleton className="h-140 w-full shrink-0 rounded-[20px] xl:w-75" />
+            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
           </ContentRow>
         ) : (
           <ContentRow>
@@ -83,6 +87,23 @@ export function MapSection() {
             </MapColumn>
 
             <WaterDeficitPanel rows={waterDeficitComparisonRows} />
+          </ContentRow>
+        )
+      ) : activeTab === "dry-spell" ? (
+        isDrySpellLoading ? (
+          <ContentRow>
+            <MapColumn>
+              <Skeleton className="h-140 w-full rounded-[20px]" />
+            </MapColumn>
+            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
+          </ContentRow>
+        ) : (
+          <ContentRow>
+            <MapColumn>
+              <DynamicDrySpellMap rows={drySpellRows} />
+            </MapColumn>
+
+            <DrySpellPanel rows={drySpellRows} />
           </ContentRow>
         )
       ) : (

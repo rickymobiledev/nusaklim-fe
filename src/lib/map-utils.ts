@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { Station, StationWaterDeficit } from "@/types/domain";
+import type { Station, StationWaterDeficit, StationDrySpell } from "@/types/domain";
 import { mapDeviceStatus, STATION_STATUS_BADGE } from "@/lib/status";
 
 function csvEscape(value: string): string {
@@ -51,6 +51,25 @@ export function buildWaterDeficitCsv(rows: StationWaterDeficit[]): string {
       row.defisitAir ?? "",
       row.hariHujan ?? "",
       row.kelebihanAir ?? "",
+    ].join(","),
+  );
+
+  return [header.join(","), ...lines].join("\n");
+}
+
+/** CSV "Perbandingan Hari Tidak Hujan" dari data yang sudah ke-fetch
+ *  (`useDrySpellMap()`) — dipakai tombol "Unduh" di toolbar peta tab
+ *  Deret Terpanjang Hari Tidak Hujan, semangatnya sama seperti
+ *  `buildWaterDeficitCsv`. */
+export function buildDrySpellCsv(rows: StationDrySpell[]): string {
+  const header = ["Nama", "Durasi Terakhir (Hari)", "Tanggal Mulai", "Tanggal Selesai"];
+
+  const lines = rows.map((row) =>
+    [
+      csvEscape(row.nama),
+      row.durasiTerakhir ?? "",
+      row.tanggalMulai ?? "",
+      row.tanggalSelesai ?? "",
     ].join(","),
   );
 
