@@ -10,12 +10,17 @@ import { StationStatsCard } from "@/components/domain/beranda/StationStatsCard";
 import { BerandaHeroBanner } from "@/components/domain/beranda/BerandaHeroBanner";
 import { WeatherChartCard } from "@/components/domain/beranda/WeatherChartCard";
 import { useWeatherMetrics } from "@/hooks/use-weather-metrics";
+import { useStations } from "@/hooks/use-stations";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BerandaPage() {
   const [stationId, setStationId] = useState<string>();
 
-  const { data: snapshot, isLoading: loadingSnapshot } = useWeatherMetrics(stationId);
+  const { data: stationsResponse } = useStations();
+  const selectedStationId = stationId ?? stationsResponse?.data[0]?.id;
+
+  const { data: snapshot, isLoading: loadingSnapshot } =
+    useWeatherMetrics(selectedStationId);
 
   return (
     <div className="flex flex-col gap-4">
@@ -26,7 +31,7 @@ export default function BerandaPage() {
           <DashboardTitle />
 
           <div className="flex flex-wrap gap-4">
-            <StationSyncCard value={stationId} onChange={setStationId} />
+            <StationSyncCard value={selectedStationId} onChange={setStationId} />
             <StationStatsCard />
           </div>
         </div>
