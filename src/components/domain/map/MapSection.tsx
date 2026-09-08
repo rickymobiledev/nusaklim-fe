@@ -6,23 +6,18 @@ import { useStations } from "@/hooks/use-stations";
 import { useWaterDeficit } from "@/hooks/use-water-deficit";
 import { useWaterDeficitComparison } from "@/hooks/use-water-deficit-comparison";
 import { useDrySpellMap } from "@/hooks/use-dry-spell-map";
+import { useRainfallToday } from "@/hooks/use-rainfall-today";
 import { Skeleton } from "@/components/ui/skeleton";
 import { media } from "@/lib/breakpoints";
 import { MapTabs, type MapTab } from "./MapTabs";
-import { ComingSoonCard } from "./ComingSoonCard";
 import { MapStationList } from "./MapStationList";
 import { DynamicStationMap } from "./dynamic-station-map";
 import { DynamicWaterDeficitMap } from "./dynamic-water-deficit-map";
 import { WaterDeficitPanel } from "./WaterDeficitPanel";
 import { DynamicDrySpellMap } from "./dynamic-dry-spell-map";
 import { DrySpellPanel } from "./DrySpellPanel";
-
-const COMING_SOON_LABEL: Record<
-  Exclude<MapTab, "status-stasiun" | "keseimbangan-air" | "dry-spell">,
-  string
-> = {
-  "curah-hujan-hari-ini": "Curah Hujan Hari Ini",
-};
+import { DynamicRainfallTodayMap } from "./dynamic-rainfall-today-map";
+import { RainfallTodayPanel } from "./RainfallTodayPanel";
 
 export function MapSection() {
   const { data: stationsResponse, isLoading } = useStations();
@@ -36,6 +31,9 @@ export function MapSection() {
     useWaterDeficitComparison();
 
   const { data: drySpellRows = [], isLoading: isDrySpellLoading } = useDrySpellMap();
+
+  const { data: rainfallTodayRows = [], isLoading: isRainfallTodayLoading } =
+    useRainfallToday();
 
   const [activeTab, setActiveTab] = useState<MapTab>("status-stasiun");
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
@@ -106,8 +104,21 @@ export function MapSection() {
             <DrySpellPanel rows={drySpellRows} />
           </ContentRow>
         )
+      ) : isRainfallTodayLoading ? (
+        <ContentRow>
+          <MapColumn>
+            <Skeleton className="h-140 w-full rounded-[20px]" />
+          </MapColumn>
+          <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
+        </ContentRow>
       ) : (
-        <ComingSoonCard label={COMING_SOON_LABEL[activeTab]} />
+        <ContentRow>
+          <MapColumn>
+            <DynamicRainfallTodayMap rows={rainfallTodayRows} />
+          </MapColumn>
+
+          <RainfallTodayPanel rows={rainfallTodayRows} />
+        </ContentRow>
       )}
     </Wrapper>
   );

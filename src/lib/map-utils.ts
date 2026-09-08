@@ -1,6 +1,12 @@
 import { format } from "date-fns";
-import type { Station, StationWaterDeficit, StationDrySpell } from "@/types/domain";
+import type {
+  Station,
+  StationWaterDeficit,
+  StationDrySpell,
+  StationRainfallToday,
+} from "@/types/domain";
 import { mapDeviceStatus, STATION_STATUS_BADGE } from "@/lib/status";
+import { RAINFALL_TODAY_LABEL, getRainfallTodayLevel } from "@/lib/rainfall-today-level";
 
 function csvEscape(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -70,6 +76,23 @@ export function buildDrySpellCsv(rows: StationDrySpell[]): string {
       row.durasiTerakhir ?? "",
       row.tanggalMulai ?? "",
       row.tanggalSelesai ?? "",
+    ].join(","),
+  );
+
+  return [header.join(","), ...lines].join("\n");
+}
+
+/** CSV "Curah Hujan Hari Ini" dari data yang sudah ke-fetch
+ *  (`useRainfallToday()`) — dipakai tombol "Unduh" di toolbar peta tab
+ *  Curah Hujan Hari Ini, semangatnya sama seperti `buildDrySpellCsv`. */
+export function buildRainfallTodayCsv(rows: StationRainfallToday[]): string {
+  const header = ["Nama", "Curah Hujan (mm)", "Status"];
+
+  const lines = rows.map((row) =>
+    [
+      csvEscape(row.nama),
+      row.curahHujan ?? "",
+      csvEscape(RAINFALL_TODAY_LABEL[getRainfallTodayLevel(row.isHujan)]),
     ].join(","),
   );
 

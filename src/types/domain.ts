@@ -304,6 +304,53 @@ export interface StationDrySpell {
   sinkronisasiTerakhir: string | null;
 }
 
+/** Level status hujan hari ini untuk warna marker/legend/chip Peta >
+ *  Curah Hujan Hari Ini — BUKAN threshold turunan seperti
+ *  `WaterDeficitLevel`/`DrySpellLevel`, BE sudah balikin status biner
+ *  langsung lewat field `is_rain` (lihat `StationRainfallToday`). Lihat
+ *  `lib/rainfall-today-level.ts`. */
+export type RainfallTodayLevel = "hujan" | "tidak_hujan";
+
+/** Snapshot HARI INI (tanpa param tanggal/year/month sama sekali) untuk
+ *  SATU stasiun, tab Peta > Curah Hujan Hari Ini — company-wide (list
+ *  semua stasiun sekaligus). Dikonfirmasi lewat tes langsung ke endpoint
+ *  asli `GET /devices/rainfall_today?company_code=` — response dibungkus
+ *  `{status, message, data}` SAMA seperti `/devices/water_deficit` &
+ *  `/devices/dry_spell`, TAPI beda dari keduanya: TIDAK ada param
+ *  tanggal/year/month sama sekali (endpoint ini otomatis "hari ini" di
+ *  sisi BE).
+ *
+ *  `curahHujan` di sini di-parse dari field mentah `rainfall` (STRING,
+ *  bukan number) — salah satu device (brand "Meteo Nusantara
+ *  Instrumen"/ARR) pernah balikin literal `"---"` sebagai sentinel
+ *  "tidak ada data" (dikonfirmasi dari response asli), `Number("---")`
+ *  jadi `NaN` sehingga di-treat `null` oleh
+ *  `parseRainfallValue()` (`lib/api/adapters/rainfall-today-adapter.ts`).
+ *  `isHujan` diambil APA ADANYA dari field `is_rain` — BE yang menentukan
+ *  status hujan/tidak, BUKAN turunan threshold dari `curahHujan` seperti
+ *  `getWaterDeficitLevel`/`getDrySpellLevel`.
+ *
+ *  `stationId`/`nama`/`brand`/`lat`/`long`/`companyCode`/`companyName`
+ *  menempel langsung di tiap device response asli (endpoint ini
+ *  independen, TIDAK PERNAH join ke `/devices/status`). `sinkronisasiTerakhir`
+ *  BUKAN nilai asli device (endpoint `rainfall_today` TIDAK punya field
+ *  `last_sync_time`) — SENGAJA diisi waktu-request-sekarang, pola &
+ *  alasan yang sama persis `StationDrySpell`/`StationWaterDeficit`
+ *  (menghindari 1 request bersamaan tambahan ke `/devices/status`, lihat
+ *  `CLAUDE.md`). */
+export interface StationRainfallToday {
+  stationId: string;
+  nama: string;
+  brand: string;
+  lat: number;
+  long: number;
+  companyCode: string;
+  companyName: string;
+  curahHujan: number | null;
+  isHujan: boolean;
+  sinkronisasiTerakhir: string | null;
+}
+
 /** Baris tabel "Unduh Data". */
 export interface DownloadDataRow {
   tanggal: string;

@@ -5,6 +5,7 @@ import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
 import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
 import { waterDeficitClient } from "./water-deficit-client";
 import { drySpellClient } from "./dry-spell-client";
+import { rainfallTodayClient } from "./rainfall-today-client";
 import { stationApi as stationClient } from "./station-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
@@ -13,6 +14,7 @@ import type { DownloadApi } from "./download-api";
 import type { RamalanCuacaApi } from "./ramalan-cuaca-api";
 import type { WaterDeficitApi } from "./water-deficit-api";
 import type { DrySpellApi } from "./dry-spell-api";
+import type { RainfallTodayApi } from "./rainfall-today-api";
 
 /**
  * Satu titik wiring — hooks import instance dari sini, bukan dari
@@ -35,3 +37,4 @@ export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 // mock/water-deficit-comparison-api.ts.
 export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;
 export const drySpellApi: DrySpellApi = drySpellClient;
+export const rainfallTodayApi: RainfallTodayApi = rainfallTodayClient;
