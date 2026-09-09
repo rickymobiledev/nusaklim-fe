@@ -40,6 +40,22 @@ interface RawWeatherDaily {
   // TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend real
   // tersedia.
   average_air_pressure?: number | string | null;
+  // UNCONFIRMED terhadap backend asli — nama field agregat harian
+  // kecepatan angin belum diverifikasi (situasi sama seperti
+  // average_temperature di atas). Coba beberapa alias umum, fallback null
+  // kalau semua tidak ada. TODO: konfirmasi ke tim BE/Data Analyst begitu
+  // akses backend real tersedia.
+  average_wind_speed?: number | string | null;
+  avg_wind_speed?: number | string | null;
+  mean_wind_speed?: number | string | null;
+  // UNCONFIRMED terhadap backend asli — nama field agregat harian arah
+  // mata angin (derajat 0-360) belum diverifikasi (situasi sama seperti
+  // average_temperature di atas). Coba beberapa alias umum, fallback null
+  // kalau semua tidak ada. TODO: konfirmasi ke tim BE/Data Analyst begitu
+  // akses backend real tersedia.
+  average_wind_direction?: number | string | null;
+  avg_wind_direction?: number | string | null;
+  mean_wind_direction?: number | string | null;
 }
 
 function parseNumeric(raw: unknown): number | null {
@@ -64,6 +80,18 @@ function parseRadiation(row: RawWeatherDaily): number | null {
 
 function parsePressure(row: RawWeatherDaily): number | null {
   return parseNumeric(row.average_air_pressure);
+}
+
+function parseWindSpeed(row: RawWeatherDaily): number | null {
+  return parseNumeric(
+    row.average_wind_speed ?? row.avg_wind_speed ?? row.mean_wind_speed,
+  );
+}
+
+function parseWindDirection(row: RawWeatherDaily): number | null {
+  return parseNumeric(
+    row.average_wind_direction ?? row.avg_wind_direction ?? row.mean_wind_direction,
+  );
 }
 
 /** Request mentah ke `/weathers/daily` untuk SATU device — dipakai baik
@@ -237,6 +265,96 @@ export async function fetchPressureRange(
 ): Promise<WeatherChartPoint[]> {
   const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
   const byDate = new Map(data.map((row) => [row.date, parsePressure(row)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? null });
+  }
+
+  return points;
+}
+
+/** Sumber chart curah hujan harian halaman `/rainfall` — rentang tanggal
+ *  dipilih user (beda dari `fetchWeatherDailyChart()` yang fixed 7 hari),
+ *  fan-out multi-stasiun di `rainfall-daily-client.ts`. BEDA dari
+ *  `fetchTemperatureRange()`/dst: hari tanpa data di-default **0**, bukan
+ *  null/gap — konsisten `fetchWeatherDailyChart()` (baris ~136-139): curah
+ *  hujan 0mm valid secara semantik, tidak seperti temperatur/radiasi/
+ *  tekanan/kelembapan yang "0" tidak wajar dianggap default. */
+export async function fetchRainfallRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parseNumeric(row.sum_rainfall)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? 0 });
+  }
+
+  return points;
+}
+
+/** Sumber chart kecepatan angin harian halaman `/wind-speed` — pola
+ *  identik `fetchTemperatureRange()`/`fetchRadiationRange()`/
+ *  `fetchPressureRange()` (rentang tanggal dipilih user, fan-out multi-
+ *  stasiun di `wind-speed-daily-client.ts`). BEDA dari
+ *  `fetchRainfallRange()`: hari tanpa data = null/gap (bukan 0) — field
+ *  agregat harian kecepatan angin masih UNCONFIRMED (lihat
+ *  `parseWindSpeed()`), tidak seperti `sum_rainfall` yang sudah
+ *  dikonfirmasi reliable, jadi ikut konvensi null/gap seperti
+ *  temperatur/radiasi/tekanan, bukan konvensi 0 seperti curah hujan. */
+export async function fetchWindSpeedRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parseWindSpeed(row)]));
+
+  const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
+  const points: WeatherChartPoint[] = [];
+
+  for (let i = 0; i < dayCount; i++) {
+    const day = addDays(startDate, i);
+    const key = format(day, "yyyy-MM-dd");
+    const label = format(day, "dd MMM");
+    points.push({ date: label, value: byDate.get(key) ?? null });
+  }
+
+  return points;
+}
+
+/** Sumber chart arah mata angin harian halaman `/wind-direction` — pola
+ *  identik `fetchWindSpeedRange()` (rentang tanggal dipilih user, fan-out
+ *  multi-stasiun di `wind-direction-daily-client.ts`, hari tanpa data =
+ *  null/gap, field agregat harian UNCONFIRMED — lihat
+ *  `parseWindDirection()`). Nilai tetap derajat mentah (0-360), BUKAN
+ *  dikonversi ke teks 8-arah-mata-angin (`degreesToCompass()` di
+ *  `lib/utils/index.ts`) — halaman detail ini menampilkan angka polos,
+ *  konsisten sama gaya tampilan halaman detail cuaca lain. */
+export async function fetchWindDirectionRange(
+  deviceId: string,
+  startDate: Date,
+  endDate: Date,
+  companyId?: string,
+): Promise<WeatherChartPoint[]> {
+  const data = await fetchRawDaily(deviceId, startDate, endDate, companyId);
+  const byDate = new Map(data.map((row) => [row.date, parseWindDirection(row)]));
 
   const dayCount = differenceInCalendarDays(endDate, startDate) + 1;
   const points: WeatherChartPoint[] = [];

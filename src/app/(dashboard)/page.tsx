@@ -51,19 +51,21 @@ export default function BerandaPage() {
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <WeatherChartCard
-                  icon={{ src: "/brand/rainy.png" }}
-                  label="Curah Hujan"
-                  value={snapshot.rainfall.value}
-                  min={snapshot.rainfall.min}
-                  max={snapshot.rainfall.max}
-                  unit={snapshot.rainfall.unit}
-                  chart={snapshot.rainfallDetail?.chart ?? []}
-                  status={
-                    snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
-                  }
-                  chartColor="#175FE2"
-                />
+                <Link href="/rainfall">
+                  <WeatherChartCard
+                    icon={{ src: "/brand/rainy.png" }}
+                    label="Curah Hujan"
+                    value={snapshot.rainfall.value}
+                    min={snapshot.rainfall.min}
+                    max={snapshot.rainfall.max}
+                    unit={snapshot.rainfall.unit}
+                    chart={snapshot.rainfallDetail?.chart ?? []}
+                    status={
+                      snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
+                    }
+                    chartColor="#175FE2"
+                  />
+                </Link>
                 <Link href="/relative-humidity">
                   <WeatherChartCard
                     icon={{ src: "/brand/humidity.png" }}
@@ -103,11 +105,13 @@ export default function BerandaPage() {
                     data={snapshot.airPressure}
                   />
                 </Link>
-                <MetricCard
-                  icon={Wind}
-                  label="Kecepatan Angin"
-                  data={snapshot.windSpeed}
-                />
+                <Link href="/wind-speed">
+                  <MetricCard
+                    icon={Wind}
+                    label="Kecepatan Angin"
+                    data={snapshot.windSpeed}
+                  />
+                </Link>
               </div>
             </div>
             {/* Placeholder sidebar kanan — widget (Periode Monitoring, Deret

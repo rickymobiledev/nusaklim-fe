@@ -104,6 +104,39 @@ export interface RelativeHumidityStationSeries {
   points: WeatherChartPoint[];
 }
 
+/** Satu deret curah hujan harian satu stasiun untuk rentang tanggal yang
+ *  diminta — item `ApiListResponse` dari `GET /api/rainfall/daily` (halaman
+ *  detail `/rainfall`, bukan kartu ringkasan Beranda). Hari tanpa hujan
+ *  di-default 0 (bukan null/gap) — lihat `fetchRainfallRange`. */
+export interface RainfallStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
+/** Satu deret kecepatan angin harian satu stasiun untuk rentang tanggal
+ *  yang diminta — item `ApiListResponse` dari `GET /api/wind-speed/daily`
+ *  (halaman detail `/wind-speed`, bukan kartu ringkasan Beranda). Field
+ *  agregat harian sumbernya UNCONFIRMED terhadap backend asli — lihat
+ *  `fetchWindSpeedRange` di `weather-daily-client.ts`. */
+export interface WindSpeedStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
+/** Satu deret arah mata angin harian satu stasiun untuk rentang tanggal
+ *  yang diminta — item `ApiListResponse` dari `GET /api/wind-direction/daily`
+ *  (halaman detail `/wind-direction`, bukan kartu ringkasan Beranda — kartu
+ *  arah mata angin belum ada di Beranda sama sekali). Nilai derajat mentah
+ *  (0-360), field agregat harian sumbernya UNCONFIRMED — lihat
+ *  `fetchWindDirectionRange` di `weather-daily-client.ts`. */
+export interface WindDirectionStationSeries {
+  stationId: string;
+  stationName: string;
+  points: WeatherChartPoint[];
+}
+
 /** Kartu ringkasan cuaca di Beranda: Temperatur Udara, Radiasi Matahari, dst. */
 export interface WeatherMetric {
   stationId: string;
