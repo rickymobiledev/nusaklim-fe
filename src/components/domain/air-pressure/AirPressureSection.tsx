@@ -14,7 +14,6 @@ import { AirPressureChart } from "./AirPressureChart";
 import { AirPressureStationList } from "./AirPressureStationList";
 
 const DEFAULT_RANGE_DAYS = 21;
-const DEFAULT_SELECTED_STATION_COUNT = 3;
 
 export function AirPressureSection() {
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
@@ -27,20 +26,14 @@ export function AirPressureSection() {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Sekali stasiun aktif ke-load & belum ada yang dipilih, auto-pilih
-  // beberapa stasiun pertama (approksimasi default Figma yang nunjukin 3
-  // stasiun terpilih) — guard ref biar tidak retrigger tiap polling
-  // useStations() (refetch tiap 5 menit).
+  // Sekali stasiun ke-load & belum ada yang dipilih, auto-pilih SEMUA
+  // stasiun (tanpa filter status) — guard ref biar tidak retrigger tiap
+  // polling useStations() (refetch tiap 5 menit).
   const seededRef = useRef(false);
   useEffect(() => {
     if (seededRef.current || stations.length === 0 || selectedIds.length > 0) return;
     seededRef.current = true;
-    setSelectedIds(
-      stations
-        .filter((s) => s.status === "on")
-        .slice(0, DEFAULT_SELECTED_STATION_COUNT)
-        .map((s) => s.id),
-    );
+    setSelectedIds(stations.map((s) => s.id));
   }, [stations, selectedIds.length]);
 
   const {

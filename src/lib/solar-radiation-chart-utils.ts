@@ -1,3 +1,4 @@
+import { toPng, toSvg } from "html-to-image";
 import type { SolarRadiationStationSeries } from "@/types/domain";
 
 export interface MergedChartRow {
@@ -64,6 +65,21 @@ export function downloadCsvFile(filename: string, content: string): void {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+/** Screenshot Card chart (svg Recharts + Legend HTML di bawahnya) jadi
+ *  PNG/SVG lewat html-to-image, lalu trigger download — dipanggil dari
+ *  tombol "Unduh Data" pas user pilih format gambar (bukan CSV). */
+export async function downloadChartImage(
+  node: HTMLElement,
+  filename: string,
+  imageFormat: "png" | "svg",
+): Promise<void> {
+  const dataUrl = imageFormat === "png" ? await toPng(node) : await toSvg(node);
+  const link = document.createElement("a");
+  link.href = dataUrl;
+  link.download = filename;
+  link.click();
 }
 
 export interface StationStats {

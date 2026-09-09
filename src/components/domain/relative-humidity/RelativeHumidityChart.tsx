@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type RefObject } from "react";
 import styled from "styled-components";
 import {
   ResponsiveContainer,
@@ -25,17 +25,19 @@ export function RelativeHumidityChart({
   isLoading,
   isError,
   error,
+  chartRef,
 }: {
   series: (ColoredSeries & { points: { date: string; value: number | null }[] })[];
   isLoading: boolean;
   isError: boolean;
   error?: unknown;
+  chartRef?: RefObject<HTMLDivElement | null>;
 }) {
   const rows = mergeSeriesByDate(series);
   const [hoveredStationId, setHoveredStationId] = useState<string | null>(null);
 
   return (
-    <Card>
+    <Card ref={chartRef}>
       <DataState
         isLoading={isLoading}
         isError={isError}

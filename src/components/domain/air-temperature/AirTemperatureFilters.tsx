@@ -3,7 +3,12 @@
 import type { DateRange } from "react-day-picker";
 import styled from "styled-components";
 import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MultiStationSelect } from "@/components/shared/MultiStationSelect";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import { media } from "@/lib/breakpoints";
@@ -25,7 +30,7 @@ export function AirTemperatureFilters({
   onSelectedIdsChange: (ids: string[]) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onDownload: () => void;
+  onDownload: (format: "csv" | "png" | "svg") => void;
   downloadDisabled: boolean;
 }) {
   return (
@@ -40,10 +45,17 @@ export function AirTemperatureFilters({
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
 
-      <DownloadButton variant="outline" onClick={onDownload} disabled={downloadDisabled}>
-        <Download size={24} />
-        Unduh Data
-      </DownloadButton>
+      <DropdownMenu>
+        <DownloadButton disabled={downloadDisabled}>
+          <Download size={24} />
+          Unduh Data
+        </DownloadButton>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => onDownload("csv")}>CSV</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onDownload("png")}>PNG</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onDownload("svg")}>SVG</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </Row>
   );
 }
@@ -68,7 +80,7 @@ const Filters = styled.div`
   gap: 16px;
 `;
 
-const DownloadButton = styled(Button)`
+const DownloadButton = styled(DropdownMenuTrigger)`
   color: #175fe2;
 
   display: flex;
@@ -76,6 +88,7 @@ const DownloadButton = styled(Button)`
   justify-content: center;
   align-items: center;
   padding: 12px 16px;
+  gap: 8px;
 
   background: #ffffff;
   border: 1.5px solid #175fe2;
@@ -88,8 +101,12 @@ const DownloadButton = styled(Button)`
   align-items: center;
   text-align: center;
 
-
   &:hover {
     background: #eff5ff;
+  }
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
   }
 `;

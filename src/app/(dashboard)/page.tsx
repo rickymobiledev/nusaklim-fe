@@ -64,20 +64,22 @@ export default function BerandaPage() {
                   }
                   chartColor="#175FE2"
                 />
-                <WeatherChartCard
-                  icon={{ src: "/brand/humidity.png" }}
-                  label="Kelembapan Relatif"
-                  value={snapshot.airHumidity.value}
-                  min={snapshot.airHumidity.min}
-                  max={snapshot.airHumidity.max}
-                  unit={snapshot.airHumidity.unit}
-                  chart={snapshot.humidityDetail?.chart ?? []}
-                  status={
-                    snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
-                  }
-                  chartColor="#0039FF"
-                  headerBorderColor="#C3FAFA"
-                />
+                <Link href="/relative-humidity">
+                  <WeatherChartCard
+                    icon={{ src: "/brand/humidity.png" }}
+                    label="Kelembapan Relatif"
+                    value={snapshot.airHumidity.value}
+                    min={snapshot.airHumidity.min}
+                    max={snapshot.airHumidity.max}
+                    unit={snapshot.airHumidity.unit}
+                    chart={snapshot.humidityDetail?.chart ?? []}
+                    status={
+                      snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
+                    }
+                    chartColor="#0039FF"
+                    headerBorderColor="#C3FAFA"
+                  />
+                </Link>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Link href="/air-temperature">

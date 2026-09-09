@@ -7,14 +7,17 @@ import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useAirTemperatureChart } from "@/hooks/use-air-temperature-chart";
 import { getStationColor } from "@/lib/station-colors";
-import { buildTemperatureCsv, downloadCsvFile } from "@/lib/air-temperature-chart-utils";
+import {
+  buildTemperatureCsv,
+  downloadChartImage,
+  downloadCsvFile,
+} from "@/lib/air-temperature-chart-utils";
 import { media } from "@/lib/breakpoints";
 import { AirTemperatureFilters } from "./AirTemperatureFilters";
 import { AirTemperatureChart } from "./AirTemperatureChart";
 import { AirTemperatureStationList } from "./AirTemperatureStationList";
 
 const DEFAULT_RANGE_DAYS = 21;
-const DEFAULT_SELECTED_STATION_COUNT = 3;
 
 export function AirTemperatureSection() {
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
@@ -26,21 +29,16 @@ export function AirTemperatureSection() {
     return { from: subDays(to, DEFAULT_RANGE_DAYS - 1), to };
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const chartCardRef = useRef<HTMLDivElement>(null);
 
-  // Sekali stasiun aktif ke-load & belum ada yang dipilih, auto-pilih
-  // beberapa stasiun pertama (approksimasi default Figma yang nunjukin 3
-  // stasiun terpilih) — guard ref biar tidak retrigger tiap polling
-  // useStations() (refetch tiap 5 menit).
+  // Sekali stasiun ke-load & belum ada yang dipilih, auto-pilih SEMUA
+  // stasiun (tanpa filter status) — guard ref biar tidak retrigger tiap
+  // polling useStations() (refetch tiap 5 menit).
   const seededRef = useRef(false);
   useEffect(() => {
     if (seededRef.current || stations.length === 0 || selectedIds.length > 0) return;
     seededRef.current = true;
-    setSelectedIds(
-      stations
-        .filter((s) => s.status === "on")
-        .slice(0, DEFAULT_SELECTED_STATION_COUNT)
-        .map((s) => s.id),
-    );
+    setSelectedIds(stations.map((s) => s.id));
   }, [stations, selectedIds.length]);
 
   const {
@@ -55,11 +53,22 @@ export function AirTemperatureSection() {
     color: getStationColor(index),
   }));
 
-  function handleDownload() {
-    const csv = buildTemperatureCsv(coloredSeries);
+  async function handleDownload(exportFormat: "csv" | "png" | "svg") {
     const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "mulai";
     const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "akhir";
-    downloadCsvFile(`temperatur-udara_${from}_${to}.csv`, csv);
+
+    if (exportFormat === "csv") {
+      const csv = buildTemperatureCsv(coloredSeries);
+      downloadCsvFile(`temperatur-udara_${from}_${to}.csv`, csv);
+      return;
+    }
+
+    if (!chartCardRef.current) return;
+    await downloadChartImage(
+      chartCardRef.current,
+      `temperatur-udara_${from}_${to}.${exportFormat}`,
+      exportFormat,
+    );
   }
 
   return (
@@ -82,6 +91,7 @@ export function AirTemperatureSection() {
             isLoading={isLoadingChart}
             isError={isError}
             error={error}
+            chartRef={chartCardRef}
           />
         </ChartColumn>
 

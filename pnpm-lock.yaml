@@ -56,6 +56,9 @@ importers:
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
+      html-to-image:
+        specifier: ^1.11.13
+        version: 1.11.13
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
@@ -2875,6 +2878,9 @@ packages:
   hono@4.13.3:
     resolution: {integrity: sha512-r8AO2mYHoLxSHkgafNeC/BXyb2vWRxD3jem4Ts+ptav8oTG5FIRifAjuJEmZI4bSvvc2ns0GxmIYiZnHqN3mMw==}
     engines: {node: '>=16.9.0'}
+
+  html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -7305,6 +7311,8 @@ snapshots:
       hermes-estree: 0.25.1
 
   hono@4.13.3: {}
+
+  html-to-image@1.11.13: {}
 
   http-errors@2.0.1:
     dependencies:
