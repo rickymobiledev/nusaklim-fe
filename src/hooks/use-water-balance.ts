@@ -1,28 +1,30 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ApiItemResponse } from "@/types/api";
+import type { ApiListResponse } from "@/types/api";
 import type { WaterBalance } from "@/types/domain";
-import type { MonitoringFilterParams } from "@/lib/api/monitoring-api";
 import { fetchJson } from "@/lib/api/client-fetch";
-import { USE_MOCK } from "@/constants";
 
 /** `companyId` TIDAK dikirim dari sini — Route Handler yang menentukan
  *  dari sesi server-side (`resolveCompanyId()`), supaya tidak bisa
- *  dispoof lewat query string. */
-export function useWaterBalance(params: Omit<MonitoringFilterParams, "companyId"> = {}) {
+ *  dispoof lewat query string. `years` di-fan-out di Route Handler (satu
+ *  call BE per tahun) — hook ini cuma manggil SATU internal endpoint,
+ *  lihat `app/api/monitoring/water-balance/route.ts`. Data sudah 100%
+ *  real (`water-balance-client.ts`, `device_id` wajib), jadi TIDAK ada
+ *  lagi escape-hatch `USE_MOCK` seperti Fase 1 — konsisten
+ *  `use-stations.ts`/`use-weather-metrics.ts`. */
+export function useWaterBalance(params: { stationId?: string; years: number[] }) {
   return useQuery({
     queryKey: ["monitoring", "water-balance", params],
     queryFn: () => {
       const qs = new URLSearchParams();
       if (params.stationId) qs.set("stationId", params.stationId);
-      if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
-      if (params.dateTo) qs.set("dateTo", params.dateTo);
-      return fetchJson<ApiItemResponse<WaterBalance>>(
+      qs.set("years", params.years.join(","));
+      return fetchJson<ApiListResponse<WaterBalance>>(
         `/api/monitoring/water-balance?${qs}`,
       );
     },
     select: (res) => res.data,
-    enabled: USE_MOCK || !!params.stationId,
+    enabled: !!params.stationId && params.years.length > 0,
   });
 }

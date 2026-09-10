@@ -1,4 +1,8 @@
 import { weatherClient } from "./weather-client";
+import { waterBalanceClient } from "./water-balance-client";
+import { sunshineDurationClient } from "./sunshine-duration-client";
+import { vpdClient } from "./vpd-client";
+import { drySpellReportClient } from "./dry-spell-report-client";
 import { mockMonitoringApi } from "./mock/monitoring-api";
 import { mockDownloadApi } from "./mock/download-api";
 import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
@@ -27,7 +31,26 @@ import type { RainfallTodayApi } from "./rainfall-today-api";
  */
 export const stationApi: StationApi = stationClient;
 export const weatherApi: WeatherApi = weatherClient;
-export const monitoringApi: MonitoringApi = mockMonitoringApi;
+// SEMUA 4 method Monitoring sekarang real
+// (`water-balance-client.ts`/`sunshine-duration-client.ts`/`vpd-client.ts`/
+// `dry-spell-report-client.ts`, endpoint `GET /water_deficit?device_id=&year=` &
+// `GET /solar_sunshine?device_id=&start_date=&end_date=` &
+// `GET /vpd?device_id=&start_date=&end_date=` &
+// `GET /dry_spell?device_id=&start_date=&end_date=` dikonfirmasi lewat
+// curl ke backend asli) — spread `...mockMonitoringApi` di bawah jadi
+// VESTIGIAL (semua method-nya ke-override), sengaja belum dibersihkan
+// (di luar scope kalau nanti mau dirapikan, `mockMonitoringApi` masih
+// bisa dipakai referensi pola mock kalau ada domain Monitoring baru).
+// `drySpellReportClient` di sini BEDA dari `drySpellClient`/`drySpellApi`
+// di bawah (itu punya tab Peta, endpoint company-wide `/devices/dry_spell?company_code=&year=`
+// — JANGAN disamakan atau digabung).
+export const monitoringApi: MonitoringApi = {
+  ...mockMonitoringApi,
+  getWaterBalance: waterBalanceClient.getWaterBalance,
+  getSunshineDuration: sunshineDurationClient.getSunshineDuration,
+  getVPD: vpdClient.getVPD,
+  getDrySpell: drySpellReportClient.getDrySpell,
+};
 export const downloadApi: DownloadApi = mockDownloadApi;
 export const ramalanCuacaApi: RamalanCuacaApi = mockRamalanCuacaApi;
 export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;

@@ -7,6 +7,7 @@ import { fetchWeatherDailyChart } from "./weather-daily-client";
 import { deriveRainfallStatus } from "./rainfall-status";
 import { deriveHumidityStatus } from "./humidity-status";
 import { stationApi } from "./station-client";
+import { extractBackendErrorMessage } from "./backend-error";
 import type { WeatherApi } from "./weather-api";
 
 async function fetchRawLatest(
@@ -68,7 +69,10 @@ export const weatherClient: WeatherApi = {
       return { data: metric };
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError("NETWORK_ERROR", "Gagal terhubung ke server cuaca.");
+      throw new ApiError(
+        "WEATHER_FETCH_FAILED",
+        extractBackendErrorMessage(err) ?? "Gagal terhubung ke server cuaca.",
+      );
     }
   },
 };

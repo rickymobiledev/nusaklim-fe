@@ -1,13 +1,18 @@
 import { ApiError, type ApiItemResponse, type ApiListResponse } from "@/types/api";
 import {
-  BULAN_ORDER,
+  MONTH_ORDER,
   type DrySpellReport,
   type SunshineDuration,
   type VPDReport,
   type WaterBalance,
   type WaterBalanceMonth,
 } from "@/types/domain";
-import type { MonitoringApi, MonitoringFilterParams } from "../monitoring-api";
+import type {
+  MonitoringApi,
+  MonitoringFilterParams,
+  WaterBalanceFilterParams,
+} from "../monitoring-api";
+import { deriveVpdKategori } from "@/lib/vpd-level";
 import { delay } from "./delay";
 
 /** ID contoh buat simulasi skenario error yang realistis: query data
@@ -33,29 +38,40 @@ function assertStationActive(params: MonitoringFilterParams) {
   }
 }
 
-/** Nilai contoh mengikuti pola tabel wide `GET /water_deficit` asli (4
- *  baris per-parameter x kolom jan..dec), sudah di-pivot ke bentuk
- *  per-bulan di sini — REFERENSI kontrak, bukan wire format final. */
-const MOCK_WATER_BALANCE_MONTHS: WaterBalanceMonth[] = BULAN_ORDER.map((bulan) => {
-  const isiBulan = ["jun", "aug", "sep", "oct"].includes(bulan);
-  if (!isiBulan) {
-    return {
-      bulan,
-      curahHujan: null,
-      defisitAir: null,
-      hariHujan: null,
-      kelebihanAir: null,
-    };
+/** Hash string -> pecahan stabil [0,1) — supaya nilai mock per
+ *  stasiun+tahun konsisten antar-request/reload (bukan `Math.random()`
+ *  polos), pola sama seperti `seededFraction` di
+ *  `water-deficit-comparison-api.ts`. */
+function seededFraction(seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
   }
-  const nilai: Record<string, [number, number, number, number]> = {
-    jun: [133, 0, 6, 0],
-    aug: [481.79, 0, 16, 0],
-    sep: [127.9, 0, 17, 12.4],
-    oct: [139.9, 0, 16, 0],
-  };
-  const [curahHujan, defisitAir, hariHujan, kelebihanAir] = nilai[bulan];
-  return { bulan, curahHujan, defisitAir, hariHujan, kelebihanAir };
-});
+  return (hash % 1000) / 1000;
+}
+
+/** Generate 12 baris bulanan dengan kurva musiman kasar (basah di
+ *  pertengahan tahun, kering di awal/akhir) + variasi per stasiun+tahun
+ *  dari `seededFraction`, supaya chart banding multi-tahun kelihatan
+ *  beda antar garis — REFERENSI kontrak (bentuk pivot
+ *  `GET /water_deficit`), bukan data asli. */
+function generateWaterBalanceMonths(
+  stationId: string,
+  year: number,
+): WaterBalanceMonth[] {
+  return MONTH_ORDER.map((month, monthIndex) => {
+    const fraction = seededFraction(`${stationId}-${year}-${month}`);
+    // 0 di awal/akhir tahun (kering), 1 di pertengahan (basah).
+    const musim = (1 - Math.cos((monthIndex / 11) * Math.PI * 2)) / 2;
+
+    const rainfall = Math.round((40 + musim * 260 + fraction * 60) * 10) / 10;
+    const waterDeficit = Math.round(Math.max(0, (1 - musim) * 200 + fraction * 40 - 40));
+    const rainyDays = Math.round(2 + musim * 14 + fraction * 3);
+    const waterSurplus = waterDeficit === 0 ? Math.round(fraction * 15) : 0;
+
+    return { month, rainfall, waterDeficit, rainyDays, waterSurplus };
+  });
+}
 
 /** Nilai contoh mengikuti pola `GET /dry_spell` asli — beberapa periode
  *  dry-spell dalam satu rentang tanggal. */
@@ -103,13 +119,6 @@ const MOCK_VPD_ROWS: Omit<VPDReport, "stasiun" | "kategori">[] = [
   },
 ];
 
-function deriveVpdKategori(vpd: number, batasAman: number): VPDReport["kategori"] {
-  const rasio = vpd / batasAman;
-  if (rasio <= 0.7) return "rendah";
-  if (rasio <= 1) return "sedang";
-  return "tinggi";
-}
-
 /** Nilai contoh mengikuti pola `GET /solar_sunshine` asli. */
 const MOCK_SUNSHINE_ROWS: Omit<SunshineDuration, "stasiun">[] = [
   { tanggal: "2026-08-17", lamaPenyinaranJam: 8, batasBawahJam: 3 },
@@ -119,7 +128,7 @@ const MOCK_SUNSHINE_ROWS: Omit<SunshineDuration, "stasiun">[] = [
 
 export const mockMonitoringApi: MonitoringApi = {
   async getWaterBalance(
-    params: MonitoringFilterParams,
+    params: WaterBalanceFilterParams,
   ): Promise<ApiItemResponse<WaterBalance>> {
     await delay();
     assertStationActive(params);
@@ -127,8 +136,8 @@ export const mockMonitoringApi: MonitoringApi = {
     return {
       data: {
         stationId: params.stationId ?? "",
-        tahun: new Date().getFullYear(),
-        bulanan: MOCK_WATER_BALANCE_MONTHS,
+        year: params.year,
+        months: generateWaterBalanceMonths(params.stationId ?? "", params.year),
       },
     };
   },

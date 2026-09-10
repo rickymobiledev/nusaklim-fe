@@ -5,6 +5,7 @@ import {
   mapRawDeviceToWaterDeficit,
   type RawWaterDeficitDevice,
 } from "./adapters/water-deficit-adapter";
+import { extractBackendErrorMessage } from "./backend-error";
 import type { WaterDeficitApi, WaterDeficitParams } from "./water-deficit-api";
 
 /** Satu-satunya implementasi Water Deficit (Peta > Keseimbangan Air) —
@@ -43,7 +44,10 @@ export const waterDeficitClient: WaterDeficitApi = {
       return { data, meta: { page: 1, pageSize: data.length, total: data.length } };
     } catch (err) {
       if (err instanceof ApiError) throw err;
-      throw new ApiError("NETWORK_ERROR", "Gagal terhubung ke server defisit air.");
+      throw new ApiError(
+        "WATER_DEFICIT_FETCH_FAILED",
+        extractBackendErrorMessage(err) ?? "Gagal terhubung ke server defisit air.",
+      );
     }
   },
 };

@@ -5,11 +5,12 @@ import type { ApiListResponse } from "@/types/api";
 import type { SunshineDuration } from "@/types/domain";
 import type { MonitoringFilterParams } from "@/lib/api/monitoring-api";
 import { fetchJson } from "@/lib/api/client-fetch";
-import { USE_MOCK } from "@/constants";
 
 /** `companyId` TIDAK dikirim dari sini — Route Handler yang menentukan
  *  dari sesi server-side (`resolveCompanyId()`), supaya tidak bisa
- *  dispoof lewat query string. */
+ *  dispoof lewat query string. Data sudah 100% real
+ *  (`sunshine-duration-client.ts`, `device_id` wajib), jadi TIDAK ada
+ *  lagi escape-hatch `USE_MOCK` — konsisten `use-water-balance.ts`. */
 export function useSunshineDuration(
   params: Omit<MonitoringFilterParams, "companyId"> = {},
 ) {
@@ -25,6 +26,6 @@ export function useSunshineDuration(
       );
     },
     select: (res) => res.data,
-    enabled: USE_MOCK || !!params.stationId,
+    enabled: !!params.stationId && !!params.dateFrom && !!params.dateTo,
   });
 }

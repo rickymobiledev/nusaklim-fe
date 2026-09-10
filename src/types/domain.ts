@@ -151,7 +151,7 @@ export interface WeatherMetric {
   humidityDetail?: HumidityDetail;
 }
 
-export type BulanKey =
+export type MonthKey =
   | "jan"
   | "feb"
   | "mar"
@@ -165,8 +165,8 @@ export type BulanKey =
   | "nov"
   | "dec";
 
-/** Urutan `BulanKey` — dipakai untuk generate 12 baris & mapping index bulan. */
-export const BULAN_ORDER: BulanKey[] = [
+/** Urutan `MonthKey` — dipakai untuk generate 12 baris & mapping index bulan. */
+export const MONTH_ORDER: MonthKey[] = [
   "jan",
   "feb",
   "mar",
@@ -183,22 +183,37 @@ export const BULAN_ORDER: BulanKey[] = [
 
 /** Satu baris bulan dari tabel `GET /water_deficit` asli (pivot dari 4 baris
  *  per-parameter x kolom jan..dec ke bentuk per-bulan yang gampang dirender
- *  sebagai tabel/chart). */
+ *  sebagai tabel/chart).
+ *
+ *  Field di sini Bahasa INGGRIS — PENGECUALIAN dari konvensi "field domain
+ *  type tetap Indonesia" yang berlaku ke tipe lain di file ini (termasuk
+ *  `StationWaterDeficit`/`VPDReport` yang KEBETULAN punya 4 metrik nama
+ *  sama). Awalnya (`WaterBalanceMonth`) sengaja DIKECUALIKAN dari rename
+ *  grup Weather (lihat ADR `docs/ARCHITECTURE.md`), tapi diubah balik ke
+ *  Inggris di sesi berikutnya atas permintaan eksplisit user — JANGAN
+ *  disamakan dengan `StationWaterDeficit` (tab Peta > Keseimbangan Air)
+ *  yang TETAP field Indonesia (`curahHujan`/`defisitAir`/dst), meski
+ *  konsepnya identik. */
 export interface WaterBalanceMonth {
-  bulan: BulanKey;
-  curahHujan: number | null;
-  defisitAir: number | null;
-  hariHujan: number | null;
-  kelebihanAir: number | null;
+  month: MonthKey;
+  rainfall: number | null;
+  waterDeficit: number | null;
+  rainyDays: number | null;
+  waterSurplus: number | null;
 }
 
 /** Panel "Monitoring" di sidebar Beranda + halaman Monitoring — data
  *  SETAHUN penuh per stasiun (bukan 1 periode), sesuai `GET /water_deficit?device_id=&year=`. */
 export interface WaterBalance {
   stationId: string;
-  tahun: number;
-  bulanan: WaterBalanceMonth[];
+  year: number;
+  months: WaterBalanceMonth[];
 }
+
+/** 4 tab metrik di halaman Monitoring > Keseimbangan Air — key field
+ *  `WaterBalanceMonth` yang sedang ditampilkan di chart banding tahun. */
+export type WaterBalanceMetric =
+  "waterDeficit" | "rainfall" | "rainyDays" | "waterSurplus";
 
 /** Satu baris dari `GET /dry_spell` — bisa lebih dari satu periode dry-spell
  *  dalam rentang tanggal, jadi ini item list, bukan objek tunggal. */

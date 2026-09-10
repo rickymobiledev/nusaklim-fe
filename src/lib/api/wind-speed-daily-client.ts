@@ -3,6 +3,7 @@ import type { ApiListResponse } from "@/types/api";
 import type { WindSpeedStationSeries } from "@/types/domain";
 import { stationApi } from "./station-client";
 import { fetchWindSpeedRange } from "./weather-daily-client";
+import { extractBackendErrorMessage } from "./backend-error";
 
 /** Server-only, dipanggil HANYA dari `app/api/wind-speed/daily/route.ts` —
  *  bukan domain mock/real toggle spt `lib/api/index.ts` (halaman
@@ -45,6 +46,9 @@ export async function getWindSpeedSeries(
     };
   } catch (err) {
     if (err instanceof ApiError) throw err;
-    throw new ApiError("NETWORK_ERROR", "Gagal terhubung ke server cuaca.");
+    throw new ApiError(
+      "WEATHER_DAILY_CHART_FETCH_FAILED",
+      extractBackendErrorMessage(err) ?? "Gagal terhubung ke server cuaca.",
+    );
   }
 }

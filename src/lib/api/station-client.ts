@@ -3,6 +3,7 @@ import type { ApiItemResponse, ApiListResponse } from "@/types/api";
 import type { Station } from "@/types/domain";
 import { createApiClient } from "./fetcher";
 import { mapDeviceToStation, type RawDevice } from "./adapters/station-adapter";
+import { extractBackendErrorMessage } from "./backend-error";
 import type { GetStationsParams, StationApi } from "./station-api";
 
 /** In-flight request coalescing, keyed per `companyCode` — BUKAN cache
@@ -62,8 +63,9 @@ async function fetchDevices(companyCode?: string): Promise<Station[]> {
     } catch (err) {
       if (err instanceof ApiError) throw err;
       throw new ApiError(
-        "NETWORK_ERROR",
-        "Gagal terhubung ke server. Periksa koneksi internet.",
+        "STATION_FETCH_FAILED",
+        extractBackendErrorMessage(err) ??
+          "Gagal terhubung ke server. Periksa koneksi internet.",
       );
     } finally {
       inFlightFetchDevices.delete(cacheKey);

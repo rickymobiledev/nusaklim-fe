@@ -17,10 +17,28 @@ export interface MonitoringFilterParams {
   companyId?: string;
 }
 
+/** Params `getWaterBalance` SENGAJA punya tipe sendiri (bukan reuse
+ *  `MonitoringFilterParams`) — endpoint asli `GET /water_deficit?device_id=&year=`
+ *  cuma terima SATU `year` per call (bukan array/rentang tanggal), jadi
+ *  banding multi-tahun di halaman Monitoring dilakukan lewat fan-out
+ *  (beberapa call, satu per tahun) di Route Handler, bukan minta BE
+ *  terima banyak tahun sekaligus. Terpisah dari `MonitoringFilterParams`
+ *  supaya `getDrySpell`/`getSunshineDuration`/`getVPD` tidak ikut
+ *  terdampak perubahan ini. */
+export interface WaterBalanceFilterParams {
+  stationId?: string;
+  year: number;
+  companyId?: string;
+}
+
 export interface MonitoringApi {
-  /** Data setahun penuh (`bulanan[]`) untuk satu stasiun — tetap 1 objek,
-   *  bukan list, lihat `WaterBalance` di types/domain.ts. */
-  getWaterBalance(params: MonitoringFilterParams): Promise<ApiItemResponse<WaterBalance>>;
+  /** Data SATU tahun penuh (`bulanan[]`) untuk satu stasiun — tetap 1
+   *  objek, bukan list, lihat `WaterBalance` di types/domain.ts. Banding
+   *  multi-tahun = panggil ini beberapa kali (fan-out), lihat
+   *  `WaterBalanceFilterParams`. */
+  getWaterBalance(
+    params: WaterBalanceFilterParams,
+  ): Promise<ApiItemResponse<WaterBalance>>;
   /** Bisa lebih dari satu periode dry-spell dalam rentang tanggal. */
   getDrySpell(params: MonitoringFilterParams): Promise<ApiListResponse<DrySpellReport>>;
   /** Satu baris per hari dalam rentang tanggal. */

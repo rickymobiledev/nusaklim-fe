@@ -5,6 +5,7 @@ import {
   mapRawDeviceToRainfallToday,
   type RawRainfallTodayDevice,
 } from "./adapters/rainfall-today-adapter";
+import { extractBackendErrorMessage } from "./backend-error";
 import type { RainfallTodayApi, RainfallTodayParams } from "./rainfall-today-api";
 
 /** Satu-satunya implementasi Curah Hujan Hari Ini (Peta > Curah Hujan
@@ -43,8 +44,9 @@ export const rainfallTodayClient: RainfallTodayApi = {
     } catch (err) {
       if (err instanceof ApiError) throw err;
       throw new ApiError(
-        "NETWORK_ERROR",
-        "Gagal terhubung ke server curah hujan hari ini.",
+        "RAINFALL_TODAY_FETCH_FAILED",
+        extractBackendErrorMessage(err) ??
+          "Gagal terhubung ke server curah hujan hari ini.",
       );
     }
   },

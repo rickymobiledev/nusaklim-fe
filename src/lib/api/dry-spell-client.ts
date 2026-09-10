@@ -5,6 +5,7 @@ import {
   mapRawDeviceToDrySpell,
   type RawDrySpellDevice,
 } from "./adapters/dry-spell-adapter";
+import { extractBackendErrorMessage } from "./backend-error";
 import type { DrySpellApi, DrySpellParams } from "./dry-spell-api";
 
 /** Satu-satunya implementasi Dry Spell (Peta > Deret Terpanjang Hari Tidak
@@ -48,8 +49,9 @@ export const drySpellClient: DrySpellApi = {
     } catch (err) {
       if (err instanceof ApiError) throw err;
       throw new ApiError(
-        "NETWORK_ERROR",
-        "Gagal terhubung ke server deret hari tidak hujan.",
+        "DRY_SPELL_FETCH_FAILED",
+        extractBackendErrorMessage(err) ??
+          "Gagal terhubung ke server deret hari tidak hujan.",
       );
     }
   },

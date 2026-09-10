@@ -53,7 +53,7 @@ export const DATA_GRANULARITY = [
 /** Title untuk route yang tidak persis cocok dengan NAV_ITEMS (sub-halaman Monitoring).
  *  Labelnya tetap Bahasa Indonesia meski slug URL "dry-spell" pakai Bahasa Inggris. */
 const EXTRA_TITLES: Record<string, string> = {
-  "/monitoring/keseimbangan-air": "Keseimbangan Air",
+  "/monitoring/water-balance": "Keseimbangan Air",
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "/monitoring/lama-penyinaran": "Lama Penyinaran",
   "/monitoring/vpd": "VPD",

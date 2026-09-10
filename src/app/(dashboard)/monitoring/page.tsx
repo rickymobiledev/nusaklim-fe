@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 const items = [
   {
-    href: "/monitoring/keseimbangan-air",
+    href: "/monitoring/water-balance",
     title: "Keseimbangan Air",
     desc: "Periksa semua laporan analisis keseimbangan air",
     icon: Scale,
