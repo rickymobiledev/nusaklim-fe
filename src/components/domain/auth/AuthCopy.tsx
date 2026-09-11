@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export function AuthFooter() {
   return (
     <FooterWrapper>
-      <FooterVersion>Nusaklim v1.0</FooterVersion>
+      <FooterVersion>Nusaklim v3.0</FooterVersion>
       <FooterCopyright>2026 Nusaklim, All right Reserved</FooterCopyright>
     </FooterWrapper>
   );
