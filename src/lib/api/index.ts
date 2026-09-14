@@ -4,12 +4,12 @@ import { sunshineDurationClient } from "./sunshine-duration-client";
 import { vpdClient } from "./vpd-client";
 import { drySpellReportClient } from "./dry-spell-report-client";
 import { mockMonitoringApi } from "./mock/monitoring-api";
-import { mockDownloadApi } from "./mock/download-api";
 import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
 import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
 import { waterDeficitClient } from "./water-deficit-client";
 import { drySpellClient } from "./dry-spell-client";
 import { rainfallTodayClient } from "./rainfall-today-client";
+import { downloadClient } from "./download-client";
 import { stationApi as stationClient } from "./station-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
@@ -51,7 +51,11 @@ export const monitoringApi: MonitoringApi = {
   getVPD: vpdClient.getVPD,
   getDrySpell: drySpellReportClient.getDrySpell,
 };
-export const downloadApi: DownloadApi = mockDownloadApi;
+// Real via `/weathers/daily` (harian) + `/weathers/filter` (10 menit/pagi/
+// siang/malam), dikonfirmasi lewat tes langsung ke backend asli —
+// `mock/download-api.ts` dibiarkan ada tapi VESTIGIAL (tidak dipakai lagi),
+// pola sama `mockMonitoringApi` di atas.
+export const downloadApi: DownloadApi = downloadClient;
 export const ramalanCuacaApi: RamalanCuacaApi = mockRamalanCuacaApi;
 export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 // TODO: belum ada endpoint BE terkonfirmasi untuk panel "Perbandingan

@@ -5,90 +5,67 @@ import { createApiClient } from "./fetcher";
 
 const CHART_DAYS = 7;
 
-/** Satu baris per hari dari `GET /weathers/daily` — dikonfirmasi reliable
- *  lintas brand utk `sum_rainfall` (field ada di raw payload semua brand).
- *  Field kelembapan (avg_humidity dkk) BELUM dikonfirmasi ada di payload
- *  asli — lihat parseHumidity(). Field temperatur JUGA belum dikonfirmasi
- *  (dipakai halaman /air-temperature) — lihat parseTemperature(). Field
- *  radiasi matahari JUGA belum dikonfirmasi (dipakai halaman
- *  /solar-radiation) — lihat parseRadiation(). */
-interface RawWeatherDaily {
+/** Satu baris per hari dari `GET /weathers/daily`. Field utama
+ *  (`sum_rainfall`, `average_temperature`, `average_humidity`,
+ *  `sum_solar_radiation`, `average_air_pressure`, `average_wind_speed`,
+ *  `average_wind_direction`) SEKARANG CONFIRMED — dikonfirmasi lewat tes
+ *  langsung ke backend asli (contoh response real dipakai membangun
+ *  `lib/api/download-client.ts`, halaman `/download-data`), bukan lagi
+ *  alias-guess. Alias tambahan (`avg_temperature`/`mean_temperature`/dst)
+ *  dibiarkan sebagai fallback kalau-kalau ada device/brand lain yang
+ *  pernah balikin nama beda — TIDAK dihapus, tapi urutan pencarian di
+ *  `parseXxx()` di bawah tetap prioritaskan nama yang sudah confirmed. */
+export interface RawWeatherDaily {
   date: string; // "YYYY-MM-DD"
   sum_rainfall: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian
-  // kelembapan belum diverifikasi (beda dgn sum_rainfall yang sudah
-  // dikonfirmasi). Coba beberapa alias umum, fallback null kalau semua
-  // tidak ada. TODO: konfirmasi ke tim BE/Data Analyst.
   average_humidity?: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian
-  // temperatur belum diverifikasi (situasi sama seperti average_humidity
-  // di atas). Coba beberapa alias umum, fallback null kalau semua tidak
-  // ada. TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend
-  // real tersedia.
   average_temperature?: number | string | null;
   avg_temperature?: number | string | null;
   mean_temperature?: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian radiasi
-  // matahari belum diverifikasi (situasi sama seperti average_temperature
-  // di atas). Coba beberapa alias umum, fallback null kalau semua tidak
-  // ada. TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend
-  // real tersedia.
   sum_solar_radiation?: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian tekanan
-  // udara belum diverifikasi (situasi sama seperti average_temperature di
-  // atas). Coba beberapa alias umum, fallback null kalau semua tidak ada.
-  // TODO: konfirmasi ke tim BE/Data Analyst begitu akses backend real
-  // tersedia.
   average_air_pressure?: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian
-  // kecepatan angin belum diverifikasi (situasi sama seperti
-  // average_temperature di atas). Coba beberapa alias umum, fallback null
-  // kalau semua tidak ada. TODO: konfirmasi ke tim BE/Data Analyst begitu
-  // akses backend real tersedia.
   average_wind_speed?: number | string | null;
   avg_wind_speed?: number | string | null;
   mean_wind_speed?: number | string | null;
-  // UNCONFIRMED terhadap backend asli — nama field agregat harian arah
-  // mata angin (derajat 0-360) belum diverifikasi (situasi sama seperti
-  // average_temperature di atas). Coba beberapa alias umum, fallback null
-  // kalau semua tidak ada. TODO: konfirmasi ke tim BE/Data Analyst begitu
-  // akses backend real tersedia.
   average_wind_direction?: number | string | null;
   avg_wind_direction?: number | string | null;
   mean_wind_direction?: number | string | null;
 }
 
-function parseNumeric(raw: unknown): number | null {
+export function parseNumeric(raw: unknown): number | null {
   if (raw === null || raw === undefined) return null;
   const n = typeof raw === "number" ? raw : parseFloat(String(raw));
   return Number.isFinite(n) ? n : null;
 }
 
-function parseHumidity(row: RawWeatherDaily): number | null {
+/** Exported juga untuk `download-client.ts` (granularitas "Per Hari") —
+ *  reuse langsung, jangan duplikasi cara parsing tiap metrik dari
+ *  `RawWeatherDaily`. */
+export function parseHumidity(row: RawWeatherDaily): number | null {
   return parseNumeric(row.average_humidity);
 }
 
-function parseTemperature(row: RawWeatherDaily): number | null {
+export function parseTemperature(row: RawWeatherDaily): number | null {
   return parseNumeric(
     row.average_temperature ?? row.avg_temperature ?? row.mean_temperature,
   );
 }
 
-function parseRadiation(row: RawWeatherDaily): number | null {
+export function parseRadiation(row: RawWeatherDaily): number | null {
   return parseNumeric(row.sum_solar_radiation);
 }
 
-function parsePressure(row: RawWeatherDaily): number | null {
+export function parsePressure(row: RawWeatherDaily): number | null {
   return parseNumeric(row.average_air_pressure);
 }
 
-function parseWindSpeed(row: RawWeatherDaily): number | null {
+export function parseWindSpeed(row: RawWeatherDaily): number | null {
   return parseNumeric(
     row.average_wind_speed ?? row.avg_wind_speed ?? row.mean_wind_speed,
   );
 }
 
-function parseWindDirection(row: RawWeatherDaily): number | null {
+export function parseWindDirection(row: RawWeatherDaily): number | null {
   return parseNumeric(
     row.average_wind_direction ?? row.avg_wind_direction ?? row.mean_wind_direction,
   );
@@ -96,11 +73,13 @@ function parseWindDirection(row: RawWeatherDaily): number | null {
 
 /** Request mentah ke `/weathers/daily` untuk SATU device — dipakai baik
  *  oleh `fetchWeatherDailyChart()` (window 7 hari tetap, kartu Beranda)
- *  maupun `fetchTemperatureRange()` (window custom dari user, halaman
- *  `/air-temperature`). Error SENGAJA tidak ditangkap/di-fallback — biar
- *  gagal (`ApiError`), konsisten kebijakan Stasiun/Weather "tidak ada
+ *  maupun `fetchTemperatureRange()` dkk (window custom dari user, halaman
+ *  `/air-temperature` dst) DAN `download-client.ts` (granularitas "Per
+ *  Hari" halaman `/download-data`, exported khusus untuk itu — satu-satunya
+ *  consumer di luar file ini). Error SENGAJA tidak ditangkap/di-fallback —
+ *  biar gagal (`ApiError`), konsisten kebijakan Stasiun/Weather "tidak ada
  *  jalur mock sama sekali". */
-async function fetchRawDaily(
+export async function fetchRawDaily(
   deviceId: string,
   start: Date,
   end: Date,

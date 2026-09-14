@@ -3,10 +3,15 @@ import type { DownloadDataRow } from "@/types/domain";
 import type { DownloadApi, GetDownloadDataParams } from "../download-api";
 import { delay } from "./delay";
 
+/** VESTIGIAL — `downloadApi` di `lib/api/index.ts` sekarang pakai
+ *  `download-client.ts` (real, via `/weathers/daily`+`/weathers/filter`).
+ *  File ini tidak dipakai lagi, dibiarkan ada sebagai referensi pola mock
+ *  kalau nanti butuh contoh lagi (pola sama `mockMonitoringApi`). */
 const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-19",
     rerataTemperatur: 26.8,
+    rerataKelembapanRelatif: 78,
     totalCurahHujan: 1.9,
     totalRadiasi: 22.74,
     rerataTekananUdara: 1010,
@@ -16,6 +21,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-20",
     rerataTemperatur: 27.3,
+    rerataKelembapanRelatif: 80,
     totalCurahHujan: 0.1,
     totalRadiasi: 20.11,
     rerataTekananUdara: 1009.9,
@@ -25,6 +31,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-21",
     rerataTemperatur: 27.7,
+    rerataKelembapanRelatif: 76,
     totalCurahHujan: 0,
     totalRadiasi: 21.43,
     rerataTekananUdara: 1009.1,
@@ -34,6 +41,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-22",
     rerataTemperatur: 27.7,
+    rerataKelembapanRelatif: 74,
     totalCurahHujan: 2.5,
     totalRadiasi: 22.9,
     rerataTekananUdara: 1009.2,
@@ -43,6 +51,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-23",
     rerataTemperatur: 26.7,
+    rerataKelembapanRelatif: 81,
     totalCurahHujan: 3.2,
     totalRadiasi: 22.78,
     rerataTekananUdara: 1009.8,
@@ -52,6 +61,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-24",
     rerataTemperatur: 25.7,
+    rerataKelembapanRelatif: 85,
     totalCurahHujan: 4.7,
     totalRadiasi: 19.68,
     rerataTekananUdara: 1010,
@@ -61,6 +71,7 @@ const ROWS: DownloadDataRow[] = [
   {
     tanggal: "2026-08-25",
     rerataTemperatur: 25.9,
+    rerataKelembapanRelatif: 83,
     totalCurahHujan: 3,
     totalRadiasi: 20.77,
     rerataTekananUdara: 1009.7,

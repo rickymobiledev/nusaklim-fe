@@ -3,8 +3,8 @@ import type { DataGranularity, DownloadDataRow } from "@/types/domain";
 
 /** `companyId` HARUS datang dari `resolveCompanyId()`
  * (`lib/api/route-guard.ts`) di Route Handler — jangan pernah diisi
- * langsung dari input client mentah, itu IDOR. Mock saat ini BELUM
- * validasi companyId vs stasiun. */
+ * langsung dari input client mentah, itu IDOR. Divalidasi via
+ * `stationApi.getStationDetail()` di `download-client.ts` (real). */
 export interface GetDownloadDataParams extends PaginationParams {
   stationId?: string;
   dateFrom?: string;

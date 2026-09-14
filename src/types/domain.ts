@@ -399,10 +399,17 @@ export interface StationRainfallToday {
   sinkronisasiTerakhir: string | null;
 }
 
-/** Baris tabel "Unduh Data". */
+/** Baris tabel "Unduh Data" — SUDAH 100% real (`lib/api/download-client.ts`),
+ *  bukan mock lagi. `tanggal` bentuknya beda tergantung `DataGranularity`:
+ *  `"harian"` → `"YYYY-MM-DD"` (dari `/weathers/daily`), granularitas lain
+ *  → datetime asli `"DD-MM-YYYY HH:mm"` dari `/weathers/filter` (satu baris
+ *  = satu pembacaan mentah, BUKAN agregat). `rerataKelembapanRelatif`
+ *  ditambahkan belakangan (field ke-8 sesuai desain Figma, sebelumnya
+ *  tidak ada di tipe ini sama sekali). */
 export interface DownloadDataRow {
   tanggal: string;
   rerataTemperatur: number | null;
+  rerataKelembapanRelatif: number | null;
   totalCurahHujan: number | null;
   totalRadiasi: number | null;
   rerataTekananUdara: number | null;

@@ -38,7 +38,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon },
   { label: "Peta", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
-  { label: "Unduh Data", href: "/unduh-data", icon: DownloadIcon },
+  { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
   { label: "Ramalan Cuaca", href: "/ramalan-cuaca", icon: ForecastIcon },
 ];
 
