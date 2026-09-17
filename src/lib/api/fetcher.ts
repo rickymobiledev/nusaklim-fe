@@ -31,7 +31,7 @@ const keepAliveHttpsAgent = new https.Agent({ keepAlive: true });
  *
  * Dipakai `station-client.ts` (`stationApi`), `weather-client.ts`
  * (`weatherApi`), dan `water-deficit-client.ts` (`waterDeficitApi`) —
- * domain lain (`monitoringApi`/`downloadApi`/`ramalanCuacaApi`) masih
+ * domain lain (`monitoringApi`/`downloadApi`/`forecastApi`) masih
  * mock, belum pindah ke sini. Header `api-key` di bawah wajib
  * (dikonfirmasi lewat Postman collection — auth level collection, bukan
  * cuma opsional).

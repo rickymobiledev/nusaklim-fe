@@ -23,11 +23,11 @@ const INACTIVE_STATION_ID = "st-2";
 
 // TODO: belum validasi companyId (params.companyId) vs company stasiun
 // (params.stationId) di sini — mock ini tidak melakukan lookup stasiun
-// sama sekali hari ini, beda dari weather-client.ts &
-// mock/ramalan-cuaca-api.ts yang sudah reuse stationApi.getStationDetail
-// (lib/api/station-client.ts) untuk guard cross-company. Konsisten dengan
-// pola "signature siap belum diisi" di download-api.ts — isi begitu ada
-// kebutuhan nyata.
+// sama sekali hari ini, beda dari weather-client.ts yang sudah reuse
+// stationApi.getStationDetail (lib/api/station-client.ts) untuk guard
+// cross-company (forecast-client.ts SENGAJA TIDAK ikut, lihat catatan
+// di file itu). Konsisten dengan pola "signature siap belum diisi" di
+// download-api.ts — isi begitu ada kebutuhan nyata.
 
 function assertStationActive(params: MonitoringFilterParams) {
   if (params.stationId === INACTIVE_STATION_ID) {

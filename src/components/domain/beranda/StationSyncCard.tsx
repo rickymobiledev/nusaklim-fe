@@ -50,10 +50,7 @@ export function StationSyncCard({
 
       <SyncBlock>
         <SyncText>
-          Sinkronisasi terakhir
-          {' '}
-          <br className="hidden lg:block" />
-          {syncText}
+          Sinkronisasi terakhir {syncText}
         </SyncText>
         <RefreshButton type="button" onClick={() => refetch()} disabled={isFetching}>
           <SpinningIcon $spinning={isFetching} size={24} />
@@ -69,16 +66,12 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  flex: 1 1 480px;
-  min-width: 0;
   padding: 16px;
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid #ecefed;
   border-radius: 16px;
-  order: 1;
 
   ${media.desktop} {
-    order: 0;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -121,6 +114,10 @@ const Trigger = styled(SelectTrigger)`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 16px;
   color: #1d2520;
+
+  ${media.desktop} {
+    width: 410px;
+  }
 `;
 
 const SyncBlock = styled.div`

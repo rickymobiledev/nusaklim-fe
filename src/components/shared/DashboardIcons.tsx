@@ -97,3 +97,28 @@ export function NavArrowDownIcon({ size = 24, color = "#1D2520", className }: Ic
     </svg>
   );
 }
+
+export function NavArrowRightIcon({
+  size = 18,
+  color = "#175FE2",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 18 18"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M6.75 4.5L11.25 9L6.75 13.5"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

@@ -10,7 +10,11 @@ import { media } from "@/lib/breakpoints";
  *  cuma 1 request yang benar-benar terjadi ke backend real (React Query
  *  otomatis berbagi query dengan queryKey identik yang mount bersamaan;
  *  ini bukan cache tambahan, cuma 2 komponen yang memang minta data yang
- *  sama lewat hook yang sama). */
+ *  sama lewat hook yang sama).
+ *
+ *  Nama "Card" cuma akurat di mobile (masih card berbingkai `#0d3787`) —
+ *  di desktop (`media.desktop`) sudah bukan card lagi, badge duduk
+ *  langsung di atas background hero (lihat CLAUDE.md bagian Beranda). */
 export function StationStatsCard() {
   const { data: stationsResponse, isLoading } = useStations();
   const stations = stationsResponse?.data;
@@ -22,8 +26,8 @@ export function StationStatsCard() {
     <Card>
       <Content>
         <Stat>
-          <IconBadge $bg="#BBD3FF" $desktopBg="#C3DFFA">
-            <StatIcon src="/brand/station-total.png" alt="" width={42} height={42} />
+          <IconBadge $bg="#BBD3FF" $borderColor="#175FE2">
+            <StatIcon src="/brand/station-total.png" alt="" width={70} height={70} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Total Stasiun</StatLabel>
@@ -32,8 +36,8 @@ export function StationStatsCard() {
         </Stat>
 
         <Stat>
-          <IconBadge $bg="#A9DEB4" $desktopBg="#ECF8EF">
-            <StatIcon src="/brand/station-active.png" alt="" width={42} height={42} />
+          <IconBadge $bg="#A9DEB4" $borderColor="#43B75D">
+            <StatIcon src="/brand/station-active.png" alt="" width={70} height={70} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Stasiun Aktif</StatLabel>
@@ -42,8 +46,8 @@ export function StationStatsCard() {
         </Stat>
 
         <Stat>
-          <IconBadge $bg="#F7A9A7" $desktopBg="#FDECEC">
-            <StatIcon src="/brand/station-inactive.png" alt="" width={42} height={42} />
+          <IconBadge $bg="#F7A9A7" $borderColor="#EE443F">
+            <StatIcon src="/brand/station-inactive.png" alt="" width={70} height={70} />
           </IconBadge>
           <TextBlock>
             <StatLabel>Tidak Aktif</StatLabel>
@@ -59,18 +63,17 @@ const Card = styled.div`
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1 1 380px;
+  width: 100%;
   min-width: 0;
-  max-width: 468px;
   padding: 24px 16px 20px;
   border-radius: 20px;
   overflow: hidden;
   background: #0d3787;
-  order: 0;
 
   ${media.desktop} {
-    padding: 8px 24px;
-    order: 1;
+    width: auto;
+    padding: 8px 0;
+    background: none;
   }
 `;
 
@@ -100,11 +103,12 @@ const Stat = styled.div`
   ${media.desktop} {
     flex-direction: row;
     justify-content: flex-start;
+    gap: 12px;
     padding: 0;
   }
 `;
 
-const IconBadge = styled.div<{ $bg: string; $desktopBg: string }>`
+const IconBadge = styled.div<{ $bg: string; $borderColor: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -115,7 +119,11 @@ const IconBadge = styled.div<{ $bg: string; $desktopBg: string }>`
   flex-shrink: 0;
 
   ${media.desktop} {
-    background: ${(p) => p.$desktopBg};
+    width: 80px;
+    height: 80px;
+    background: #ffffff;
+    border: 2px solid ${(p) => p.$borderColor};
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -124,8 +132,8 @@ const StatIcon = styled(Image)`
   height: 42px;
 
   ${media.desktop} {
-    width: 36px;
-    height: 36px;
+    width: 70px;
+    height: 70px;
   }
 `;
 
@@ -150,6 +158,9 @@ const StatLabel = styled.span`
   white-space: nowrap;
 
   ${media.desktop} {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
     text-align: left;
   }
 `;
@@ -163,6 +174,8 @@ const StatValue = styled.span`
   text-align: center;
 
   ${media.desktop} {
+    font-size: 40px;
+    line-height: 48px;
     text-align: left;
   }
 `;

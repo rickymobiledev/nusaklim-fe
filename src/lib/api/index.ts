@@ -3,8 +3,8 @@ import { waterBalanceClient } from "./water-balance-client";
 import { sunshineDurationClient } from "./sunshine-duration-client";
 import { vpdClient } from "./vpd-client";
 import { drySpellReportClient } from "./dry-spell-report-client";
+import { forecastClient } from "./forecast-client";
 import { mockMonitoringApi } from "./mock/monitoring-api";
-import { mockRamalanCuacaApi } from "./mock/ramalan-cuaca-api";
 import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
 import { waterDeficitClient } from "./water-deficit-client";
 import { drySpellClient } from "./dry-spell-client";
@@ -18,7 +18,7 @@ import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
 import type { MonitoringApi } from "./monitoring-api";
 import type { DownloadApi } from "./download-api";
-import type { RamalanCuacaApi } from "./ramalan-cuaca-api";
+import type { ForecastApi } from "./forecast-api";
 import type { WaterDeficitApi } from "./water-deficit-api";
 import type { DrySpellApi } from "./dry-spell-api";
 import type { RainfallTodayApi } from "./rainfall-today-api";
@@ -62,7 +62,11 @@ export const monitoringApi: MonitoringApi = {
 // `mock/download-api.ts` dibiarkan ada tapi VESTIGIAL (tidak dipakai lagi),
 // pola sama `mockMonitoringApi` di atas.
 export const downloadApi: DownloadApi = downloadClient;
-export const ramalanCuacaApi: RamalanCuacaApi = mockRamalanCuacaApi;
+// Real via `POST /forecast` (body form `station_id`), dikonfirmasi lewat
+// curl langsung ke backend asli — `mock/forecast-api.ts` dibiarkan
+// ada tapi VESTIGIAL (tidak dipakai lagi), pola sama `mockMonitoringApi`/
+// `mock/download-api.ts` di atas.
+export const forecastApi: ForecastApi = forecastClient;
 export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 // TODO: belum ada endpoint BE terkonfirmasi untuk panel "Perbandingan
 // Defisit Air" (WaterDeficitPanel.tsx) — beda dari `waterDeficitApi` di

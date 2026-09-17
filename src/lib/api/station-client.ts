@@ -78,9 +78,10 @@ async function fetchDevices(companyCode?: string): Promise<Station[]> {
 
 /** Satu-satunya implementasi Stasiun — dipakai `lib/api/index.ts` (sebagai
  *  `stationApi`) DAN sebagai sumber lookup stasiun untuk domain lain
- *  (`weather-client.ts` yang sudah real, `mock/ramalan-cuaca-api.ts` yang
- *  masih data contoh — lihat pemakaian `getStationDetail` di sana),
- *  supaya tidak ada 2 sumber data stasiun yang beda. */
+ *  (`weather-client.ts`, lihat pemakaian `getStationDetail` di sana) —
+ *  supaya tidak ada 2 sumber data stasiun yang beda. `forecast-client.ts`
+ *  SENGAJA TIDAK ikut memanggil `getStationDetail` (lihat catatan di
+ *  file itu & CLAUDE.md bagian "companyId (multi-tenant)"). */
 export const stationApi: StationApi = {
   async getStations(params: GetStationsParams = {}): Promise<ApiListResponse<Station>> {
     const all = await fetchDevices(params.companyId);

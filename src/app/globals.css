@@ -136,3 +136,15 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
+
+/* TEMPORARY — QA visual vs Figma, hapus blok ini + atribut
+ * data-page="beranda" di app/(dashboard)/page.tsx begitu selesai
+ * dibandingkan. Cuma menyembunyikan GARIS scrollbar secara visual di
+ * halaman Beranda — scroll via mouse/keyboard tetap jalan normal,
+ * konten tidak dipotong. */
+main:has([data-page="beranda"]) {
+  scrollbar-width: none; /* Firefox */
+}
+main:has([data-page="beranda"])::-webkit-scrollbar {
+  display: none; /* Chrome/Edge/Safari */
+}

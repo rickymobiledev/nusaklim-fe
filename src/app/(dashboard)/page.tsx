@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { Thermometer, Sun, Gauge, Wind } from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
-import { DashboardTitle } from "@/components/domain/beranda/DashboardTitle";
+import { ForecastCard } from "@/components/domain/beranda/ForecastCard";
+import { DashboardGreeting } from "@/components/domain/beranda/DashboardGreeting";
 import { StationSyncCard } from "@/components/domain/beranda/StationSyncCard";
 import { StationStatsCard } from "@/components/domain/beranda/StationStatsCard";
 import { BerandaHeroBanner } from "@/components/domain/beranda/BerandaHeroBanner";
@@ -23,17 +24,17 @@ export default function BerandaPage() {
     useWeatherMetrics(selectedStationId);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative -mx-6 -mt-6 flex flex-col gap-4 px-4 pt-4 lg:px-6 lg:pt-6">
+    <div className="flex flex-col gap-6" data-page="beranda">
+      <div className="relative -mx-6 -mt-6 flex flex-col gap-4 px-4 pt-4 lg:px-6 lg:py-6">
         <BerandaHeroBanner />
 
-        <div className="relative z-10 flex flex-col gap-4">
-          <DashboardTitle />
-
-          <div className="flex flex-wrap gap-4">
-            <StationSyncCard value={selectedStationId} onChange={setStationId} />
+        <div className="relative z-10 flex flex-col gap-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <DashboardGreeting />
             <StationStatsCard />
           </div>
+
+          <StationSyncCard value={selectedStationId} onChange={setStationId} />
         </div>
       </div>
 
@@ -50,6 +51,7 @@ export default function BerandaPage() {
         ) : snapshot ? (
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="flex flex-col gap-4">
+              <ForecastCard stationId={selectedStationId} />
               <div className="grid gap-4 sm:grid-cols-2">
                 <Link href="/rainfall">
                   <WeatherChartCard

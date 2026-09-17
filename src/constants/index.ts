@@ -47,7 +47,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Peta", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
-  { label: "Ramalan Cuaca", href: "/ramalan-cuaca", icon: ForecastIcon },
+  { label: "Ramalan Cuaca", href: "/forecast", icon: ForecastIcon },
   {
     label: "Lainnya",
     href: "/user-management",

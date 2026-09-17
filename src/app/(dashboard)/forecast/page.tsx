@@ -33,7 +33,7 @@ function fmt(value: number, unit?: string) {
   return unit ? `${value} ${unit}` : `${value}`;
 }
 
-export default function RamalanCuacaPage() {
+export default function ForecastPage() {
   const [stationId, setStationId] = useState<string>();
   const { data, isLoading } = useForecast(stationId);
 

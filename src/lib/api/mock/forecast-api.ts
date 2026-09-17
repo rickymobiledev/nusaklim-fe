@@ -1,6 +1,6 @@
 import type { ApiItemResponse } from "@/types/api";
-import type { ForecastDay, ForecastResult } from "@/types/ramalan-cuaca";
-import type { RamalanCuacaApi } from "../ramalan-cuaca-api";
+import type { ForecastDay, ForecastResult } from "@/types/forecast";
+import type { ForecastApi } from "../forecast-api";
 import { stationApi } from "../station-client";
 import { delay } from "./delay";
 
@@ -89,7 +89,7 @@ const MOCK_UNITS: Record<string, string> = {
   windSpeed: "m/s",
 };
 
-export const mockRamalanCuacaApi: RamalanCuacaApi = {
+export const mockForecastApi: ForecastApi = {
   async getForecast(
     stationId: string,
     companyId?: string,
