@@ -132,6 +132,31 @@ export function DownloadIcon({
   );
 }
 
+/** Icon nav "Lainnya" — dot horizontal ("more"), dipakai SATU-SATUNYA
+ *  untuk item nav admin-only yang isinya dropdown "Manajemen". Bukan
+ *  lucide-react (`MoreHorizontal`), ikut aturan CLAUDE.md: item
+ *  `NAV_ITEMS` wajib pakai custom SVG kontrak `{size,color}` file ini. */
+export function OthersIcon({
+  size = 20,
+  color = "#8B9C90",
+  className,
+}: SidebarIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="4.16667" cy="10" r="1.66667" fill={color} />
+      <circle cx="10" cy="10" r="1.66667" fill={color} />
+      <circle cx="15.8333" cy="10" r="1.66667" fill={color} />
+    </svg>
+  );
+}
+
 export function ForecastIcon({
   size = 20,
   color = "#8B9C90",

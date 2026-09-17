@@ -18,6 +18,28 @@ export function Sidebar() {
   );
   const activeHref = getActiveNavHref(pathname);
 
+  // Drawer mobile TETAP flat-list (tidak ada dropdown nested) — item dengan
+  // `children` (mis. "Lainnya") di-flatten jadi SidebarItem tersendiri per
+  // child, active-state-nya dicek terhadap href child itu sendiri (BUKAN
+  // `activeHref` yang cuma nunjuk induk "/user-management").
+  const flatItems = visibleItems.flatMap((item) =>
+    item.children
+      ? item.children.map((child) => ({
+          href: child.href,
+          icon: item.icon,
+          label: child.label,
+          active: pathname.startsWith(child.href),
+        }))
+      : [
+          {
+            href: item.href,
+            icon: item.icon,
+            label: item.label,
+            active: item.href === activeHref,
+          },
+        ],
+  );
+
   return (
     <>
       <Backdrop $open={mobileOpen} onClick={closeMobile} aria-hidden />
@@ -33,13 +55,13 @@ export function Sidebar() {
         </DrawerHeader>
 
         <NavList>
-          {visibleItems.map((item) => (
+          {flatItems.map((item) => (
             <SidebarItem
               key={item.href}
               href={item.href}
               icon={item.icon}
               label={item.label}
-              active={item.href === activeHref}
+              active={item.active}
               onNavigate={closeMobile}
             />
           ))}

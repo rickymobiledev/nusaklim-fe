@@ -11,6 +11,9 @@ import { drySpellClient } from "./dry-spell-client";
 import { rainfallTodayClient } from "./rainfall-today-client";
 import { downloadClient } from "./download-client";
 import { stationApi as stationClient } from "./station-client";
+import { usersClient } from "./users-client";
+import { companiesClient } from "./companies-client";
+import { userRolesClient } from "./user-roles-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
 import type { MonitoringApi } from "./monitoring-api";
@@ -19,6 +22,9 @@ import type { RamalanCuacaApi } from "./ramalan-cuaca-api";
 import type { WaterDeficitApi } from "./water-deficit-api";
 import type { DrySpellApi } from "./dry-spell-api";
 import type { RainfallTodayApi } from "./rainfall-today-api";
+import type { UsersApi } from "./users-api";
+import type { CompaniesApi } from "./companies-api";
+import type { UserRolesApi } from "./user-roles-api";
 
 /**
  * Satu titik wiring — hooks import instance dari sini, bukan dari
@@ -65,3 +71,9 @@ export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;
 export const drySpellApi: DrySpellApi = drySpellClient;
 export const rainfallTodayApi: RainfallTodayApi = rainfallTodayClient;
+// Domain "Manajemen Pengguna" (admin-only) — 100% real sejak awal, tidak
+// pernah ada jalur mock (`GET/POST/PUT/DELETE /users`, `GET /companies`,
+// `GET /user_roles`, dikonfirmasi curl langsung ke backend asli).
+export const usersApi: UsersApi = usersClient;
+export const companiesApi: CompaniesApi = companiesClient;
+export const userRolesApi: UserRolesApi = userRolesClient;

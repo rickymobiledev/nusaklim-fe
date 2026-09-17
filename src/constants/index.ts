@@ -6,6 +6,7 @@ import {
   MonitoringIcon,
   DownloadIcon,
   ForecastIcon,
+  OthersIcon,
   type SidebarIconProps,
 } from "@/components/shared/SidebarIcons";
 
@@ -30,16 +31,30 @@ export type NavItem = {
   icon: ComponentType<SidebarIconProps>;
   /** Kalau diisi, menu cuma tampil untuk role yang disebut. Kosong = semua role. */
   roles?: UserRole[];
+  /** Kalau diisi, item ini dirender sebagai dropdown (HeaderNav) — `href`
+   *  tetap dipakai buat active-state prefix-match (getActiveNavHref/dst),
+   *  tapi bukan tujuan klik langsung. Di drawer mobile (Sidebar.tsx),
+   *  children di-flatten jadi SidebarItem tersendiri (tanpa dropdown). */
+  children?: { label: string; href: string }[];
 };
 
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data)
- *  plus the new Ramalan Cuaca (DL forecast) menu from the redesign scope. */
+ *  plus the new Ramalan Cuaca (DL forecast) menu from the redesign scope.
+ *  "Lainnya" (admin-only, dropdown berisi "Manajemen") ditambah menyusul
+ *  buat halaman Manajemen Pengguna — lihat `docs/ARCHITECTURE.md`. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon },
   { label: "Peta", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
   { label: "Ramalan Cuaca", href: "/ramalan-cuaca", icon: ForecastIcon },
+  {
+    label: "Lainnya",
+    href: "/user-management",
+    icon: OthersIcon,
+    roles: ["ADMINISTRATOR"],
+    children: [{ label: "Manajemen", href: "/user-management/users" }],
+  },
 ];
 
 export const DATA_GRANULARITY = [
@@ -65,6 +80,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/wind-speed": "Kecepatan Angin",
   "/wind-direction": "Arah Mata Angin",
   "/login": "Masuk",
+  "/user-management/users": "Manajemen",
 };
 
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan

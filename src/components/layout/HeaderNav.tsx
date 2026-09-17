@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { NAV_ITEMS, getActiveNavHref } from "@/constants";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { media } from "@/lib/breakpoints";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function HeaderNav() {
   const pathname = usePathname();
@@ -19,6 +25,29 @@ export function HeaderNav() {
     <Nav aria-label="Navigasi utama">
       {visibleItems.map((item) => {
         const active = item.href === activeHref;
+
+        // Item dengan `children` (mis. "Lainnya") dirender sebagai dropdown,
+        // BUKAN link langsung — isi dropdown-nya yang jadi tujuan navigasi.
+        if (item.children) {
+          return (
+            <DropdownMenu key={item.href}>
+              <DropdownMenuTrigger asChild>
+                <PillButton type="button" $active={active}>
+                  <item.icon size={20} color={active ? "#ffffff" : "#455249"} />
+                  {item.label}
+                </PillButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center">
+                {item.children.map((child) => (
+                  <DropdownMenuItem key={child.href} asChild>
+                    <Link href={child.href}>{child.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        }
+
         return (
           <Pill key={item.href} href={item.href} $active={active}>
             <item.icon size={20} color={active ? "#ffffff" : "#455249"} />
@@ -43,7 +72,7 @@ const Nav = styled.nav`
   }
 `;
 
-const Pill = styled(Link)<{ $active: boolean }>`
+const pillStyles = css<{ $active: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -61,4 +90,14 @@ const Pill = styled(Link)<{ $active: boolean }>`
   transition:
     background-color 0.15s,
     color 0.15s;
+`;
+
+const Pill = styled(Link)<{ $active: boolean }>`
+  ${pillStyles}
+`;
+
+const PillButton = styled.button<{ $active: boolean }>`
+  ${pillStyles}
+  border: none;
+  cursor: pointer;
 `;

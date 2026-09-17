@@ -50,6 +50,27 @@ export function resolveCompanyId(
   return user.companyCode;
 }
 
+/**
+ * Sama seperti `requireUser()` tapi juga menolak role selain
+ * `ADMINISTRATOR` (403 JSON) — dipakai Route Handler domain "Manajemen
+ * Pengguna" (`app/api/user-management/**`), satu-satunya bagian app ini
+ * yang memang admin-only. Bentuk return-nya sengaja dibuat field
+ * `unauthorized` juga (bukan nama baru) supaya call site tetap
+ * `const { user, unauthorized } = await requireAdmin(); if (!user) return unauthorized;`
+ * — persis pola `requireUser()`.
+ */
+export async function requireAdmin() {
+  const { user, unauthorized } = await requireUser();
+  if (!user) return { user: null, unauthorized };
+  if (user.role !== "ADMINISTRATOR") {
+    return {
+      user: null,
+      unauthorized: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    };
+  }
+  return { user, unauthorized: null };
+}
+
 /** Satu tempat konversi `ApiError` (dari `lib/api/*`) jadi response JSON —
  *  dipakai di blok `catch` tiap Route Handler. */
 export function apiErrorResponse(error: unknown) {

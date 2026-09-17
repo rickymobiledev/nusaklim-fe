@@ -1,0 +1,55 @@
+import type { UserRole } from "./auth";
+
+/**
+ * Domain "Manajemen Pengguna" (admin-only) — BUKAN domain cuaca/stasiun,
+ * jadi sengaja dipisah dari `domain.ts` (konvensi field Bahasa Indonesia
+ * di file itu khusus domain weather). Field di sini Bahasa Inggris,
+ * mengikuti field asli backend (`GET/POST/PUT/DELETE /users`,
+ * `GET /companies`, `GET /user_roles`).
+ */
+
+export interface Company {
+  id: number;
+  code: string;
+  name: string;
+  imageUrl: string | null;
+}
+
+export interface UserRoleOption {
+  id: string;
+  code: UserRole;
+  name: string;
+}
+
+export interface ManagedUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  imageUrl: string | null;
+  role: UserRoleOption;
+  company: Company;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateUserInput {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  userRoleId: string;
+  companyId: string;
+}
+
+/** `PUT /users` asli TIDAK menerima `email`/`password` (dikonfirmasi lewat
+ *  curl user — payload update cuma `id, name, username, user_role_id,
+ *  company_id`) — jangan tambah field itu di sini tanpa konfirmasi ulang
+ *  kontrak BE. */
+export interface UpdateUserInput {
+  id: string;
+  name: string;
+  username: string;
+  userRoleId: string;
+  companyId: string;
+}
