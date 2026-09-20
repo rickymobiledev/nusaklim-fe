@@ -77,6 +77,62 @@ export function WarningTriangleIcon({
   );
 }
 
+export function CheckCircleIcon({ size = 12, color = "#FFFFFF", className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 12 12"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.5 6.25L5 7.75L8.5 4.25"
+        stroke={color}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="6"
+        cy="6"
+        r="5"
+        stroke={color}
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ChevronCircleDownIcon({
+  size = 16,
+  color = "#43B75D",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="8" cy="8" r="6.5" stroke={color} strokeWidth="1.25" />
+      <path
+        d="M5.5 7L8 9.5L10.5 7"
+        stroke={color}
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function NavArrowDownIcon({ size = 24, color = "#1D2520", className }: IconProps) {
   return (
     <svg
@@ -89,6 +145,27 @@ export function NavArrowDownIcon({ size = 24, color = "#1D2520", className }: Ic
     >
       <path
         d="M6 9L12 15L18 9"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function ArrowDownIcon({ size = 16, color = "#175FE2", className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 3V13M8 13L4.5 9.5M8 13L11.5 9.5"
         stroke={color}
         strokeWidth="1.5"
         strokeLinecap="round"

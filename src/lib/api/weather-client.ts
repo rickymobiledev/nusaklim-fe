@@ -6,6 +6,11 @@ import { normalizeWeather } from "./adapters/weather-adapter";
 import { fetchWeatherDailyChart } from "./weather-daily-client";
 import { deriveRainfallStatus } from "./rainfall-status";
 import { deriveHumidityStatus } from "./humidity-status";
+import { deriveTemperatureStatus } from "./temperature-status";
+import { deriveSolarRadiationStatus } from "./solar-radiation-status";
+import { deriveAirPressureStatus } from "./air-pressure-status";
+import { deriveWindSpeedStatus } from "./wind-speed-status";
+import { deriveWindDirectionStatus } from "./wind-direction-status";
 import { stationApi } from "./station-client";
 import { extractBackendErrorMessage } from "./backend-error";
 import type { WeatherApi } from "./weather-api";
@@ -35,10 +40,13 @@ async function fetchRawLatest(
  *  cabang mock lagi (persis presedan Stasiun). `normalizeWeather()`
  *  (`weather-adapter.ts`) tidak lagi peduli `station.brand` — field yang
  *  tidak tersedia di raw payload device jadi `null` (UI render "--"), itu
- *  keterbatasan sensor device asli, bukan bug. Curah Hujan & Kelembapan
- *  Relatif dapat data tambahan (`rainfallDetail`/`humidityDetail`: chart
- *  7 hari + status) dari `/weathers/daily` (satu call gabungan) — lihat
- *  `weather-daily-client.ts`/`rainfall-status.ts`/`humidity-status.ts`. */
+ *  keterbatasan sensor device asli, bukan bug. Curah Hujan, Kelembapan
+ *  Relatif, Temperatur Udara, Radiasi Matahari, Tekanan Udara, Kecepatan
+ *  Angin & Arah Mata Angin dapat data tambahan (`rainfallDetail`/
+ *  `humidityDetail`/`temperatureDetail`/`solarRadiationDetail`/
+ *  `airPressureDetail`/`windSpeedDetail`/`windDirectionDetail`: chart 7 hari
+ *  + status) dari `/weathers/daily` (satu call gabungan) — lihat
+ *  `weather-daily-client.ts` dan `*-status.ts` di folder yang sama. */
 export const weatherClient: WeatherApi = {
   async getWeatherMetrics(
     stationId: string,
@@ -64,6 +72,26 @@ export const weatherClient: WeatherApi = {
       metric.humidityDetail = {
         chart: dailyChart.humidity,
         status: deriveHumidityStatus(metric.airHumidity.value),
+      };
+      metric.temperatureDetail = {
+        chart: dailyChart.temperature,
+        status: deriveTemperatureStatus(metric.airTemperature.value),
+      };
+      metric.solarRadiationDetail = {
+        chart: dailyChart.radiation,
+        status: deriveSolarRadiationStatus(metric.solarRadiation.value),
+      };
+      metric.airPressureDetail = {
+        chart: dailyChart.pressure,
+        status: deriveAirPressureStatus(metric.airPressure.value),
+      };
+      metric.windSpeedDetail = {
+        chart: dailyChart.windSpeed,
+        status: deriveWindSpeedStatus(metric.windSpeed.value),
+      };
+      metric.windDirectionDetail = {
+        chart: dailyChart.windDirection,
+        status: deriveWindDirectionStatus(metric.windDirection.value),
       };
 
       return { data: metric };

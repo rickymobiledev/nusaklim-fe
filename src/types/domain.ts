@@ -40,8 +40,9 @@ export interface WeatherMetricRange {
 
 export interface WeatherChartPoint {
   date: string; // label pendek "01 Jan"
-  // null = hari tanpa data (bukan 0) — lihat WeatherChartCard, Recharts
-  // otomatis putus garis chart di titik null (connectNulls default false).
+  // null = hari tanpa data (bukan 0) — WeatherSummaryCard menampilkan "--",
+  // Recharts (halaman detail) otomatis putus garis chart di titik null
+  // (connectNulls default false).
   value: number | null;
 }
 
@@ -64,6 +65,41 @@ export interface RainfallDetail {
  *  Data Analyst/BE). Field harian sumber chart JUGA belum dikonfirmasi
  *  ada di payload /weathers/daily asli — lihat weather-daily-client.ts. */
 export interface HumidityDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
+/** Data tambahan kartu Temperatur Udara (chart 7 hari + status). Ambang di
+ *  temperature-status.ts BELUM final (butuh konfirmasi Data Analyst/BE). */
+export interface TemperatureDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
+/** Data tambahan kartu Radiasi Matahari (chart 7 hari = rata-rata W/m² per
+ *  hari + status). Ambang di solar-radiation-status.ts BELUM final. */
+export interface SolarRadiationDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
+/** Data tambahan kartu Tekanan Udara (chart 7 hari + status). Ambang di
+ *  air-pressure-status.ts BELUM final. */
+export interface AirPressureDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
+/** Data tambahan kartu Kecepatan Angin (chart 7 hari + status). Ambang di
+ *  wind-speed-status.ts BELUM final. */
+export interface WindSpeedDetail {
+  chart: WeatherChartPoint[];
+  status: WeatherStatus;
+}
+
+/** Data tambahan kartu Arah Mata Angin (chart 7 hari, nilai = derajat 0-360 +
+ *  status). Nama arah (Utara, Timur Laut, dst) diturunkan di layer tampilan. */
+export interface WindDirectionDetail {
   chart: WeatherChartPoint[];
   status: WeatherStatus;
 }
@@ -147,8 +183,15 @@ export interface WeatherMetric {
   rainfall: WeatherMetricRange;
   airPressure: WeatherMetricRange;
   windSpeed: WeatherMetricRange;
+  /** Derajat mentah 0-360 (`value`); min/max selalu null (tidak ada di `statistics`). */
+  windDirection: WeatherMetricRange;
   rainfallDetail?: RainfallDetail;
   humidityDetail?: HumidityDetail;
+  temperatureDetail?: TemperatureDetail;
+  solarRadiationDetail?: SolarRadiationDetail;
+  airPressureDetail?: AirPressureDetail;
+  windSpeedDetail?: WindSpeedDetail;
+  windDirectionDetail?: WindDirectionDetail;
 }
 
 export type MonthKey =

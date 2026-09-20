@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Thermometer, Sun, Gauge, Wind } from "lucide-react";
-import { MetricCard } from "@/components/shared/MetricCard";
 import { ForecastCard } from "@/components/domain/beranda/ForecastCard";
 import { DashboardGreeting } from "@/components/domain/beranda/DashboardGreeting";
 import { StationSyncCard } from "@/components/domain/beranda/StationSyncCard";
 import { StationStatsCard } from "@/components/domain/beranda/StationStatsCard";
 import { BerandaHeroBanner } from "@/components/domain/beranda/BerandaHeroBanner";
-import { WeatherChartCard } from "@/components/domain/beranda/WeatherChartCard";
+import { WeatherSummaryCard } from "@/components/domain/beranda/WeatherSummaryCard";
 import { useWeatherMetrics } from "@/hooks/use-weather-metrics";
 import { useStations } from "@/hooks/use-stations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { degreesToCardinal } from "@/lib/cardinal-direction";
 
 export default function BerandaPage() {
   const [stationId, setStationId] = useState<string>();
@@ -49,69 +48,118 @@ export default function BerandaPage() {
             <div />
           </div>
         ) : snapshot ? (
-          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
             <div className="flex flex-col gap-4">
-              <ForecastCard stationId={selectedStationId} />
               <div className="grid gap-4 sm:grid-cols-2">
-                <Link href="/rainfall">
-                  <WeatherChartCard
-                    icon={{ src: "/brand/rainy.png" }}
+                <ForecastCard stationId={selectedStationId} />
+                <Link href="/rainfall" className="flex">
+                  <WeatherSummaryCard
                     label="Curah Hujan"
+                    illustrationSrc="/brand/rainy.png"
                     value={snapshot.rainfall.value}
-                    min={snapshot.rainfall.min}
-                    max={snapshot.rainfall.max}
                     unit={snapshot.rainfall.unit}
                     chart={snapshot.rainfallDetail?.chart ?? []}
                     status={
                       snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
                     }
-                    chartColor="#175FE2"
                   />
                 </Link>
-                <Link href="/relative-humidity">
-                  <WeatherChartCard
-                    icon={{ src: "/brand/humidity.png" }}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Link href="/relative-humidity" className="flex">
+                  <WeatherSummaryCard
                     label="Kelembapan Relatif"
+                    illustrationSrc="/brand/humidity.png"
                     value={snapshot.airHumidity.value}
-                    min={snapshot.airHumidity.min}
-                    max={snapshot.airHumidity.max}
                     unit={snapshot.airHumidity.unit}
                     chart={snapshot.humidityDetail?.chart ?? []}
                     status={
                       snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
                     }
-                    chartColor="#0039FF"
-                    headerBorderColor="#C3FAFA"
                   />
                 </Link>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Link href="/air-temperature">
-                  <MetricCard
-                    icon={Thermometer}
+                <Link href="/air-temperature" className="flex">
+                  <WeatherSummaryCard
                     label="Temperatur Udara"
-                    data={snapshot.airTemperature}
+                    illustrationSrc="/brand/temperature.png"
+                    value={snapshot.airTemperature.value}
+                    unit={snapshot.airTemperature.unit}
+                    chart={snapshot.temperatureDetail?.chart ?? []}
+                    status={
+                      snapshot.temperatureDetail?.status ?? {
+                        tone: "success",
+                        message: "",
+                      }
+                    }
                   />
                 </Link>
-                <Link href="/solar-radiation">
-                  <MetricCard
-                    icon={Sun}
+                <Link href="/solar-radiation" className="flex">
+                  <WeatherSummaryCard
                     label="Radiasi Matahari"
-                    data={snapshot.solarRadiation}
+                    illustrationSrc="/brand/weather-sunny.png"
+                    value={snapshot.solarRadiation.value}
+                    unit={snapshot.solarRadiation.unit}
+                    chart={snapshot.solarRadiationDetail?.chart ?? []}
+                    status={
+                      snapshot.solarRadiationDetail?.status ?? {
+                        tone: "success",
+                        message: "",
+                      }
+                    }
                   />
                 </Link>
-                <Link href="/air-pressure">
-                  <MetricCard
-                    icon={Gauge}
+                <Link href="/air-pressure" className="flex">
+                  <WeatherSummaryCard
                     label="Tekanan Udara"
-                    data={snapshot.airPressure}
+                    illustrationSrc="/brand/air-pressure.png"
+                    value={snapshot.airPressure.value}
+                    unit={snapshot.airPressure.unit}
+                    chart={snapshot.airPressureDetail?.chart ?? []}
+                    status={
+                      snapshot.airPressureDetail?.status ?? {
+                        tone: "success",
+                        message: "",
+                      }
+                    }
                   />
                 </Link>
-                <Link href="/wind-speed">
-                  <MetricCard
-                    icon={Wind}
+                <Link href="/wind-speed" className="flex">
+                  <WeatherSummaryCard
                     label="Kecepatan Angin"
-                    data={snapshot.windSpeed}
+                    illustrationSrc="/brand/wind-speed.png"
+                    value={snapshot.windSpeed.value}
+                    unit={snapshot.windSpeed.unit}
+                    chart={snapshot.windSpeedDetail?.chart ?? []}
+                    status={
+                      snapshot.windSpeedDetail?.status ?? {
+                        tone: "success",
+                        message: "",
+                      }
+                    }
+                  />
+                </Link>
+                <Link href="/wind-direction" className="flex">
+                  <WeatherSummaryCard
+                    label="Arah Mata Angin"
+                    illustrationSrc="/brand/wind-direction.png"
+                    value={snapshot.windDirection.value}
+                    unit={snapshot.windDirection.unit}
+                    chart={snapshot.windDirectionDetail?.chart ?? []}
+                    status={
+                      snapshot.windDirectionDetail?.status ?? {
+                        tone: "success",
+                        message: "",
+                      }
+                    }
+                    showTrend={false}
+                    valueSuffix={
+                      snapshot.windDirection.value === null
+                        ? undefined
+                        : degreesToCardinal(snapshot.windDirection.value)
+                    }
+                    formatDayValue={(deg) =>
+                      deg === null ? "--" : degreesToCardinal(deg)
+                    }
                   />
                 </Link>
               </div>

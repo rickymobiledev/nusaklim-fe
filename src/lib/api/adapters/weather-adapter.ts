@@ -24,7 +24,7 @@ import type { WeatherMetric, WeatherMetricRange } from "@/types/domain";
  *
  * Field yang tidak tersedia jadi `null` (bukan dihilangkan dari tipe —
  * ini BENAR/jujur, bukan bug, kalau device-nya memang tidak punya sensor
- * itu). Komponen UI (MetricCard dkk) HANYA boleh menerima hasil yang
+ * itu). Komponen UI (WeatherSummaryCard dkk) HANYA boleh menerima hasil yang
  * sudah dinormalisasi ini, tidak pernah bentuk mentah. Dipakai oleh
  * `weather-client.ts` (real, satu-satunya implementasi — lihat
  * `lib/api/index.ts`).
@@ -93,7 +93,7 @@ export function normalizeWeather(
     ),
     solarRadiation: toRange(
       raw.radiation,
-      "MJ/m²",
+      "W/m²",
       stats,
       "min_solar_radiation",
       "max_solar_radiation",
@@ -108,11 +108,15 @@ export function normalizeWeather(
     rainfall: toRange(raw.rainfall, "mm", stats, "min_rainfall", "max_rainfall"),
     airPressure: toRange(
       raw.air_pressure,
-      "hPa",
+      "mbar",
       stats,
       "min_air_pressure",
       "max_air_pressure",
     ),
     windSpeed: toRange(raw.wind_speed, "m/s", stats, "min_wind_speed", "max_wind_speed"),
+    // `wind_direction_name` dari BE tidak dibaca (deret harian cuma punya
+    // derajat) — nama arah diturunkan di layer tampilan lewat
+    // `degreesToCardinal` yang mereproduksi mapping 4 arah BE itu.
+    windDirection: toRange(raw.wind_direction, "°"),
   };
 }

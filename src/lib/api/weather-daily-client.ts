@@ -5,6 +5,15 @@ import { createApiClient } from "./fetcher";
 
 const CHART_DAYS = 7;
 
+/** `sum_solar_radiation` dari `/weathers/daily` = JUMLAH pembacaan W/m² sehari
+ *  (dikonfirmasi tes langsung, mis. 19553), bukan W/m² maupun MJ/m². Kartu
+ *  Beranda menampilkan rata-rata W/m² (sesuai Figma) = sum ÷ jumlah
+ *  pembacaan per hari; `/weathers/filter` memang per ~10 menit → 144/hari.
+ *  ASUMSI interval tetap — hari dengan pembacaan bolong jadi sedikit terlalu
+ *  rendah. Konversi ini HANYA untuk kartu Beranda; `parseRadiation`
+ *  (halaman `/solar-radiation`, `/download-data`) tetap angka sum mentah. */
+const RADIATION_READINGS_PER_DAY = 144;
+
 /** Satu baris per hari dari `GET /weathers/daily`. Field utama
  *  (`sum_rainfall`, `average_temperature`, `average_humidity`,
  *  `sum_solar_radiation`, `average_air_pressure`, `average_wind_speed`,
@@ -108,15 +117,24 @@ export async function fetchRawDaily(
   return res.data.data;
 }
 
-/** Sumber chart 7 hari kartu Curah Hujan & Kelembapan Relatif — SATU-
- *  SATUNYA hal yang `weather-client.ts` tidak dapat dari `/weathers/latest`
- *  (yang cuma snapshot 1 hari). Rainfall & humidity digabung dalam SATU
- *  call karena sama-sama dari `/weathers/daily` dengan device_id+date
- *  range identik — hindari 2 request terpisah ke endpoint yang sama. */
+/** Sumber deret 7 hari 7 kartu ringkasan Beranda (Curah Hujan, Kelembapan
+ *  Relatif, Temperatur Udara, Radiasi Matahari, Tekanan Udara, Kecepatan
+ *  Angin, Arah Mata Angin) — SATU-SATUNYA hal yang `weather-client.ts` tidak dapat dari
+ *  `/weathers/latest` (yang cuma snapshot 1 hari). Semuanya digabung dalam
+ *  SATU call karena sama-sama dari `/weathers/daily` dengan device_id+date
+ *  range identik — hindari request terpisah ke endpoint yang sama. */
 export async function fetchWeatherDailyChart(
   deviceId: string,
   companyId?: string,
-): Promise<{ rainfall: WeatherChartPoint[]; humidity: WeatherChartPoint[] }> {
+): Promise<{
+  rainfall: WeatherChartPoint[];
+  humidity: WeatherChartPoint[];
+  temperature: WeatherChartPoint[];
+  radiation: WeatherChartPoint[];
+  pressure: WeatherChartPoint[];
+  windSpeed: WeatherChartPoint[];
+  windDirection: WeatherChartPoint[];
+}> {
   const end = new Date();
   const start = subDays(end, CHART_DAYS - 1);
 
@@ -128,12 +146,25 @@ export async function fetchWeatherDailyChart(
   const byDate = new Map(
     data.map((row) => [
       row.date,
-      { rainfall: parseNumeric(row.sum_rainfall), humidity: parseHumidity(row) },
+      {
+        rainfall: parseNumeric(row.sum_rainfall),
+        humidity: parseHumidity(row),
+        temperature: parseTemperature(row),
+        radiation: parseRadiation(row),
+        pressure: parsePressure(row),
+        windSpeed: parseWindSpeed(row),
+        windDirection: parseWindDirection(row),
+      },
     ]),
   );
 
   const rainfall: WeatherChartPoint[] = [];
   const humidity: WeatherChartPoint[] = [];
+  const temperature: WeatherChartPoint[] = [];
+  const radiation: WeatherChartPoint[] = [];
+  const pressure: WeatherChartPoint[] = [];
+  const windSpeed: WeatherChartPoint[] = [];
+  const windDirection: WeatherChartPoint[] = [];
 
   for (let i = 0; i < CHART_DAYS; i++) {
     const day = subDays(end, CHART_DAYS - 1 - i);
@@ -145,9 +176,31 @@ export async function fetchWeatherDailyChart(
     // null/gap, Recharts otomatis putus garis (connectNulls default false).
     rainfall.push({ date: label, value: row?.rainfall ?? 0 });
     humidity.push({ date: label, value: row?.humidity ?? null });
+    // Sama seperti kelembapan: 0 °C bukan nilai wajar untuk "tanpa data".
+    temperature.push({ date: label, value: row?.temperature ?? null });
+    radiation.push({
+      date: label,
+      value:
+        row?.radiation === null || row?.radiation === undefined
+          ? null
+          : row.radiation / RADIATION_READINGS_PER_DAY,
+    });
+    pressure.push({ date: label, value: row?.pressure ?? null });
+    windSpeed.push({ date: label, value: row?.windSpeed ?? null });
+    // `average_wind_direction` = rata-rata aritmetika derajat dari BE (tidak
+    // valid untuk arah melingkar) — nama arah di kartu cuma perkiraan.
+    windDirection.push({ date: label, value: row?.windDirection ?? null });
   }
 
-  return { rainfall, humidity };
+  return {
+    rainfall,
+    humidity,
+    temperature,
+    radiation,
+    pressure,
+    windSpeed,
+    windDirection,
+  };
 }
 
 /** Sumber chart temperatur harian halaman `/air-temperature` — beda dari
