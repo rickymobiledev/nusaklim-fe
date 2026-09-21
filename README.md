@@ -1,7 +1,6 @@
 This is a [Next.js](https://nextjs.org) project.
 
 ## Getting Started
-
 Install dependencies:
 
 ```bash
