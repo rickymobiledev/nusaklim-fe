@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { ApiError, type ApiListResponse } from "@/types/api";
 import type { SunshineDuration } from "@/types/domain";
 import { createApiClient } from "./fetcher";
@@ -53,6 +54,22 @@ export const sunshineDurationClient = {
       return { data, meta: { page: 1, pageSize: data.length, total: data.length } };
     } catch (err) {
       if (err instanceof ApiError) throw err;
+
+      // Rentang tanpa baris (mis. hari ini belum punya data) dibalas BE
+      // dengan HTTP 404 `{status:false, message:"No such solar sunshine
+      // found."}`, BUKAN 200 dengan `data: []` (dikonfirmasi curl ke
+      // backend asli) — jadi axios melempar di sini, bukan di cabang
+      // `!res.data.status` di atas. Itu "kosong", bukan error. Aman
+      // dibedakan dari device_id salah/bukan milik company karena
+      // `getStationDetail()` di atas sudah melempar sendiri untuk kasus itu.
+      if (
+        isAxiosError(err) &&
+        err.response?.status === 404 &&
+        /^No such solar sunshine found/i.test(extractBackendErrorMessage(err) ?? "")
+      ) {
+        return { data: [], meta: { page: 1, pageSize: 0, total: 0 } };
+      }
+
       throw new ApiError(
         "SUNSHINE_DURATION_FETCH_FAILED",
         extractBackendErrorMessage(err) ?? "Gagal terhubung ke server lama penyinaran.",

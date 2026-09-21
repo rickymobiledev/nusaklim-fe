@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ForecastCard } from "@/components/domain/beranda/ForecastCard";
+import { BerandaSidePanel } from "@/components/domain/beranda/BerandaSidePanel";
 import { DashboardGreeting } from "@/components/domain/beranda/DashboardGreeting";
 import { StationSyncCard } from "@/components/domain/beranda/StationSyncCard";
 import { StationStatsCard } from "@/components/domain/beranda/StationStatsCard";
@@ -164,10 +165,10 @@ export default function BerandaPage() {
                 </Link>
               </div>
             </div>
-            {/* Placeholder sidebar kanan — widget (Periode Monitoring, Deret
-                Hari Terpanjang Tidak Hujan, Keseimbangan Air, Lama
-                Penyinaran, VPD) menyusul sbg task terpisah, lihat CLAUDE.md. */}
-            <div />
+            {/* Sidebar kanan — baru alert info + Deret Hari Terpanjang Tidak
+                Hujan; Keseimbangan Air, Lama Penyinaran, VPD menyusul sbg
+                task terpisah, lihat CLAUDE.md. */}
+            <BerandaSidePanel stationId={selectedStationId} />
           </div>
         ) : (
           <p className="text-muted-foreground text-sm">
