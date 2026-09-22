@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ForecastCard } from "@/components/domain/beranda/ForecastCard";
+import { RainfallHeatmapCard } from "@/components/domain/beranda/RainfallHeatmapCard";
+import { NewsCard } from "@/components/domain/beranda/NewsCard";
 import { BerandaSidePanel } from "@/components/domain/beranda/BerandaSidePanel";
 import { DashboardGreeting } from "@/components/domain/beranda/DashboardGreeting";
 import { StationSyncCard } from "@/components/domain/beranda/StationSyncCard";
@@ -25,7 +27,7 @@ export default function BerandaPage() {
 
   return (
     <div className="flex flex-col gap-6" data-page="beranda">
-      <div className="relative -mx-6 -mt-6 flex flex-col gap-4 px-4 pt-4 lg:px-6 lg:py-6">
+      <div className="relative -mx-4 -mt-6 flex flex-col gap-4 px-4 py-4 lg:-mx-6 lg:px-6 lg:py-6">
         <BerandaHeroBanner />
 
         <div className="relative z-10 flex flex-col gap-6">
@@ -49,9 +51,9 @@ export default function BerandaPage() {
             <div />
           </div>
         ) : snapshot ? (
-          <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-            <div className="flex flex-col gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[1fr_300px]">
+            <div className="flex min-w-0 flex-col gap-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <ForecastCard stationId={selectedStationId} />
                 <Link href="/rainfall" className="flex">
                   <WeatherSummaryCard
@@ -66,7 +68,7 @@ export default function BerandaPage() {
                   />
                 </Link>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2">
                 <Link href="/relative-humidity" className="flex">
                   <WeatherSummaryCard
                     label="Kelembapan Relatif"
@@ -164,6 +166,8 @@ export default function BerandaPage() {
                   />
                 </Link>
               </div>
+
+              <RainfallHeatmapCard stationId={selectedStationId} />
             </div>
             {/* Sidebar kanan — baru alert info + Deret Hari Terpanjang Tidak
                 Hujan; Keseimbangan Air, Lama Penyinaran, VPD menyusul sbg
@@ -176,6 +180,8 @@ export default function BerandaPage() {
           </p>
         )}
       </div>
+
+      <NewsCard />
     </div>
   );
 }

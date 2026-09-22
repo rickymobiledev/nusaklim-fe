@@ -7,6 +7,8 @@ import {
   DownloadIcon,
   ForecastIcon,
   OthersIcon,
+  MissingDataIcon,
+  ManajemenIcon,
   type SidebarIconProps,
 } from "@/components/shared/SidebarIcons";
 
@@ -34,26 +36,46 @@ export type NavItem = {
   /** Kalau diisi, item ini dirender sebagai dropdown (HeaderNav) — `href`
    *  tetap dipakai buat active-state prefix-match (getActiveNavHref/dst),
    *  tapi bukan tujuan klik langsung. Di drawer mobile (Sidebar.tsx),
-   *  children di-flatten jadi SidebarItem tersendiri (tanpa dropdown). */
-  children?: { label: string; href: string }[];
+   *  children di-flatten jadi SidebarItem tersendiri (tanpa dropdown).
+   *  `icon` WAJIB diisi (dipakai HeaderNav dropdown & Sidebar drawer).
+   *  `disabled` = item tampil tapi tidak bisa diklik (belum ada halaman
+   *  tujuan, mis. "Missing Data" — lihat docs/ARCHITECTURE.md). */
+  children?: {
+    label: string;
+    href: string;
+    icon: ComponentType<SidebarIconProps>;
+    disabled?: boolean;
+  }[];
 };
 
-/** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data)
- *  plus the new Ramalan Cuaca (DL forecast) menu from the redesign scope.
- *  "Lainnya" (admin-only, dropdown berisi "Manajemen") ditambah menyusul
- *  buat halaman Manajemen Pengguna — lihat `docs/ARCHITECTURE.md`. */
+/** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data).
+ *  "Lainnya" (admin-only) dropdown-nya redesign: "Ramalan Cuaca" DIPINDAH
+ *  ke sini dari pill top-level (menghindari dobel di drawer mobile yang
+ *  flatten `children`), + "Missing Data" (BARU, disabled — belum ada
+ *  halaman sama sekali) + "Manajemen" (sudah ada). `/forecast` masih bisa
+ *  diakses langsung via URL / kartu Ramalan Cuaca di Beranda — lihat
+ *  `EXTRA_TITLES["/forecast"]` di bawah supaya title/breadcrumb tetap benar
+ *  walau bukan lagi top-level NAV_ITEMS. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon },
   { label: "Peta", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
-  { label: "Ramalan Cuaca", href: "/forecast", icon: ForecastIcon },
   {
     label: "Lainnya",
     href: "/user-management",
     icon: OthersIcon,
     roles: ["ADMINISTRATOR"],
-    children: [{ label: "Manajemen", href: "/user-management/users" }],
+    children: [
+      { label: "Ramalan Cuaca", href: "/forecast", icon: ForecastIcon },
+      {
+        label: "Missing Data",
+        href: "/missing-data",
+        icon: MissingDataIcon,
+        disabled: true,
+      },
+      { label: "Manajemen", href: "/user-management/users", icon: ManajemenIcon },
+    ],
   },
 ];
 
@@ -68,6 +90,7 @@ export const DATA_GRANULARITY = [
 /** Title untuk route yang tidak persis cocok dengan NAV_ITEMS (sub-halaman Monitoring).
  *  Labelnya tetap Bahasa Indonesia meski slug URL "dry-spell" pakai Bahasa Inggris. */
 const EXTRA_TITLES: Record<string, string> = {
+  "/forecast": "Ramalan Cuaca",
   "/monitoring/water-balance": "Keseimbangan Air",
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "/monitoring/lama-penyinaran": "Lama Penyinaran",

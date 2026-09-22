@@ -9,6 +9,8 @@ import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-a
 import { waterDeficitClient } from "./water-deficit-client";
 import { drySpellClient } from "./dry-spell-client";
 import { rainfallTodayClient } from "./rainfall-today-client";
+import { newsClient } from "./news-client";
+import { notificationClient } from "./notification-client";
 import { downloadClient } from "./download-client";
 import { stationApi as stationClient } from "./station-client";
 import { usersClient } from "./users-client";
@@ -22,6 +24,8 @@ import type { ForecastApi } from "./forecast-api";
 import type { WaterDeficitApi } from "./water-deficit-api";
 import type { DrySpellApi } from "./dry-spell-api";
 import type { RainfallTodayApi } from "./rainfall-today-api";
+import type { NewsApi } from "./news-api";
+import type { NotificationApi } from "./notification-api";
 import type { UsersApi } from "./users-api";
 import type { CompaniesApi } from "./companies-api";
 import type { UserRolesApi } from "./user-roles-api";
@@ -75,6 +79,13 @@ export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
 export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;
 export const drySpellApi: DrySpellApi = drySpellClient;
 export const rainfallTodayApi: RainfallTodayApi = rainfallTodayClient;
+// Real sejak awal via `GET /news`, dikonfirmasi user lewat tes langsung ke
+// backend asli — tidak pernah ada jalur mock untuk domain ini.
+export const newsApi: NewsApi = newsClient;
+// Real via `GET /notification`, TAPI auth belum tervalidasi tes langsung
+// (beda dari domain lain yang sudah "100% real, terkonfirmasi") — lihat
+// catatan risiko di notification-client.ts.
+export const notificationApi: NotificationApi = notificationClient;
 // Domain "Manajemen Pengguna" (admin-only) — 100% real sejak awal, tidak
 // pernah ada jalur mock (`GET/POST/PUT/DELETE /users`, `GET /companies`,
 // `GET /user_roles`, dikonfirmasi curl langsung ke backend asli).

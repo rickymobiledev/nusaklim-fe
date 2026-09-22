@@ -37,13 +37,23 @@ export function HeaderNav() {
                   {item.label}
                 </PillButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center">
-                {item.children.map((child) => (
-                  <DropdownMenuItem key={child.href} asChild>
-                    <Link href={child.href}>{child.label}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
+              <MoreMenuContent align="center">
+                {item.children.map((child) =>
+                  child.disabled ? (
+                    <MoreMenuItemDisabled key={child.href}>
+                      <child.icon size={20} color="#B7C2BB" />
+                      {child.label}
+                    </MoreMenuItemDisabled>
+                  ) : (
+                    <MoreMenuItem key={child.href} asChild>
+                      <Link href={child.href}>
+                        <child.icon size={20} color="#455249" />
+                        {child.label}
+                      </Link>
+                    </MoreMenuItem>
+                  ),
+                )}
+              </MoreMenuContent>
             </DropdownMenu>
           );
         }
@@ -100,4 +110,46 @@ const PillButton = styled.button<{ $active: boolean }>`
   ${pillStyles}
   border: none;
   cursor: pointer;
+`;
+
+const MoreMenuContent = styled(DropdownMenuContent)`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 250px;
+  padding: 16px;
+  background: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0px 4px 26px rgba(0, 0, 0, 0.25);
+`;
+
+const menuItemStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 12px;
+  border-radius: 9999px;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+`;
+
+const MoreMenuItem = styled(DropdownMenuItem)`
+  ${menuItemStyles}
+  color: #455249;
+
+  &:hover,
+  &:focus {
+    background: #f6f8f7;
+  }
+`;
+
+const MoreMenuItemDisabled = styled.div`
+  ${menuItemStyles}
+  color: #b7c2bb;
+  cursor: not-allowed;
 `;

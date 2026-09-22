@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <Topbar />
         <Sidebar />
-        <main className="flex-1 overflow-auto px-6 pt-6 pb-20">{children}</main>
+        <main className="flex-1 overflow-auto px-4 pb-20 pt-6 lg:px-6">{children}</main>
         <DashboardFooter />
       </div>
     </div>

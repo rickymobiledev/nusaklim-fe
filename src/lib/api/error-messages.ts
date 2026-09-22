@@ -5,6 +5,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   STATION_INACTIVE: "Stasiun sedang tidak aktif, data tidak tersedia.",
   STATION_FETCH_FAILED: "Gagal mengambil data stasiun dari server.",
   NETWORK_ERROR: "Gagal terhubung ke server. Periksa koneksi internet.",
+  NEWS_FETCH_FAILED: "Gagal mengambil data berita dari server.",
+  NOTIFICATION_FETCH_FAILED: "Gagal mengambil data notifikasi dari server.",
 };
 
 /** Domain "Manajemen Pengguna" — kode di atas TIDAK di-map ke sini secara

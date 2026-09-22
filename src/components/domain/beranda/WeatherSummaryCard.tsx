@@ -174,10 +174,11 @@ function computeTrendPercent(chart: WeatherChartPoint[]): number | null {
 
 /* Kartu fluid (lebar ikut cell grid, bukan viewport) — makanya pakai
  * `@container` di lebar kartu, bukan `media.desktop`. Base = spec Figma
- * (kartu 530px); <500px = versi ringkas (ilustrasi 96px, padding
- * dikurangi) supaya 3 kotak hari tetap muat di lebar ~440px (kolom kiri
- * Beranda di 1280px); <420px = ilustrasi disembunyikan. Versi ringkas
- * BUKAN dari Figma (hanya ada mockup 530px), asumsi penulis. */
+ * (kartu 530px); <500px = versi ringkas (ilustrasi 82px, padding
+ * dikurangi) supaya 3 kotak hari tetap muat di lebar sempit — ukuran
+ * 82px dikonfirmasi dari CSS Figma mobile persis (kartu ~397px lebar),
+ * BUKAN lagi tebakan 96px/disembunyikan di bawah 420px seperti revisi
+ * sebelumnya (mobile Figma TETAP menampilkan ilustrasi). */
 const Card = styled.div`
   container-type: inline-size;
   display: flex;
@@ -190,7 +191,15 @@ const Card = styled.div`
   border-radius: 20px;
 `;
 
+/* `position:relative` — konteks positioning `Illustration` di mobile
+ * (jadi `position:absolute`, lihat di bawah). Di mobile, ilustrasi
+ * dilepas dari flex flow (bukan flex sibling `Main` lagi) — CSS Figma
+ * mobile persis nunjukkan ilustrasi `position:absolute` "mengambang" di
+ * pojok kanan atas, TIDAK menyisakan ruang horizontal, jadi `Main`
+ * (label+value+day-boxes) mengisi PENUH lebar card, bukan cuma sisa
+ * ruang setelah ilustrasi seperti desktop. */
 const Body = styled.div`
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -198,7 +207,7 @@ const Body = styled.div`
   padding: 0 40px 0 0;
 
   @container (max-width: 499px) {
-    padding-right: 16px;
+    padding-right: 0;
   }
 `;
 
@@ -235,6 +244,7 @@ const Content = styled.div`
 
   @container (max-width: 499px) {
     padding-left: 16px;
+    padding-right: 16px;
   }
 `;
 
@@ -306,7 +316,7 @@ const DayBox = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  flex: 0 1 100px;
+  flex: 1 1 0;
   min-width: 0;
   min-height: 50px;
   padding: 4px 8px 8px;
@@ -340,12 +350,11 @@ const Illustration = styled(Image)`
   object-fit: contain;
 
   @container (max-width: 499px) {
-    width: 96px;
-    height: 96px;
-  }
-
-  @container (max-width: 419px) {
-    display: none;
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 82px;
+    height: 82px;
   }
 `;
 

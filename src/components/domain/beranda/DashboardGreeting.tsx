@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import styled from "styled-components";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { media } from "@/lib/breakpoints";
 
 export function DashboardGreeting() {
   const { user } = useCurrentUser();
@@ -33,29 +32,24 @@ const Wrapper = styled.div`
   gap: 4px;
 `;
 
+/* Ukuran teks SAMA di semua breakpoint (14px date, 40px/48px greeting) —
+ * dikoreksi setelah user kasih CSS Figma mobile persis, yang ternyata
+ * pakai ukuran identik desktop (bukan diperkecil), beda dari asumsi
+ * awal sebelum ada acuan mobile. */
 const DateTimeText = styled.p`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 20px;
   color: rgba(255, 255, 255, 0.7);
-
-  ${media.desktop} {
-    font-size: 14px;
-  }
 `;
 
 const GreetingLine = styled.p`
   font-family: var(--font-manrope), sans-serif;
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
-  line-height: 34px;
+  line-height: 48px;
   color: #ffffff;
-
-  ${media.desktop} {
-    font-size: 40px;
-    line-height: 48px;
-  }
 `;
 
 const NameLine = styled(GreetingLine)``;

@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // `cover_image` dari `GET /news` (kartu Berita Pilihan) berupa URL S3
+    // eksternal, bukan asset lokal `public/` — host ini dari contoh
+    // response asli yang dikonfirmasi user. Kalau backend nanti pakai
+    // bucket/host lain, tambahkan pattern baru di sini.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "iopri-storage-prod-ap-southeast-1-001.s3-ap-southeast-1.amazonaws.com",
+      },
+    ],
   },
 };
 

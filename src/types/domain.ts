@@ -347,6 +347,39 @@ export interface StationWaterDeficit {
  *  "< 10 hari", bukan "tidak ada data"). Lihat `lib/dry-spell-level.ts`. */
 export type DrySpellLevel = "rendah" | "sedang" | "tinggi";
 
+/** Level kategori curah hujan harian untuk warna sel kartu "Heatmap
+ *  Curah Hujan" Beranda — bukan field dari BE, threshold ikut legenda
+ *  "Keterangan Curah Hujan (mm)" di Figma (<0.1, 0.1-20, 21-50, 51-100,
+ *  101-150, >150), BELUM final (butuh konfirmasi Data Analyst/BE), sama
+ *  status "belum final"-nya seperti `DrySpellLevel`/`WaterDeficitLevel`.
+ *  `tidak_ada_data` KHUSUS untuk tanggal MASA DEPAN dalam grid kalender —
+ *  `fetchRainfallRange()` (`lib/api/weather-daily-client.ts`) men-default
+ *  hari tanpa record BE jadi 0mm (bukan null), jadi backend tidak bisa
+ *  dibedakan dari hari yang belum terjadi; override-nya dilakukan di
+ *  `use-rainfall-heatmap.ts` berdasarkan perbandingan tanggal, BUKAN dari
+ *  nilai API. Lihat `lib/rainfall-heatmap-level.ts`. */
+export type RainfallHeatmapLevel =
+  | "tidak_hujan"
+  | "ringan"
+  | "sedang"
+  | "lebat"
+  | "sangat_lebat"
+  | "ekstrem"
+  | "tidak_ada_data";
+
+/** Satu sel tanggal DALAM bulan berjalan pada grid "Heatmap Curah Hujan"
+ *  Beranda — sel padding kosong sebelum tanggal 1 / setelah akhir bulan
+ *  direpresentasikan `null` di array `hariKalender`, bukan objek ini.
+ *  `curahHujan` = null KHUSUS untuk `level: "tidak_ada_data"` (tanggal
+ *  masa depan); hari lampau/hari ini tanpa record BE tetap angka 0
+ *  (`"tidak_hujan"`), ikut konvensi default `fetchRainfallRange()`. */
+export interface RainfallHeatmapHari {
+  tanggal: string; // ISO "yyyy-MM-dd" — derived di client (eachDayOfInterval), bukan dari BE
+  tanggalAngka: number; // 1-31, angka besar yang dirender di sel
+  curahHujan: number | null;
+  level: RainfallHeatmapLevel;
+}
+
 /** Snapshot SATU TAHUN (bukan 1 bulan) untuk SATU stasiun, tab Peta >
  *  Deret Terpanjang Hari Tidak Hujan — company-wide (list semua stasiun
  *  sekaligus untuk `year` yang sama). Dikonfirmasi user lewat contoh
@@ -461,3 +494,33 @@ export interface DownloadDataRow {
 }
 
 export type DataGranularity = "harian" | "10menit" | "pagi" | "siang" | "malam";
+
+/** Kartu "Berita Pilihan" di Beranda — `GET /news` asli, dikonfirmasi user.
+ *  PENGECUALIAN sengaja dari konvensi "kontrak Indonesia" di docblock atas
+ *  file ini (sama seperti grup Weather di atas) — field Bahasa Inggris ikut
+ *  nama asli backend, atas permintaan eksplisit user. Field lain dari
+ *  response asli (`slug`, `content` penuh, `status` draft/published,
+ *  `updated_at`) SENGAJA tidak dipetakan — tidak ada UI yang butuh detail
+ *  berita penuh/link per-berita, card di Beranda cuma ringkasan statis. */
+export interface NewsItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  coverImage: string | null;
+  createdAt: string;
+}
+
+/** Notifikasi user (bell icon Header) — `GET /notification`, polymorphic
+ *  per-user ala Laravel (`notifiable_type`+`notifiable_id`), BELUM
+ *  dikonfirmasi lewat tes langsung (cuma screenshot tabel DB, lihat
+ *  `notification-client.ts`). Field mentah `data` backend adalah STRING
+ *  JSON `{title, message}` — sudah di-parse jadi `judul`/`pesan` di
+ *  adapter. Field lain (`notifiable_type`, `notifiable_id`, `updated_at`)
+ *  sengaja diabaikan, tidak dipakai UI. */
+export interface NotificationItem {
+  id: string;
+  judul: string;
+  pesan: string;
+  sudahDibaca: boolean;
+  dibuatPada: string;
+}

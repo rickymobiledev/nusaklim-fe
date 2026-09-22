@@ -10,14 +10,25 @@ export function SidebarItem({
   icon: Icon,
   label,
   active,
+  disabled,
   onNavigate,
 }: {
   href: string;
   icon: ComponentType<SidebarIconProps>;
   label: string;
   active: boolean;
+  disabled?: boolean;
   onNavigate?: () => void;
 }) {
+  if (disabled) {
+    return (
+      <DisabledRow>
+        <Icon size={20} color="#B7C2BB" className="shrink-0" />
+        <Label>{label}</Label>
+      </DisabledRow>
+    );
+  }
+
   return (
     <StyledLink href={href} $active={active} onClick={onNavigate}>
       <Icon size={20} color={active ? "#FFFFFF" : "#8B9C90"} className="shrink-0" />
@@ -40,6 +51,18 @@ const StyledLink = styled(Link)<{ $active: boolean }>`
   transition:
     background-color 0.15s,
     color 0.15s;
+`;
+
+const DisabledRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 9999px;
+  color: #b7c2bb;
+  cursor: not-allowed;
 `;
 
 const Label = styled.span`

@@ -7,6 +7,7 @@ import { useVPD } from "@/hooks/use-vpd";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
 import { getErrorMessage } from "@/lib/api/error-messages";
+import { media } from "@/lib/breakpoints";
 import {
   DEFAULT_BATAS_AMAN_KPA,
   formatKpa,
@@ -78,6 +79,10 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
   );
 }
 
+/* Mobile: tanpa border/radius, tanpa padding kiri-kanan — dipisah dari
+ * kartu sebelumnya lewat `border-top` (pengganti box penuh), bukan
+ * card berbingkai seperti kartu sidebar lain. Desktop tetap card
+ * berbingkai seperti sebelumnya. */
 const Card = styled.div`
   box-sizing: border-box;
   display: flex;
@@ -85,9 +90,15 @@ const Card = styled.div`
   align-items: flex-start;
   align-self: stretch;
   gap: 8px;
-  padding: 16px;
-  border: 1px solid #d6dcd8;
-  border-radius: 16px;
+  width: 100%;
+  padding: 16px 0 0;
+  border-top: 1px solid #d6dcd8;
+
+  ${media.desktop} {
+    padding: 16px;
+    border: 1px solid #d6dcd8;
+    border-radius: 16px;
+  }
 `;
 
 const Header = styled.div`

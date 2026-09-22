@@ -49,9 +49,10 @@ export function StationSyncCard({
       </Field>
 
       <SyncBlock>
-        <SyncText>
-          Sinkronisasi terakhir {syncText}
-        </SyncText>
+        <SyncTextBlock>
+          <SyncLabel>Sinkronisasi terakhir</SyncLabel>
+          <SyncValue>{syncText}</SyncValue>
+        </SyncTextBlock>
         <RefreshButton type="button" onClick={() => refetch()} disabled={isFetching}>
           <SpinningIcon $spinning={isFetching} size={24} />
           Refresh
@@ -66,7 +67,7 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 16px;
+  padding: 24px;
   background: rgba(255, 255, 255, 0.4);
   border: 1px solid #ecefed;
   border-radius: 16px;
@@ -76,17 +77,22 @@ const Card = styled.div`
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    padding: 24px;
   }
 `;
 
+/* Label di atas, select di bawah (stack) di mobile — dikoreksi setelah
+ * user laporkan bug (sebelumnya row/inline di semua breakpoint, salah
+ * untuk mobile). Desktop tetap row/inline seperti sebelumnya. */
 const Field = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
   width: 100%;
 
   ${media.desktop} {
+    flex-direction: row;
+    align-items: center;
     width: auto;
     flex: 1 1 auto;
     min-width: 0;
@@ -120,36 +126,57 @@ const Trigger = styled(SelectTrigger)`
   }
 `;
 
+/* Dulu punya box gelap `rgba(0,0,0,0.2)` pembungkus khusus mobile —
+ * dihapus setelah user kasih CSS Figma mobile persis, yang ternyata
+ * flat (tanpa box tambahan) sama seperti desktop. */
 const SyncBlock = styled.div`
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 20px;
   width: 100%;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
 
   ${media.desktop} {
     width: auto;
-    padding: 0;
-    background: none;
-    border-radius: 0;
   }
 `;
 
-const SyncText = styled.p`
+/* 2 baris terpisah (label + tanggal bold) di mobile — dikoreksi setelah
+ * user laporkan bug (sebelumnya 1 baris kalimat gabungan di semua
+ * breakpoint). Di desktop tetap 1 baris seperti sebelumnya (label+value
+ * inline, tanpa bold). */
+const SyncTextBlock = styled.div`
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-width: 0;
+
+  ${media.desktop} {
+    flex-direction: row;
+    gap: 4px;
+    flex: none;
+    min-width: auto;
+  }
+`;
+
+const SyncLabel = styled.span`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 13px;
   font-weight: 400;
   line-height: 20px;
   color: #ffffff;
+`;
+
+const SyncValue = styled.span`
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #ffffff;
 
   ${media.desktop} {
-    flex: none;
-    min-width: auto;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;
   }
 `;
 

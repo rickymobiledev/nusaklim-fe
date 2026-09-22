@@ -223,3 +223,92 @@ export function ForecastIcon({
     </svg>
   );
 }
+
+/** Icon item "Missing Data" di dropdown "Lainnya" (`HeaderNav.tsx`) — Iconoir
+ *  `folder-warning` (MIT license), dicocokkan titik-demi-titik terhadap
+ *  koordinat CSS Figma layer "folder-alert" (Iconoir tidak punya icon
+ *  persis nama itu). viewBox dibiarkan 24x24 asli (BEDA dari icon lain di
+ *  file ini yang di-scale manual ke 20x20) — menghindari galat pembulatan
+ *  tangan, hasil render tetap identik karena ukuran akhir dikontrol prop
+ *  `size`, bukan angka di viewBox. */
+export function MissingDataIcon({
+  size = 20,
+  color = "#8B9C90",
+  className,
+}: SidebarIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M18 3L18 7"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18 11.01L18.01 10.9989"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M22 7V11V19.4C22 19.7314 21.7314 20 21.4 20H2.6C2.26863 20 2 19.7314 2 19.4V11"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 7H12.722C12.5787 7 12.4402 6.94876 12.3315 6.85555L9.16852 4.14445C9.05977 4.05124 8.92127 4 8.77805 4H2.6C2.26863 4 2 4.26863 2 4.6V11H14"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Icon item "Manajemen" di dropdown "Lainnya" (`HeaderNav.tsx`) — Iconoir
+ *  `keyframes-couple` (MIT license), cocok persis koordinat CSS Figma
+ *  layer "keyframes-couple". viewBox 24x24 asli, sama alasan seperti
+ *  `MissingDataIcon` di atas. */
+export function ManajemenIcon({
+  size = 20,
+  color = "#8B9C90",
+  className,
+}: SidebarIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15.8189 13.3287L10.4948 19.3183C9.69924 20.2134 8.30076 20.2134 7.50518 19.3183L2.18109 13.3287C1.50752 12.571 1.50752 11.429 2.18109 10.6713L7.50518 4.68167C8.30076 3.78664 9.69924 3.78664 10.4948 4.68167L15.8189 10.6713C16.4925 11.429 16.4925 12.571 15.8189 13.3287Z"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 6.375L13.5052 4.68167C14.3008 3.78664 15.6992 3.78664 16.4948 4.68167L21.8189 10.6713C22.4925 11.429 22.4925 12.571 21.8189 13.3287L16.4948 19.3183C15.6992 20.2134 14.3008 20.2134 13.5052 19.3183L12 17.625"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

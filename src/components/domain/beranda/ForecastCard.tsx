@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { useForecast } from "@/hooks/use-forecast";
 import { NavArrowRightIcon } from "@/components/shared/DashboardIcons";
 import { FORECAST_ICON_SRC, getForecastIconLevel } from "@/lib/forecast-icon-level";
+import { media } from "@/lib/breakpoints";
 
 export function ForecastCard({ stationId }: { stationId?: string }) {
   const { data, isLoading } = useForecast(stationId);
@@ -66,6 +67,7 @@ export function ForecastCard({ stationId }: { stationId?: string }) {
 const Card = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 0;
   padding: 16px;
   gap: 4px;
   max-width: 530px;
@@ -110,13 +112,18 @@ const Subtitle = styled.p`
   color: #667a6c;
 `;
 
-/* `overflow-x:auto` bukan bagian spec Figma (Figma cuma render 7 kolom
- * pas di lebar kartu 530px desktop) — fallback supaya di layar sempit
- * kolom tidak terpaksa menyusut di bawah lebar wajarnya, sekaligus tidak
- * ada mockup mobile untuk kartu ini. */
+/* `overflow-x:auto` sengaja dipertahankan sbg fallback safety-net kalau
+ * suatu saat kolom tetap tidak muat (mis. horizon forecast berubah jadi
+ * >7 hari) — TAPI di mobile, CSS Figma persis menunjukkan 7 kolom TETAP
+ * muat TANPA scroll (kolom menyusut ke ~52px, bukan dipertahankan
+ * min-width 70px seperti desktop) — lihat `DayColumn` di bawah. Tanpa
+ * `min-width:0` di sini, konten yang mau di-scroll internal ini malah
+ * memaksa `<main>` di layout dashboard ikut scroll horizontal (parent
+ * flex/grid tidak otomatis menyusut ke bawah lebar konten intrinsiknya). */
 const DayStrip = styled.div`
   display: flex;
   align-items: stretch;
+  min-width: 0;
   overflow-x: auto;
   margin-top: 12px;
 `;
@@ -128,18 +135,27 @@ const EmptyMessage = styled.p`
   color: #667a6c;
 `;
 
+/* min-width 0 di mobile (7 kolom menyusut ke ~52px & tetap muat tanpa
+ * scroll, dikonfirmasi CSS Figma mobile persis) — 70px cuma dipakai
+ * mulai desktop, BEDA dari revisi sebelumnya yang 70px di semua
+ * breakpoint (itu yang memaksa DayStrip melebar & bikin <main> ikut
+ * scroll horizontal di mobile). */
 const DayColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex: 1 1 0;
-  min-width: 70px;
+  min-width: 0;
   gap: 8px;
   padding: 8px;
 
   &:not(:last-child) {
     border-right: 1px solid #ecefed;
+  }
+
+  ${media.desktop} {
+    min-width: 70px;
   }
 `;
 
@@ -150,12 +166,20 @@ const DateBlock = styled.div`
   gap: 4px;
 `;
 
+/* Lebih kecil di mobile (12px, cocok CSS Figma) — kolom cuma ~52px di
+ * mobile, 13px desktop tetap seperti sebelumnya. */
 const DateText = styled.span`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
   color: #1d2520;
+
+  ${media.desktop} {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 20px;
+  }
 `;
 
 const DayName = styled.span`
@@ -173,11 +197,20 @@ const StatusBlock = styled.div`
   gap: 4px;
 `;
 
+/* Lebih kecil di mobile (12px, cocok CSS Figma) — dengan kolom ~52px,
+ * `white-space:nowrap` di ukuran 16px desktop bisa memaksa lebar
+ * minimum kolom lebih besar dari yang tersedia. */
 const RainfallValue = styled.span`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 24px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
   color: #1d2520;
   white-space: nowrap;
+
+  ${media.desktop} {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+  }
 `;

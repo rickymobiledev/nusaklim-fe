@@ -26,9 +26,10 @@ export function Sidebar() {
     item.children
       ? item.children.map((child) => ({
           href: child.href,
-          icon: item.icon,
+          icon: child.icon,
           label: child.label,
           active: pathname.startsWith(child.href),
+          disabled: child.disabled,
         }))
       : [
           {
@@ -36,6 +37,7 @@ export function Sidebar() {
             icon: item.icon,
             label: item.label,
             active: item.href === activeHref,
+            disabled: false,
           },
         ],
   );
@@ -62,6 +64,7 @@ export function Sidebar() {
               icon={item.icon}
               label={item.label}
               active={item.active}
+              disabled={item.disabled}
               onNavigate={closeMobile}
             />
           ))}
