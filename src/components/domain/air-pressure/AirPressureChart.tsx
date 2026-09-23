@@ -20,6 +20,12 @@ interface ColoredSeries {
   color: string;
 }
 
+/** Estimasi lebar per titik tanggal (BELUM final, murni UX judgment)
+ *  supaya label tanggal & garis tidak bertumpuk di layar sempit —
+ *  chart jadi lebih lebar dari viewport & bisa di-scroll horizontal
+ *  (`ChartScroll`) alih-alih diperas `ResponsiveContainer` ke 100%. */
+const CHART_MIN_WIDTH_PER_POINT = 50;
+
 export function AirPressureChart({
   series,
   isLoading,
@@ -43,54 +49,60 @@ export function AirPressureChart({
         isEmpty={series.length === 0}
         emptyMessage="Pilih minimal satu stasiun untuk melihat grafik."
       >
-        <ResponsiveContainer width="100%" height={352}>
-          <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-            <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 12, fill: "#6D717F" }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: "#6D717F" }}
-              tickLine={false}
-              axisLine={false}
-              domain={["dataMin - 2", "dataMax + 2"]}
-              tickFormatter={(value: number) => value.toLocaleString("id-ID")}
-            />
-            <Tooltip
-              content={
-                <ChartTooltip series={series} hoveredStationId={hoveredStationId} />
-              }
-            />
-            {series.map((s) => (
-              <Line
-                key={s.stationId}
-                type="monotone"
-                dataKey={s.stationId}
-                name={s.stationName}
-                stroke={s.color}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{
-                  r: 4,
-                  onMouseEnter: () => setHoveredStationId(s.stationId),
-                  onMouseLeave: () => setHoveredStationId(null),
-                }}
-                connectNulls={false}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <ChartScroll>
+          <ChartInner $minWidth={rows.length * CHART_MIN_WIDTH_PER_POINT}>
+            <ResponsiveContainer width="100%" height={352}>
+              <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12, fill: "#6D717F" }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: "#6D717F" }}
+                  tickLine={false}
+                  axisLine={false}
+                  domain={["dataMin - 2", "dataMax + 2"]}
+                  tickFormatter={(value: number) => value.toLocaleString("id-ID")}
+                />
+                <Tooltip
+                  content={
+                    <ChartTooltip series={series} hoveredStationId={hoveredStationId} />
+                  }
+                />
+                {series.map((s) => (
+                  <Line
+                    key={s.stationId}
+                    type="monotone"
+                    dataKey={s.stationId}
+                    name={s.stationName}
+                    stroke={s.color}
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{
+                      r: 4,
+                      onMouseEnter: () => setHoveredStationId(s.stationId),
+                      onMouseLeave: () => setHoveredStationId(null),
+                    }}
+                    connectNulls={false}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartInner>
+        </ChartScroll>
 
-        <Legend>
-          {series.map((s) => (
-            <LegendItem key={s.stationId}>
-              <LegendDot $color={s.color} />
-              {s.stationName}
-            </LegendItem>
-          ))}
-        </Legend>
+        {series.length > 1 && (
+          <Legend>
+            {series.map((s) => (
+              <LegendItem key={s.stationId}>
+                <LegendDot $color={s.color} />
+                {s.stationName}
+              </LegendItem>
+            ))}
+          </Legend>
+        )}
       </DataState>
     </Card>
   );
@@ -144,6 +156,15 @@ const Card = styled.div`
   background: #ffffff;
   border: 1px solid #e5e7ea;
   border-radius: 12px;
+`;
+
+const ChartScroll = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+`;
+
+const ChartInner = styled.div<{ $minWidth: number }>`
+  min-width: ${(p) => p.$minWidth}px;
 `;
 
 const Legend = styled.div`

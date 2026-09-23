@@ -2,17 +2,11 @@
 
 import type { DateRange } from "react-day-picker";
 import styled from "styled-components";
-import { Download } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { MultiStationSelect } from "@/components/shared/MultiStationSelect";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
+import { RelativeHumidityDownloadMenu } from "./RelativeHumidityDownloadMenu";
 
 export function RelativeHumidityFilters({
   stations,
@@ -30,9 +24,11 @@ export function RelativeHumidityFilters({
   onSelectedIdsChange: (ids: string[]) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onDownload: (format: "csv" | "png" | "svg") => void;
+  onDownload: (stationIds: string[]) => void;
   downloadDisabled: boolean;
 }) {
+  const selectedStations = stations.filter((s) => selectedIds.includes(s.id));
+
   return (
     <Row>
       <Filters>
@@ -45,17 +41,11 @@ export function RelativeHumidityFilters({
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
 
-      <DropdownMenu>
-        <DownloadButton disabled={downloadDisabled}>
-          <Download size={24} />
-          Unduh Data
-        </DownloadButton>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => onDownload("csv")}>CSV</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onDownload("png")}>PNG</DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => onDownload("svg")}>SVG</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RelativeHumidityDownloadMenu
+        stations={selectedStations}
+        onDownload={onDownload}
+        disabled={downloadDisabled}
+      />
     </Row>
   );
 }
@@ -63,50 +53,27 @@ export function RelativeHumidityFilters({
 const Row = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: stretch;
+  gap: 12px;
 
   ${media.desktop} {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
 `;
 
 const Filters = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-`;
-
-const DownloadButton = styled(DropdownMenuTrigger)`
-  color: #175fe2;
-
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 16px;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
 
-  background: #ffffff;
-  border: 1.5px solid #175fe2;
-  border-radius: 12px;
-
-  font-style: normal;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 16px;
-  align-items: center;
-  text-align: center;
-
-  &:hover {
-    background: #eff5ff;
-  }
-
-  &:disabled {
-    pointer-events: none;
-    opacity: 0.5;
+  ${media.desktop} {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
   }
 `;

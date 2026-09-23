@@ -7,15 +7,9 @@ import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useWindSpeedChart } from "@/hooks/use-wind-speed-chart";
 import { getStationColor } from "@/lib/station-colors";
-import {
-  buildWindSpeedCsv,
-  downloadChartImage,
-  downloadCsvFile,
-} from "@/lib/wind-speed-chart-utils";
-import { media } from "@/lib/breakpoints";
+import { buildWindSpeedCsv, downloadCsvFile } from "@/lib/wind-speed-chart-utils";
 import { WindSpeedFilters } from "./WindSpeedFilters";
 import { WindSpeedChart } from "./WindSpeedChart";
-import { WindSpeedStationList } from "./WindSpeedStationList";
 
 const DEFAULT_RANGE_DAYS = 21;
 
@@ -28,17 +22,21 @@ export function WindSpeedSection() {
     const to = new Date();
     return { from: subDays(to, DEFAULT_RANGE_DAYS - 1), to };
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const chartCardRef = useRef<HTMLDivElement>(null);
-
-  // Sekali stasiun ke-load & belum ada yang dipilih, auto-pilih SEMUA
-  // stasiun (tanpa filter status) — guard ref biar tidak retrigger tiap
-  // polling useStations() (refetch tiap 5 menit).
+  // Sekali stasiun ke-load & belum ada yang dipilih, auto-pilih stasiun
+  // PERTAMA saja (BUKAN lagi semua stasiun) — guard ref biar tidak
+  // retrigger tiap polling useStations() (refetch tiap 5 menit), dan
+  // supaya kalau user sengaja mengosongkan semua pilihan manual lewat
+  // MultiStationSelect, tidak auto ke-isi ulang. Mirror perbaikan yang
+  // sama seperti air-temperature/solar-radiation/air-pressure/
+  // relative-humidity/rainfall — dulu auto-pilih SEMUA stasiun, tapi
+  // itu fan-out Promise.all ke /weathers/daily per stasiun terpilih di
+  // server (lib/api/wind-speed-daily-client.ts) — company dengan
+  // ratusan stasiun bikin page load lambat.
   const seededRef = useRef(false);
   useEffect(() => {
     if (seededRef.current || stations.length === 0 || selectedIds.length > 0) return;
     seededRef.current = true;
-    setSelectedIds(stations.map((s) => s.id));
+    setSelectedIds([stations[0].id]);
   }, [stations, selectedIds.length]);
 
   const {
@@ -53,22 +51,12 @@ export function WindSpeedSection() {
     color: getStationColor(index),
   }));
 
-  async function handleDownload(exportFormat: "csv" | "png" | "svg") {
+  function handleDownloadCsv(stationIds: string[]) {
     const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "mulai";
     const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "akhir";
-
-    if (exportFormat === "csv") {
-      const csv = buildWindSpeedCsv(coloredSeries);
-      downloadCsvFile(`kecepatan-angin_${from}_${to}.csv`, csv);
-      return;
-    }
-
-    if (!chartCardRef.current) return;
-    await downloadChartImage(
-      chartCardRef.current,
-      `kecepatan-angin_${from}_${to}.${exportFormat}`,
-      exportFormat,
-    );
+    const selected = coloredSeries.filter((s) => stationIds.includes(s.stationId));
+    const csv = buildWindSpeedCsv(selected);
+    downloadCsvFile(`kecepatan-angin_${from}_${to}.csv`, csv);
   }
 
   return (
@@ -80,27 +68,16 @@ export function WindSpeedSection() {
         onSelectedIdsChange={setSelectedIds}
         dateRange={dateRange}
         onDateRangeChange={(range) => range && setDateRange(range)}
-        onDownload={handleDownload}
+        onDownload={handleDownloadCsv}
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <ContentRow>
-        <ChartColumn>
-          <WindSpeedChart
-            series={coloredSeries}
-            isLoading={isLoadingChart}
-            isError={isError}
-            error={error}
-            chartRef={chartCardRef}
-          />
-        </ChartColumn>
-
-        <WindSpeedStationList
-          series={coloredSeries}
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-        />
-      </ContentRow>
+      <WindSpeedChart
+        series={coloredSeries}
+        isLoading={isLoadingChart}
+        isError={isError}
+        error={error}
+      />
     </Wrapper>
   );
 }
@@ -109,20 +86,4 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`;
-
-const ContentRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  ${media.desktop} {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-`;
-
-const ChartColumn = styled.div`
-  min-width: 0;
-  flex: 1;
 `;

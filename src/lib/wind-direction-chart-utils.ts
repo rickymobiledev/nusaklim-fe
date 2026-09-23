@@ -1,4 +1,3 @@
-import { toPng, toSvg } from "html-to-image";
 import type { WindDirectionStationSeries } from "@/types/domain";
 
 export interface MergedChartRow {
@@ -64,32 +63,4 @@ export function downloadCsvFile(filename: string, content: string): void {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
-}
-
-/** Screenshot Card chart (svg Recharts + Legend HTML di bawahnya) jadi
- *  PNG/SVG lewat html-to-image, lalu trigger download — dipanggil dari
- *  tombol "Unduh Data" pas user pilih format gambar (bukan CSV). */
-export async function downloadChartImage(
-  node: HTMLElement,
-  filename: string,
-  imageFormat: "png" | "svg",
-): Promise<void> {
-  const dataUrl = imageFormat === "png" ? await toPng(node) : await toSvg(node);
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = filename;
-  link.click();
-}
-
-/** Nilai TERAKHIR (bukan rata-rata) dari satu deret — dipakai panel
- *  "Arah Mata Angin Hari Ini" (`WindDirectionStationList.tsx`), BUKAN
- *  `computeStationStats` avg/max/min seperti halaman detail cuaca lain.
- *  Arah mata angin (derajat 0-360) tidak punya "rata-rata" yang bermakna
- *  secara linear (mis. rata-rata 350° dan 10° BUKAN 180°) — desain Figma
- *  halaman ini juga cuma menampilkan satu nilai "hari ini" per stasiun,
- *  bukan tiga baris avg/max/min. Titik terakhir dari rentang tanggal yang
- *  dipilih (default berakhir di hari ini) dipakai apa adanya, TIDAK
- *  mencari mundur titik non-null terdekat kalau hari terakhir kosong. */
-export function getLatestValue(points: { value: number | null }[]): number | null {
-  return points.length > 0 ? points[points.length - 1].value : null;
 }

@@ -63,27 +63,3 @@ export function downloadCsvFile(filename: string, content: string): void {
   link.click();
   URL.revokeObjectURL(url);
 }
-
-export interface StationStats {
-  avg: number | null;
-  max: number | null;
-  min: number | null;
-}
-
-/** Rata-rata/max/min null-safe — titik tanpa data (gap) diabaikan, bukan
- *  dihitung sebagai 0. */
-export function computeStationStats(points: { value: number | null }[]): StationStats {
-  const values = points.map((p) => p.value).filter((v): v is number => v !== null);
-
-  if (values.length === 0) {
-    return { avg: null, max: null, min: null };
-  }
-
-  const sum = values.reduce((acc, v) => acc + v, 0);
-
-  return {
-    avg: Math.round((sum / values.length) * 10) / 10,
-    max: Math.max(...values),
-    min: Math.min(...values),
-  };
-}
