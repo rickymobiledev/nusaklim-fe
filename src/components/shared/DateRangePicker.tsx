@@ -44,10 +44,11 @@ export function DateRangePicker({
 const Trigger = styled.button`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 12px;
   height: 48px;
-  background: #f6f8f7;
+  background: #ffffff;
   border: 1.5px solid #d6dcd8;
   border-radius: 12px;
   font-family: var(--font-body), sans-serif;

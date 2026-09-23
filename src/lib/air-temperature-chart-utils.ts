@@ -1,4 +1,3 @@
-import { toPng, toSvg } from "html-to-image";
 import type { AirTemperatureStationSeries } from "@/types/domain";
 
 export interface MergedChartRow {
@@ -65,43 +64,4 @@ export function downloadCsvFile(filename: string, content: string): void {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
-}
-
-/** Screenshot Card chart (svg Recharts + Legend HTML di bawahnya) jadi
- *  PNG/SVG lewat html-to-image, lalu trigger download — dipanggil dari
- *  tombol "Unduh Data" pas user pilih format gambar (bukan CSV). */
-export async function downloadChartImage(
-  node: HTMLElement,
-  filename: string,
-  imageFormat: "png" | "svg",
-): Promise<void> {
-  const dataUrl = imageFormat === "png" ? await toPng(node) : await toSvg(node);
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = filename;
-  link.click();
-}
-
-export interface StationStats {
-  avg: number | null;
-  max: number | null;
-  min: number | null;
-}
-
-/** Rata-rata/max/min null-safe — titik tanpa data (gap) diabaikan, bukan
- *  dihitung sebagai 0. */
-export function computeStationStats(points: { value: number | null }[]): StationStats {
-  const values = points.map((p) => p.value).filter((v): v is number => v !== null);
-
-  if (values.length === 0) {
-    return { avg: null, max: null, min: null };
-  }
-
-  const sum = values.reduce((acc, v) => acc + v, 0);
-
-  return {
-    avg: Math.round((sum / values.length) * 10) / 10,
-    max: Math.max(...values),
-    min: Math.min(...values),
-  };
 }
