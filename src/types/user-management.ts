@@ -15,6 +15,16 @@ export interface Company {
   imageUrl: string | null;
 }
 
+/** Form Tambah/Edit Perusahaan. Logo BELUM ikut (kontrak upload BE belum ada). */
+export interface CreateCompanyInput {
+  name: string;
+  code: string;
+}
+
+export interface UpdateCompanyInput extends CreateCompanyInput {
+  id: number;
+}
+
 export interface UserRoleOption {
   id: string;
   code: UserRole;

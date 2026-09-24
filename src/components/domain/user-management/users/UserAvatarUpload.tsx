@@ -9,7 +9,15 @@ import { AVATAR_ACCEPT, validateAvatarFile } from "@/lib/user-avatar";
 /** Avatar bulat + tombol "Unggah Foto". TODO: file BELUM dikirim ke BE —
  *  `POST/PUT /users` belum punya field foto; sambungkan setelah kontrak BE
  *  jelas. Untuk sekarang cuma validasi + preview lokal. */
-export function UserAvatarUpload({ initialUrl }: { initialUrl?: string | null }) {
+export function UserAvatarUpload({
+  initialUrl,
+  alt = "Foto pengguna",
+  uploadLabel = "Unggah Foto",
+}: {
+  initialUrl?: string | null;
+  alt?: string;
+  uploadLabel?: string;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -39,7 +47,7 @@ export function UserAvatarUpload({ initialUrl }: { initialUrl?: string | null })
       <Circle>
         {shownUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- preview blob lokal / URL host tak terdaftar di next/image
-          <img src={shownUrl} alt="Foto pengguna" />
+          <img src={shownUrl} alt={alt} />
         ) : (
           <ImageIcon size={40} strokeWidth={2} color="#8DB5FF" />
         )}
@@ -47,7 +55,7 @@ export function UserAvatarUpload({ initialUrl }: { initialUrl?: string | null })
       <Side>
         <UploadButton type="button" onClick={() => inputRef.current?.click()}>
           <UploadCloud size={24} strokeWidth={1.5} />
-          Unggah Foto
+          {uploadLabel}
         </UploadButton>
         <Hint>Format file: JPEG, JPG, atau PNG file maksimal 2MB</Hint>
       </Side>
