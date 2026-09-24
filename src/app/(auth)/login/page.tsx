@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import {
@@ -128,7 +129,9 @@ export default function LoginPage() {
               />
               <AuthCheckboxLabel htmlFor="rememberMe">Ingat Saya</AuthCheckboxLabel>
             </div>
-            <AuthLink type="button">Lupa Password</AuthLink>
+            <AuthLink as={Link} href="/forgot-password">
+              Lupa Password
+            </AuthLink>
           </div>
         </div>
 

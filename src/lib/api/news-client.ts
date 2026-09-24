@@ -5,49 +5,20 @@ import { mapRawNewsItem, type RawNewsItem } from "./adapters/news-adapter";
 import { extractBackendErrorMessage } from "./backend-error";
 import type { NewsApi } from "./news-api";
 
-// TODO(sementara — cek visual lokal): true = pakai data mock di bawah,
-// BUKAN hit backend asli. Set balik ke `false` (atau hapus blok ini)
-// begitu mau lanjut tes endpoint /news asli.
-const TEMP_USE_MOCK_NEWS = true;
+/** SEMENTARA cuma tampilkan berita berstatus "draft" (keputusan user —
+ *  belum ada berita "published" di backend). Ganti ke "published" (atau
+ *  hapus filter ini) begitu alur publish berita sudah dipakai. */
+const VISIBLE_NEWS_STATUS = "draft";
 
-const MOCK_NEWS: NewsItem[] = [
-  {
-    id: "1",
-    title: "Prediksi Iklim Indonesia 2026",
-    excerpt:
-      "Ulasan ini memberikan gambaran penting terkait perubahan cuaca, tren suhu, serta proyeksi musim kemarau yang perlu diantisipasi secara nasional.",
-    coverImage: null,
-    createdAt: "2026-08-30",
-  },
-  {
-    id: "2",
-    title: "Pentingnya Data Iklim (Curah Hujan)",
-    excerpt: "",
-    coverImage: null,
-    createdAt: "2026-08-30",
-  },
-  {
-    id: "3",
-    title: "Perubahan Iklim dan Pengaruhnya terhadap Tanaman Kelapa Sawit",
-    excerpt: "",
-    coverImage: null,
-    createdAt: "2026-08-30",
-  },
-  {
-    id: "4",
-    title: "Tanaman Kelapa Sawit Hemat Lahan dan Air",
-    excerpt: "",
-    coverImage: null,
-    createdAt: "2026-08-30",
-  },
-  {
-    id: "5",
-    title: "Benarkah Kelapa Sawit Adalah Sumber Emisi Karbon Terbesar?",
-    excerpt: "",
-    coverImage: null,
-    createdAt: "2026-08-30",
-  },
-];
+/** Berita `is_featured` di paling depan (jadi kartu besar di
+ *  `NewsCard.tsx`), sisanya terbaru dulu. `created_at` asli berformat
+ *  seragam ("2026-09-24 18:33:06.6884411") jadi aman dibandingkan sebagai
+ *  string; `Array.sort` stabil, jadi urutan antar-featured mengikuti
+ *  aturan yang sama. */
+function compareNews(a: NewsItem, b: NewsItem): number {
+  if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+  return b.createdAt.localeCompare(a.createdAt);
+}
 
 /** Satu-satunya implementasi "Berita Pilihan" — pola identik
  *  `rainfall-today-client.ts`: `createApiClient()` (TANPA companyId, lihat
@@ -58,13 +29,6 @@ const MOCK_NEWS: NewsItem[] = [
  *  semua endpoint (lihat CLAUDE.md bagian "Kontrak response API"). */
 export const newsClient: NewsApi = {
   async getNews(): Promise<ApiListResponse<NewsItem>> {
-    if (TEMP_USE_MOCK_NEWS) {
-      return {
-        data: MOCK_NEWS,
-        meta: { page: 1, pageSize: MOCK_NEWS.length, total: MOCK_NEWS.length },
-      };
-    }
-
     try {
       const client = createApiClient();
       const res = await client.get<{
@@ -80,7 +44,10 @@ export const newsClient: NewsApi = {
         );
       }
 
-      const data = res.data.data.map(mapRawNewsItem);
+      const data = res.data.data
+        .map(mapRawNewsItem)
+        .filter((item) => item.status === VISIBLE_NEWS_STATUS)
+        .sort(compareNews);
 
       return { data, meta: { page: 1, pageSize: data.length, total: data.length } };
     } catch (err) {

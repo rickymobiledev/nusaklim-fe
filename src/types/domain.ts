@@ -501,13 +501,17 @@ export type DataGranularity = "harian" | "10menit" | "pagi" | "siang" | "malam";
  *  nama asli backend, atas permintaan eksplisit user. Field lain dari
  *  response asli (`slug`, `content` penuh, `status` draft/published,
  *  `updated_at`) SENGAJA tidak dipetakan — tidak ada UI yang butuh detail
- *  berita penuh/link per-berita, card di Beranda cuma ringkasan statis. */
+ *  berita penuh/link per-berita, card di Beranda cuma ringkasan statis.
+ *  `status` & `isFeatured` dipetakan karena dipakai `news-client.ts` untuk
+ *  memfilter (sementara cuma "draft") dan mengurutkan (featured di depan). */
 export interface NewsItem {
   id: string;
   title: string;
   excerpt: string;
   coverImage: string | null;
   createdAt: string;
+  status: string;
+  isFeatured: boolean;
 }
 
 /** Notifikasi user (bell icon Header) — `GET /notification`, polymorphic

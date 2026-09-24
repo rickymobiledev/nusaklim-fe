@@ -34,7 +34,10 @@ export const authConfig: NextAuthConfig = {
     // Dipanggil oleh middleware untuk memutuskan apakah request boleh lanjut.
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
-      const isOnLogin = request.nextUrl.pathname.startsWith("/login");
+      const { pathname } = request.nextUrl;
+      // Halaman auth publik (belum ada sesi): login & lupa password.
+      const isOnLogin =
+        pathname.startsWith("/login") || pathname.startsWith("/forgot-password");
 
       if (isOnLogin) {
         // Sudah login tapi buka /login -> lempar ke dashboard.
