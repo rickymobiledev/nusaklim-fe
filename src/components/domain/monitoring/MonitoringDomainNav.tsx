@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
 import { ChevronDown } from "lucide-react";
+import { media } from "@/lib/breakpoints";
 
 /** Teks/icon sama persis `app/(dashboard)/monitoring/page.tsx` (landing
  *  grid 4 domain Monitoring) — nav pill ini versi ringkas yang dirender
@@ -43,42 +45,67 @@ const ITEMS = [
 
 export function MonitoringDomainNav() {
   const pathname = usePathname();
+  const [brokenIcons, setBrokenIcons] = useState<string[]>([]);
 
   return (
-    <Grid>
+    <Row>
       {ITEMS.map((item) => {
         const active = pathname === item.href;
         return (
           <NavCard key={item.href} href={item.href} $active={active}>
             <NavRow>
-              <Image src={item.icon} alt="" width={24} height={24} />
-              <NavTitle>{item.title}</NavTitle>
-              <ChevronDown size={18} color="#131927" />
+              {!brokenIcons.includes(item.icon) && (
+                <Image
+                  src={item.icon}
+                  alt=""
+                  width={50}
+                  height={50}
+                  onError={() => setBrokenIcons((prev) => [...prev, item.icon])}
+                />
+              )}
+              <NavTitle $active={active}>{item.title}</NavTitle>
+              <ChevronDown size={18} color={active ? "#ffffff" : "#1d2520"} />
             </NavRow>
-            <NavDesc>{item.desc}</NavDesc>
+            <NavDesc $active={active}>{item.desc}</NavDesc>
           </NavCard>
         );
       })}
-    </Grid>
+    </Row>
   );
 }
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+const Row = styled.div`
+  display: flex;
   gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ${media.desktop} {
+    overflow-x: visible;
+  }
 `;
 
 const NavCard = styled(Link)<{ $active: boolean }>`
   box-sizing: border-box;
+  flex: 0 0 336px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: ${(p) => (p.$active ? "#eff5ff" : "rgba(255, 255, 255, 0.7)")};
-  border: 1px solid ${(p) => (p.$active ? "#175fe2" : "#e5e7ea")};
+  background: ${(p) => (p.$active ? "#175fe2" : "rgba(255, 255, 255, 0.7)")};
+  border: 1px solid ${(p) => (p.$active ? "#1045a8" : "#d6dcd8")};
   border-radius: 12px;
   text-decoration: none;
+
+  ${media.desktop} {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 `;
 
 const NavRow = styled.div`
@@ -87,21 +114,21 @@ const NavRow = styled.div`
   gap: 8px;
 `;
 
-const NavTitle = styled.p`
+const NavTitle = styled.p<{ $active: boolean }>`
   flex: 1;
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  color: #000000;
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 700;
+  color: ${(p) => (p.$active ? "#ffffff" : "#1d2520")};
 `;
 
-const NavDesc = styled.p`
+const NavDesc = styled.p<{ $active: boolean }>`
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 400;
-  color: #6d717f;
+  color: ${(p) => (p.$active ? "#ffffff" : "#667a6c")};
 `;

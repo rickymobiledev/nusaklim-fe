@@ -17,14 +17,18 @@ export const VPD_LOW_KPA = 0.8;
  *  `AIR_TEMPERATURE` 1817 °C, `SVP` 1.3e25. */
 const MAX_PLAUSIBLE_TEMPERATURE_C = 60;
 
+/** VPD atmosfer nyata di bawah ~10 kPa; di atasnya lonjakan sensor. */
+const MAX_PLAUSIBLE_VPD_KPA = 10;
+
 /** Baris VPD yang punya pengukuran bermakna. BE memberi baris "kosong"
  *  untuk hari tanpa data — `AIR_TEMPERATURE`/`AIR_HUMIDITY`/`SVP` = `null`
  *  dan `VPD: 0` — dan `vpd-adapter.ts` memetakan `null` lewat `Number()`
  *  jadi 0, sehingga baris kosong tampak "valid". Kelembapan 0 (atau -1,
  *  seperti baris 30 Mar) mustahil untuk pengukuran nyata. */
-function isMeaningfulVpdRow(row: VPDReport): boolean {
+export function isMeaningfulVpdRow(row: VPDReport): boolean {
   return (
     Number.isFinite(row.vpd) &&
+    row.vpd <= MAX_PLAUSIBLE_VPD_KPA &&
     row.svp > 0 &&
     row.kelembabanUdara > 0 &&
     row.kelembabanUdara <= 100 &&
@@ -70,4 +74,52 @@ export function getVpdMessage(row: VPDReport | null): string {
  *  Angka contoh Figma (1.7 / 2716.4 / 0.54) tampil sama persis. */
 export function formatKpa(value: number): string {
   return `${Number(value.toFixed(6))} kPa`;
+}
+
+/** Batas aman yang dipakai chart/panel/alert halaman Monitoring — nilai
+ *  dari baris bermakna TERBARU (BE mengirim per-baris, praktisnya selalu
+ *  1.7), fallback `DEFAULT_BATAS_AMAN_KPA` kalau tidak ada baris. */
+export function getBatasAmanKpa(rows: VPDReport[]): number {
+  const latest = pickLatestVpd(rows);
+  return latest && Number.isFinite(latest.batasAman)
+    ? latest.batasAman
+    : DEFAULT_BATAS_AMAN_KPA;
+}
+
+/** Hari bermakna yang VPD-nya DI ATAS batas aman barisnya sendiri, urut
+ *  tanggal naik. Dipakai panel ringkasan Monitoring. */
+export function getAboveLimitVpdDays(rows: VPDReport[]): VPDReport[] {
+  return rows
+    .filter((row) => isMeaningfulVpdRow(row) && row.vpd > row.batasAman)
+    .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+}
+
+function csvEscape(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+/** CSV data chart Monitoring > VPD (seluruh baris rentang, termasuk baris
+ *  kosong dari BE apa adanya). */
+export function buildVpdCsv(rows: VPDReport[]): string {
+  const header = [
+    "Tanggal",
+    "Stasiun",
+    "Temperatur Udara",
+    "Kelembapan Udara",
+    "SVP",
+    "VPD",
+    "Batas Aman",
+  ];
+  const lines = rows.map((row) =>
+    [
+      csvEscape(row.tanggal),
+      csvEscape(row.stasiun),
+      row.temperaturUdara,
+      row.kelembabanUdara,
+      row.svp,
+      row.vpd,
+      row.batasAman,
+    ].join(","),
+  );
+  return [header.join(","), ...lines].join("\n");
 }

@@ -8,7 +8,14 @@ import { useStations } from "@/hooks/use-stations";
 import { useSunshineDuration } from "@/hooks/use-sunshine-duration";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { SunshineDurationFilters } from "./SunshineDurationFilters";
+import { Info } from "lucide-react";
+import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import {
+  buildSunshineDurationCsv,
+  getBatasBawahJam,
+} from "@/lib/sunshine-duration-summary";
 import { SunshineDurationChart } from "./SunshineDurationChart";
+import { SunshineDurationSummary } from "./SunshineDurationSummary";
 
 const DEFAULT_RANGE_DAYS = 10;
 
@@ -33,6 +40,17 @@ export function SunshineDurationSection() {
     dateTo: dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : undefined,
   });
   const rows = data ?? [];
+  const visibleRows = selectedStationId ? rows : [];
+
+  function handleDownload() {
+    if (visibleRows.length === 0) return;
+    const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+    downloadCsvFile(
+      `lama-penyinaran_${from}_${to}.csv`,
+      buildSunshineDurationCsv(visibleRows),
+    );
+  }
 
   return (
     <Wrapper>
@@ -51,15 +69,26 @@ export function SunshineDurationSection() {
         onStationIdChange={setStationId}
         dateRange={dateRange}
         onDateRangeChange={(range) => range && setDateRange(range)}
+        onDownload={handleDownload}
         downloadDisabled={rows.length === 0}
       />
 
       <SunshineDurationChart
-        data={selectedStationId ? rows : []}
+        data={visibleRows}
         isLoading={isLoading}
         isError={isError}
         error={error}
       />
+
+      <SunshineDurationSummary data={visibleRows} />
+
+      <InfoAlert>
+        <Info size={20} strokeWidth={1.5} color="#175fe2" />
+        <AlertText>
+          Sinar matahari &lt; {getBatasBawahJam(visibleRows)} jam dapat menyebabkan
+          fotosintesis tanaman kelapa sawit terganggu.
+        </AlertText>
+      </InfoAlert>
     </Wrapper>
   );
 }
@@ -88,8 +117,33 @@ const Divider = styled.hr`
 const SectionTitle = styled.h2`
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 18px;
+  line-height: 28px;
   font-weight: 700;
   color: #000000;
+`;
+
+const InfoAlert = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #e6f4ff;
+  border: 1.5px solid #0095ff;
+  border-radius: 12px;
+
+  & svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+`;
+
+const AlertText = styled.p`
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #667a6c;
 `;

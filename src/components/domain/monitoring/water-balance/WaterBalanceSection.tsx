@@ -5,15 +5,14 @@ import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
 import { useWaterBalance } from "@/hooks/use-water-balance";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
-import type { WaterBalanceMetric } from "@/types/domain";
+import { buildWaterBalanceCsv } from "@/lib/water-balance-chart-utils";
+import { downloadCsvFile } from "@/lib/download-data-csv-utils";
 import { WaterBalanceFilters } from "./WaterBalanceFilters";
-import { WaterBalanceTabs } from "./WaterBalanceTabs";
-import { WaterBalanceChart } from "./WaterBalanceChart";
+import { WaterBalanceTable } from "./WaterBalanceTable";
 
 export function WaterBalanceSection() {
   const [stationId, setStationId] = useState<string>();
-  const [years, setYears] = useState<number[]>([new Date().getFullYear()]);
-  const [metric, setMetric] = useState<WaterBalanceMetric>("waterDeficit");
+  const [year, setYear] = useState<number>(new Date().getFullYear());
 
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
   const stations = stationsResponse?.data ?? [];
@@ -26,9 +25,18 @@ export function WaterBalanceSection() {
 
   const { data, isLoading, isError, error } = useWaterBalance({
     stationId: selectedStationId,
-    years,
+    years: [year],
   });
-  const series = data ?? [];
+  const series = data?.[0];
+  const stationCode = stations.find((s) => s.id === selectedStationId)?.companyCode ?? "";
+
+  function handleDownload() {
+    if (!series) return;
+    downloadCsvFile(
+      `keseimbangan-air_${year}.csv`,
+      buildWaterBalanceCsv(series, stationCode),
+    );
+  }
 
   return (
     <Wrapper>
@@ -45,16 +53,15 @@ export function WaterBalanceSection() {
         isLoadingStations={isLoadingStations}
         stationId={selectedStationId}
         onStationIdChange={setStationId}
-        years={years}
-        onYearsChange={setYears}
-        downloadDisabled={series.length === 0}
+        year={year}
+        onYearChange={setYear}
+        onDownload={handleDownload}
+        downloadDisabled={!series}
       />
 
-      <WaterBalanceTabs active={metric} onChange={setMetric} />
-
-      <WaterBalanceChart
-        series={selectedStationId ? series : []}
-        metric={metric}
+      <WaterBalanceTable
+        data={selectedStationId ? series : undefined}
+        stationCode={stationCode}
         isLoading={isLoading}
         isError={isError}
         error={error}
@@ -87,8 +94,8 @@ const Divider = styled.hr`
 const SectionTitle = styled.h2`
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 18px;
+  line-height: 28px;
   font-weight: 700;
   color: #000000;
 `;

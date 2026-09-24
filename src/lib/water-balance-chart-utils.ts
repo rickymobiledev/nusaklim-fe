@@ -20,33 +20,48 @@ export const MONTH_LABEL_SHORT: Record<MonthKey, string> = {
   dec: "Des",
 };
 
-export interface MergedWaterBalanceRow {
-  month: string;
-  [year: number]: string | number | null;
-}
+/** Baris tabel Keseimbangan Air — urutan & label ikut Figma. */
+export const WATER_BALANCE_ROWS: { metric: WaterBalanceMetric; label: string }[] = [
+  { metric: "rainfall", label: "Curah Hujan" },
+  { metric: "waterDeficit", label: "Defisit Air" },
+  { metric: "rainyDays", label: "Hari Hujan" },
+  { metric: "waterSurplus", label: "Kelebihan Air" },
+];
 
-/** Gabung `WaterBalance[]` (satu objek per tahun terpilih) jadi satu
- *  baris per bulan dengan satu kolom per tahun — bentuk yang Recharts
- *  `<LineChart data={...}>` butuhkan supaya semua `<Line dataKey={tahun}>`
- *  berbagi sumbu-X yang sama. Mirror `mergeSeriesByDate` di
- *  `air-temperature-chart-utils.ts`, cuma sumbunya bulan (selalu 12,
- *  ikut `MONTH_ORDER`) bukan tanggal. */
-export function mergeSeriesByMonth(
-  seriesByYear: WaterBalance[],
+/** Total setahun untuk satu metrik (kolom "Total"). Bulan tanpa data
+ *  (null/gap) diabaikan, bukan dihitung 0; semua bulan kosong → `null`. */
+export function sumMetric(
+  series: WaterBalance,
   metric: WaterBalanceMetric,
-): MergedWaterBalanceRow[] {
-  return MONTH_ORDER.map((month, index) => {
-    const row: MergedWaterBalanceRow = { month: MONTH_LABEL_SHORT[month] };
-    for (const series of seriesByYear) {
-      row[series.year] = series.months[index]?.[metric] ?? null;
-    }
-    return row;
-  });
+): number | null {
+  const values = series.months
+    .map((month) => month[metric])
+    .filter((value): value is number => value !== null);
+  if (values.length === 0) return null;
+  const sum = values.reduce((total, value) => total + value, 0);
+  return Math.round(sum * 100) / 100;
 }
 
-/** Total setahun untuk satu metrik — dipakai baris legend ("2025 Total:
- *  1316.27"). Bulan tanpa data (null/gap) diabaikan, bukan dihitung 0. */
-export function sumMetric(series: WaterBalance, metric: WaterBalanceMetric): number {
-  const sum = series.months.reduce((total, month) => total + (month[metric] ?? 0), 0);
-  return Math.round(sum * 100) / 100;
+/** Format sel tabel: 2 desimal ("88.50"), `null` → "-". */
+export function formatWaterBalanceValue(value: number | null | undefined): string {
+  return value === null || value === undefined ? "-" : value.toFixed(2);
+}
+
+/** CSV isi tabel (Parameter, Stasiun, Jan–Des, Total). Sel kosong untuk `null`. */
+export function buildWaterBalanceCsv(series: WaterBalance, stationCode: string): string {
+  const header = [
+    "Parameter",
+    "Stasiun",
+    ...MONTH_ORDER.map((month) => MONTH_LABEL_SHORT[month]),
+    "Total",
+  ];
+  const lines = WATER_BALANCE_ROWS.map(({ metric, label }) =>
+    [
+      label,
+      `"${stationCode.replace(/"/g, '""')}"`,
+      ...series.months.map((month) => month[metric] ?? ""),
+      sumMetric(series, metric) ?? "",
+    ].join(","),
+  );
+  return [header.join(","), ...lines].join("\n");
 }

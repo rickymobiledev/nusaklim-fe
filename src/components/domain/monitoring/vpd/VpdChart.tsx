@@ -3,7 +3,7 @@
 import styled from "styled-components";
 import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
-import { Wind } from "lucide-react";
+import { Waves } from "lucide-react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -12,23 +12,23 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
 } from "recharts";
 import { DataState } from "@/components/shared/DataState";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { getStationColor } from "@/lib/station-colors";
+import { getBatasAmanKpa, isMeaningfulVpdRow, formatKpa } from "@/lib/vpd-summary";
 import type { VPDReport } from "@/types/domain";
 
-const KATEGORI_TONE = {
-  rendah: "success",
-  sedang: "warning",
-  tinggi: "destructive",
-} as const;
+/** Estimasi lebar per titik tanggal supaya label "01 Agt 2026" tidak
+ *  bertumpuk di mobile — chart di-scroll horizontal (pola sama Lama
+ *  Penyinaran), BELUM spec Figma. */
+const CHART_MIN_WIDTH_PER_POINT = 90;
+const Y_MIN_MAX = 3;
 
 interface ChartRow {
   tanggal: string;
+  /** `null` untuk baris kosong/lonjakan sensor dari BE (lihat
+   *  `isMeaningfulVpdRow`) — diplot sebagai celah, bukan 0. */
   vpd: number | null;
-  batasAman: number | null;
-  kategori: VPDReport["kategori"];
 }
 
 export function VpdChart({
@@ -43,20 +43,19 @@ export function VpdChart({
   error?: unknown;
 }) {
   const rows: ChartRow[] = data.map((d) => ({
-    tanggal: format(parseISO(d.tanggal), "dd MMM", { locale: id }),
-    vpd: d.vpd,
-    batasAman: d.batasAman,
-    kategori: d.kategori,
+    tanggal: format(parseISO(d.tanggal), "dd MMM yyyy", { locale: id }),
+    vpd: isMeaningfulVpdRow(d) ? d.vpd : null,
   }));
-
-  const vpdColor = getStationColor(0);
-  const batasColor = getStationColor(1);
+  const batasAman = getBatasAmanKpa(data);
+  const maxVpd = Math.max(0, ...rows.map((r) => r.vpd ?? 0));
+  const yMax = Math.max(Y_MIN_MAX, Math.ceil(maxVpd * 2) / 2);
+  const ticks = Array.from({ length: yMax * 2 + 1 }, (_, i) => i / 2);
 
   return (
     <Card>
       <HeadingRow>
-        <Wind size={18} strokeWidth={1.5} color="#1d2520" />
-        <Heading>VPD (Vapor Pressure Deficit)</Heading>
+        <Waves size={18} strokeWidth={1.5} color="#1d2520" />
+        <Heading>VPD</Heading>
       </HeadingRow>
 
       <DataState
@@ -66,106 +65,86 @@ export function VpdChart({
         isEmpty={data.length === 0}
         emptyMessage="Pilih stasiun & rentang tanggal untuk melihat VPD."
       >
-        <ResponsiveContainer width="100%" height={352}>
-          <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-            <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" />
-            <XAxis
-              dataKey="tanggal"
-              tick={{ fontSize: 12, fill: "#6D717F" }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: "#6D717F" }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip content={<ChartTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="vpd"
-              name="VPD"
-              stroke={vpdColor}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-              connectNulls={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="batasAman"
-              name="Batas Aman"
-              stroke={batasColor}
-              strokeWidth={2}
-              strokeDasharray="4 4"
-              dot={false}
-              activeDot={{ r: 4 }}
-              connectNulls={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <ChartScroll>
+          <ChartInner $minWidth={rows.length * CHART_MIN_WIDTH_PER_POINT}>
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={rows} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EA" />
+                <XAxis
+                  dataKey="tanggal"
+                  tick={{ fontSize: 12, fill: "#6D717F" }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#D2D5DB" }}
+                />
+                <YAxis
+                  domain={[0, yMax]}
+                  ticks={ticks}
+                  tickFormatter={(value: number) =>
+                    value === 0 ? "0" : value.toFixed(1)
+                  }
+                  tick={{ fontSize: 12, fill: "#6D717F" }}
+                  tickLine={false}
+                  axisLine={{ stroke: "#D2D5DB" }}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <ReferenceLine y={batasAman} stroke="#EE443F" strokeWidth={1} />
+                <Line
+                  type="monotone"
+                  dataKey="vpd"
+                  name="VPD"
+                  stroke="#0039FF"
+                  strokeWidth={1}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "#FFFFFF", stroke: "#0039FF", strokeWidth: 1 }}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartInner>
+        </ChartScroll>
 
-        <Legend>
-          <LegendItem>
-            <LegendDot $color={vpdColor} />
-            VPD
-          </LegendItem>
-          <LegendItem>
-            <LegendDot $color={batasColor} />
-            Batas Aman
-          </LegendItem>
-        </Legend>
+        <Footnote>
+          Garis merah pada grafis adalah batas bawah VPD &gt;{" "}
+          {Number(batasAman.toFixed(2))} kPa
+        </Footnote>
       </DataState>
     </Card>
   );
 }
 
 interface ChartTooltipPayloadEntry {
-  dataKey?: string;
-  name?: string;
   value?: number | string | null;
-  color?: string;
   payload?: ChartRow;
 }
 
 function ChartTooltip({
   active,
-  label,
   payload,
 }: {
   active?: boolean;
-  label?: string;
   payload?: ChartTooltipPayloadEntry[];
 }) {
-  if (!active || !payload || payload.length === 0) return null;
-
-  const kategori = payload[0]?.payload?.kategori;
+  const entry = payload?.[0];
+  if (!active || !entry || entry.value === null || entry.value === undefined) return null;
 
   return (
     <TooltipBox>
-      <TooltipHeader>
-        <TooltipDate>{label}</TooltipDate>
-        {kategori && (
-          <StatusBadge label={`Cekaman ${kategori}`} tone={KATEGORI_TONE[kategori]} />
-        )}
-      </TooltipHeader>
-      {payload.map((entry) => {
-        if (entry.value === null || entry.value === undefined) return null;
-        return (
-          <TooltipMetricRow key={entry.dataKey}>
-            <TooltipLabel>{entry.name}</TooltipLabel>
-            <TooltipValue $color={entry.color ?? "#000000"}>{entry.value}</TooltipValue>
-          </TooltipMetricRow>
-        );
-      })}
+      <TooltipDate>{entry.payload?.tanggal}</TooltipDate>
+      <TooltipMetricRow>
+        <TooltipLabel>VPD</TooltipLabel>
+        <TooltipValue>{formatKpa(Number(entry.value))}</TooltipValue>
+      </TooltipMetricRow>
     </TooltipBox>
   );
 }
 
 const Card = styled.div`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
   background: #ffffff;
   border: 1px solid #e5e7ea;
@@ -187,42 +166,35 @@ const Heading = styled.h3`
   color: #000000;
 `;
 
-const Legend = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+const ChartScroll = styled.div`
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const ChartInner = styled.div<{ $minWidth: number }>`
+  min-width: ${(p) => p.$minWidth}px;
+`;
+
+const Footnote = styled.p`
+  margin: 0;
   padding-top: 8px;
-`;
-
-const LegendItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px;
-  border: 1px solid #e5e7ea;
-  border-radius: 12px;
-  font-family: var(--font-caption), sans-serif;
+  text-align: center;
+  font-family: var(--font-body), sans-serif;
   font-size: 12px;
-  font-weight: 500;
-  color: #000000;
-  box-sizing: border-box;
-  background: #ffffff;
-`;
-
-const LegendDot = styled.span<{ $color: string }>`
-  width: 18px;
-  height: 4px;
-  border-radius: 50px;
-  background: ${(p) => p.$color};
-  flex-shrink: 0;
+  line-height: 16px;
+  color: #6d717f;
 `;
 
 const TooltipBox = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 180px;
+  gap: 4px;
+  min-width: 95px;
   padding: 8px;
   background: #ffffff;
   border: 1px solid #e5e7ea;
@@ -230,16 +202,10 @@ const TooltipBox = styled.div`
   box-shadow: 4px 4px 15.5px rgba(0, 0, 0, 0.15);
 `;
 
-const TooltipHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-`;
-
 const TooltipDate = styled.span`
   font-family: var(--font-caption), sans-serif;
   font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
   color: #000000;
 `;
@@ -247,8 +213,7 @@ const TooltipDate = styled.span`
 const TooltipMetricRow = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
 `;
 
 const TooltipLabel = styled.span`
@@ -257,9 +222,9 @@ const TooltipLabel = styled.span`
   color: #6d717f;
 `;
 
-const TooltipValue = styled.span<{ $color: string }>`
+const TooltipValue = styled.span`
   font-family: var(--font-caption), sans-serif;
   font-size: 12px;
   font-weight: 400;
-  color: ${(p) => p.$color};
+  color: #0039ff;
 `;

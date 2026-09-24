@@ -7,8 +7,12 @@ import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useVPD } from "@/hooks/use-vpd";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
+import { Info } from "lucide-react";
+import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import { buildVpdCsv, getBatasAmanKpa } from "@/lib/vpd-summary";
 import { VpdFilters } from "./VpdFilters";
 import { VpdChart } from "./VpdChart";
+import { VpdSummary } from "./VpdSummary";
 
 const DEFAULT_RANGE_DAYS = 10;
 
@@ -32,6 +36,14 @@ export function VpdSection() {
     dateTo: dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : undefined,
   });
   const rows = data ?? [];
+  const visibleRows = selectedStationId ? rows : [];
+
+  function handleDownload() {
+    if (visibleRows.length === 0) return;
+    const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+    downloadCsvFile(`vpd_${from}_${to}.csv`, buildVpdCsv(visibleRows));
+  }
 
   return (
     <Wrapper>
@@ -50,15 +62,27 @@ export function VpdSection() {
         onStationIdChange={setStationId}
         dateRange={dateRange}
         onDateRangeChange={(range) => range && setDateRange(range)}
+        onDownload={handleDownload}
         downloadDisabled={rows.length === 0}
       />
 
       <VpdChart
-        data={selectedStationId ? rows : []}
+        data={visibleRows}
         isLoading={isLoading}
         isError={isError}
         error={error}
       />
+
+      <VpdSummary data={visibleRows} />
+
+      <InfoAlert>
+        <Info size={20} strokeWidth={1.5} color="#175fe2" />
+        <AlertText>
+          VPD &gt; {Number(getBatasAmanKpa(visibleRows).toFixed(2))} kPa menandakan bahwa
+          tanaman kelapa sawit mengalami stress lingkungan sehingga mengalami perlambatan
+          fotosintesis.
+        </AlertText>
+      </InfoAlert>
     </Wrapper>
   );
 }
@@ -87,8 +111,33 @@ const Divider = styled.hr`
 const SectionTitle = styled.h2`
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 18px;
+  line-height: 28px;
   font-weight: 700;
   color: #000000;
+`;
+
+const InfoAlert = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #e6f4ff;
+  border: 1.5px solid #0095ff;
+  border-radius: 12px;
+
+  & svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+`;
+
+const AlertText = styled.p`
+  margin: 0;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #667a6c;
 `;

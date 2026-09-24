@@ -41,3 +41,43 @@ export function getSunshineDurationMessage(row: SunshineDuration | null): string
 export function formatHours(value: number): string {
   return `${Number(value.toFixed(2))} Jam`;
 }
+
+/** Batas bawah yang dipakai chart/panel/alert halaman Monitoring — nilai
+ *  dari baris TERBARU yang valid (BE mengirim per-baris, praktisnya selalu
+ *  3), fallback `DEFAULT_BATAS_BAWAH_JAM` kalau tidak ada baris. */
+export function getBatasBawahJam(rows: SunshineDuration[]): number {
+  const latest = pickLatestSunshineDuration(rows);
+  return latest && Number.isFinite(latest.batasBawahJam)
+    ? latest.batasBawahJam
+    : DEFAULT_BATAS_BAWAH_JAM;
+}
+
+/** Hari yang lama penyinarannya DI BAWAH batas bawah barisnya sendiri,
+ *  urut tanggal naik. Dipakai panel ringkasan Monitoring. */
+export function getBelowLimitDays(rows: SunshineDuration[]): SunshineDuration[] {
+  return rows
+    .filter(
+      (row) =>
+        Number.isFinite(row.lamaPenyinaranJam) &&
+        row.lamaPenyinaranJam < row.batasBawahJam,
+    )
+    .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+}
+
+function csvEscape(value: string): string {
+  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
+
+/** CSV data chart Monitoring > Lama Penyinaran (seluruh baris rentang). */
+export function buildSunshineDurationCsv(rows: SunshineDuration[]): string {
+  const header = ["Tanggal", "Stasiun", "Lama Penyinaran (Jam)", "Batas Bawah (Jam)"];
+  const lines = rows.map((row) =>
+    [
+      csvEscape(row.tanggal),
+      csvEscape(row.stasiun),
+      row.lamaPenyinaranJam,
+      row.batasBawahJam,
+    ].join(","),
+  );
+  return [header.join(","), ...lines].join("\n");
+}
