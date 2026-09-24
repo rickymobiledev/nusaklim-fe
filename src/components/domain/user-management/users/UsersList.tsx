@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { media } from "@/lib/breakpoints";
 import type { ManagedUser } from "@/types/user-management";
 
 export function UsersList({
@@ -262,36 +263,56 @@ function TrashIcon() {
 const List = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+
+  ${media.desktop} {
+    gap: 12px;
+  }
 `;
 
 const Row = styled.div`
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 24px;
+  gap: 8px;
   padding: 16px 24px;
   background: #ffffff;
   border: 1px solid #ecefed;
   border-radius: 16px;
+
+  ${media.desktop} {
+    align-items: center;
+    gap: 24px;
+  }
 `;
 
+/** Mobile: kolom bertumpuk (identitas lalu 3 field). Desktop: baris wrap. */
 const FieldsGroup = styled.div`
   display: flex;
   flex: 1;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 24px 40px;
+  flex-direction: column;
+  gap: 8px;
   min-width: 0;
+
+  ${media.desktop} {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px 40px;
+  }
 `;
 
 const Identity = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
-  flex: 2;
-  min-width: 220px;
+  min-width: 0;
+
+  ${media.desktop} {
+    flex: 2;
+    min-width: 220px;
+  }
 `;
 
 const AvatarCircle = styled.div`
@@ -341,8 +362,12 @@ const FieldCol = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 1;
-  min-width: 140px;
+  min-width: 0;
+
+  ${media.desktop} {
+    flex: 1;
+    min-width: 140px;
+  }
 `;
 
 const FieldLabel = styled.span`

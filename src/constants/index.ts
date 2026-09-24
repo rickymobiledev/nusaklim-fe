@@ -51,8 +51,8 @@ export type NavItem = {
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Sebaran Spasial, Monitoring, Unduh Data).
  *  "Lainnya" (admin-only) dropdown-nya redesign: "Ramalan Cuaca" DIPINDAH
  *  ke sini dari pill top-level (menghindari dobel di drawer mobile yang
- *  flatten `children`), + "Missing Data" (BARU, disabled — belum ada
- *  halaman sama sekali) + "Manajemen" (sudah ada). `/forecast` masih bisa
+ *  flatten `children`), + "Missing Data" (`/missing-data`, admin-only) +
+ *  "Manajemen" (sudah ada). `/forecast` masih bisa
  *  diakses langsung via URL / kartu Ramalan Cuaca di Beranda — lihat
  *  `EXTRA_TITLES["/forecast"]` di bawah supaya title/breadcrumb tetap benar
  *  walau bukan lagi top-level NAV_ITEMS. */
@@ -72,7 +72,6 @@ export const NAV_ITEMS: NavItem[] = [
         label: "Missing Data",
         href: "/missing-data",
         icon: MissingDataIcon,
-        disabled: true,
       },
       { label: "Manajemen", href: "/user-management/users", icon: ManajemenIcon },
     ],
@@ -91,6 +90,7 @@ export const DATA_GRANULARITY = [
  *  Labelnya tetap Bahasa Indonesia meski slug URL "dry-spell" pakai Bahasa Inggris. */
 const EXTRA_TITLES: Record<string, string> = {
   "/forecast": "Ramalan Cuaca",
+  "/missing-data": "Missing Data",
   "/monitoring/water-balance": "Keseimbangan Air",
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "/monitoring/lama-penyinaran": "Lama Penyinaran",

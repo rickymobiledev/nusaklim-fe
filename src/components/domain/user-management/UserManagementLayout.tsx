@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import styled from "styled-components";
+import { media } from "@/lib/breakpoints";
 import { UserManagementSidebar } from "./UserManagementSidebar";
 
 export function UserManagementLayout({ children }: { children: ReactNode }) {
@@ -33,8 +34,13 @@ const PageTitle = styled.h1`
 
 const Row = styled.div`
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 16px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    align-items: flex-start;
+  }
 `;
 
 const Content = styled.div`

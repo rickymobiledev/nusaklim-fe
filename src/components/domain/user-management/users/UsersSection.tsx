@@ -12,6 +12,7 @@ import { UsersList } from "./UsersList";
 import { UserFormDialog } from "./UserFormDialog";
 import { UserDeleteDialog } from "./UserDeleteDialog";
 import { UserViewDialog } from "./UserViewDialog";
+import { media } from "@/lib/breakpoints";
 import type {
   CreateUserInput,
   ManagedUser,
@@ -143,10 +144,10 @@ export function UsersSection() {
           </Title>
           <Subtitle>Kelola seluruh akun pengguna</Subtitle>
         </HeaderText>
-        <Button type="button" onClick={handleOpenCreate}>
+        <AddButton type="button" onClick={handleOpenCreate}>
           <Plus size={16} />
           Tambah Pengguna
-        </Button>
+        </AddButton>
       </Header>
 
       <SearchInputWrap>
@@ -178,22 +179,24 @@ export function UsersSection() {
           <FooterLabel>
             Menampilkan {rangeStart}-{rangeEnd} dari {total} data
           </FooterLabel>
-          <ArrowButton
-            type="button"
-            aria-label="Halaman sebelumnya"
-            disabled={effectivePage <= 1}
-            onClick={() => setPage(effectivePage - 1)}
-          >
-            <ChevronLeft size={18} />
-          </ArrowButton>
-          <ArrowButton
-            type="button"
-            aria-label="Halaman berikutnya"
-            disabled={effectivePage >= pageCount}
-            onClick={() => setPage(effectivePage + 1)}
-          >
-            <ChevronRight size={18} />
-          </ArrowButton>
+          <ArrowGroup>
+            <ArrowButton
+              type="button"
+              aria-label="Halaman sebelumnya"
+              disabled={effectivePage <= 1}
+              onClick={() => setPage(effectivePage - 1)}
+            >
+              <ChevronLeft size={18} />
+            </ArrowButton>
+            <ArrowButton
+              type="button"
+              aria-label="Halaman berikutnya"
+              disabled={effectivePage >= pageCount}
+              onClick={() => setPage(effectivePage + 1)}
+            >
+              <ChevronRight size={18} />
+            </ArrowButton>
+          </ArrowGroup>
         </Footer>
       )}
 
@@ -218,29 +221,9 @@ export function UsersSection() {
       />
 
       <UserViewDialog
-        // open={!!viewTarget}
-        open={true}
+        open={!!viewTarget}
         onOpenChange={(open) => !open && setViewTarget(null)}
-        user={{
-    "id": "4",
-    "name": "Iput Pradiko",
-    "username": "iputpradiko",
-    "email": "iputpradiko@gmail.com",
-    "imageUrl": "https://nusaklim-api.holding-perkebunan.com:8443/assets/images/users/user.png",
-    "role": {
-        "id": "2",
-        "code": "RESEARCHER",
-        "name": "Researcher"
-    },
-    "company": {
-        "id": 1,
-        "code": "RPN",
-        "name": "PT Riset Perkebunan Nusantara",
-        "imageUrl": "https://nusaklim-api.holding-perkebunan.com:8443/assets/images/companies/fc6dc10d22a9ead50ede1efa8852cde8.png"
-    },
-    "createdAt": "2023-04-07 14:10:47.880",
-    "updatedAt": "2023-04-07 14:16:40.250"
-}}
+        user={viewTarget}
         onEdit={handleEditFromView}
         onDelete={handleDeleteFromView}
       />
@@ -274,21 +257,48 @@ function SearchIcon() {
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
+
+  ${media.desktop} {
+    gap: 8px;
+  }
 `;
 
 const Header = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: stretch;
   padding: 16px;
-  gap: 4px;
+  gap: 12px;
 
   background: #ffffff;
   border: 1px solid #ecefed;
   border-radius: 16px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4px;
+  }
+`;
+
+/** Mobile: full-width 48px (Figma). Desktop: ukuran `Button` default. */
+const AddButton = styled(Button)`
+  width: 100%;
+  height: 48px;
+  padding: 14px 20px;
+  font-size: 16px;
+  line-height: 20px;
+
+  ${media.desktop} {
+    width: auto;
+    height: 36px;
+    padding: 8px 16px;
+    font-size: 14px;
+    line-height: 20px;
+  }
 `;
 
 const HeaderText = styled.div`
@@ -350,8 +360,20 @@ const SearchTextInput = styled.input`
 
 const Footer = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+`;
+
+const ArrowGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
   gap: 12px;
 `;
 

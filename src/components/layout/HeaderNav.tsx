@@ -45,9 +45,16 @@ export function HeaderNav() {
                       {child.label}
                     </MoreMenuItemDisabled>
                   ) : (
-                    <MoreMenuItem key={child.href} asChild>
+                    <MoreMenuItem
+                      key={child.href}
+                      asChild
+                      $active={pathname.startsWith(child.href)}
+                    >
                       <Link href={child.href}>
-                        <child.icon size={20} color="#455249" />
+                        <child.icon
+                          size={20}
+                          color={pathname.startsWith(child.href) ? "#ffffff" : "#455249"}
+                        />
                         {child.label}
                       </Link>
                     </MoreMenuItem>
@@ -138,13 +145,16 @@ const menuItemStyles = css`
   line-height: 20px;
 `;
 
-const MoreMenuItem = styled(DropdownMenuItem)`
+const MoreMenuItem = styled(DropdownMenuItem)<{ $active: boolean }>`
   ${menuItemStyles}
-  color: #455249;
+  color: ${(p) => (p.$active ? "#ffffff" : "#455249")};
+  background: ${(p) => (p.$active ? "#175fe2" : "transparent")};
+  box-shadow: ${(p) => (p.$active ? "0px 4px 8.7px rgba(0, 0, 0, 0.15)" : "none")};
 
   &:hover,
   &:focus {
-    background: #f6f8f7;
+    background: ${(p) => (p.$active ? "#175fe2" : "#f6f8f7")};
+    color: ${(p) => (p.$active ? "#ffffff" : "#455249")};
   }
 `;
 

@@ -16,6 +16,7 @@ import { stationApi as stationClient } from "./station-client";
 import { usersClient } from "./users-client";
 import { companiesClient } from "./companies-client";
 import { userRolesClient } from "./user-roles-client";
+import { missingDataClient } from "./missing-data-client";
 import type { StationApi } from "./station-api";
 import type { WeatherApi } from "./weather-api";
 import type { MonitoringApi } from "./monitoring-api";
@@ -29,6 +30,7 @@ import type { NotificationApi } from "./notification-api";
 import type { UsersApi } from "./users-api";
 import type { CompaniesApi } from "./companies-api";
 import type { UserRolesApi } from "./user-roles-api";
+import type { MissingDataApi } from "./missing-data-api";
 
 /**
  * Satu titik wiring — hooks import instance dari sini, bukan dari
@@ -92,3 +94,7 @@ export const notificationApi: NotificationApi = notificationClient;
 export const usersApi: UsersApi = usersClient;
 export const companiesApi: CompaniesApi = companiesClient;
 export const userRolesApi: UserRolesApi = userRolesClient;
+// Domain "Missing Data" (admin-only) — SEMENTARA mock di dalam
+// `missing-data-client.ts` (`TEMP_USE_MOCK_MISSING_DATA`), endpoint asli
+// `GET /weathers/missing` & `POST /import/aws` belum punya kontrak response.
+export const missingDataApi: MissingDataApi = missingDataClient;

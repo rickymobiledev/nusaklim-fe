@@ -573,3 +573,117 @@ export function BellNotificationIcon({
     </svg>
   );
 }
+
+/** Icon "Stasiun" (halaman Missing Data, kartu Stasiun Terdampak) — SVG
+ *  dari Figma, viewBox 32x32 asli. */
+export function StationIcon({ size = 32, color = "#175FE2", className }: IconProps) {
+  const stroke = { stroke: color, strokeWidth: 2, strokeMiterlimit: 10 } as const;
+  const round = { ...stroke, strokeLinecap: "round" } as const;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.38098 22.9004C4.07812 22.9004 4.07812 23.4134 5.78574 23.4134C7.49336 23.4134 7.48289 22.9004 9.1905 22.9004C10.8981 22.9004 10.8876 23.4134 12.5848 23.4134C14.2819 23.4134 14.2819 22.9004 15.9896 22.9004C17.6972 22.9004 17.6867 23.4134 19.3943 23.4134C21.1019 23.4134 21.0915 22.9004 22.7991 22.9004C24.5067 22.9004 24.5067 23.4134 26.2143 23.4134C27.9219 23.4134 27.9219 22.9004 29.6296 22.9004"
+        {...round}
+      />
+      <path
+        d="M2.38098 27.834C4.07812 27.834 4.07812 28.347 5.78574 28.347C7.49336 28.347 7.48289 27.834 9.1905 27.834C10.8981 27.834 10.8876 28.347 12.5848 28.347C14.2819 28.347 14.2819 27.834 15.9896 27.834C17.6972 27.834 17.6867 28.347 19.3943 28.347C21.1019 28.347 21.0915 27.834 22.7991 27.834C24.5067 27.834 24.5067 28.347 26.2143 28.347C27.9219 28.347 27.9219 27.834 29.6296 27.834"
+        {...round}
+      />
+      <path d="M10.7619 6.38672V23.1582" {...round} />
+      <path
+        d="M21.5 9.3457H17.8333C16.8208 9.3457 16 10.1187 16 11.0722V14.5251C16 15.4786 16.8208 16.2516 17.8333 16.2516H21.5C22.5125 16.2516 23.3333 15.4786 23.3333 14.5251V11.0722C23.3333 10.1187 22.5125 9.3457 21.5 9.3457Z"
+        {...stroke}
+        strokeLinejoin="round"
+      />
+      <path d="M19.6667 16.7441V23.1568" {...round} />
+      <path d="M6.57146 4.41211L2.52765 12.3342" {...round} />
+      <path d="M10.7619 12.3054L4.5495 8.37891" {...stroke} />
+      <path
+        d="M24.2762 6.38672C24.2762 6.38672 26.4762 6.38672 26.7171 8.6854"
+        {...round}
+      />
+      <path
+        d="M25.5648 3.65257C25.5648 3.65257 28.8557 3.65257 29.619 7.47055"
+        {...round}
+      />
+    </svg>
+  );
+}
+
+/** Icon "import" (unduh ke tray) — tombol Import & link template di
+ *  halaman Missing Data. viewBox 20x20 asli Figma. */
+export function ImportIcon({ size = 20, color = "#175FE2", className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.33331 10.834L3.33331 15.5007C3.33331 16.6052 4.22874 17.5007 5.33331 17.5007H14.6666C15.7712 17.5007 16.6666 16.6052 16.6666 15.5007V10.834"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 2.5L10 12.5M12.9167 9.58333L10 12.5L7.08335 9.58333"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** Icon "submit-document" (dokumen + panah) — tombol Pilih File di halaman
+ *  Missing Data. viewBox 24x24 asli Figma. */
+export function SubmitDocumentIcon({
+  size = 24,
+  color = "#175FE2",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M20 13V5.74853C20 5.5894 19.9368 5.43679 19.8243 5.32426L16.6757 2.17574C16.5632 2.06321 16.4106 2 16.2515 2H4.6C4.26863 2 4 2.26863 4 2.6V21.4C4 21.7314 4.26863 22 4.6 22H14"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 19H22M19 22L22 19L19 16"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

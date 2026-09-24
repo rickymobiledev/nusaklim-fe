@@ -28,10 +28,14 @@ export function DownloadDataTable<T>({
   columns,
   data,
   emptyMessage = "Data Tidak Tersedia",
+  headerHeight = 88,
 }: {
   columns: ColumnDef<T>[];
   data: T[];
   emptyMessage?: string;
+  /** Tinggi baris header (px) — default 88 (Unduh Data), halaman lain
+   *  yang reuse tabel ini boleh override (mis. Missing Data: 64). */
+  headerHeight?: number;
 }) {
   const table = useReactTable({
     data,
@@ -54,7 +58,7 @@ export function DownloadDataTable<T>({
           {headerGroups.map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Th key={header.id}>
+                <Th key={header.id} $height={headerHeight}>
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -167,9 +171,9 @@ const Table = styled.table`
   table-layout: fixed;
 `;
 
-const Th = styled.th`
+const Th = styled.th<{ $height: number }>`
   box-sizing: border-box;
-  height: 88px;
+  height: ${(p) => p.$height}px;
   padding: 8px 12px;
   background: #ffffff;
   text-align: center;
