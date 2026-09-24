@@ -10,7 +10,7 @@ export function getRainfallTodayLevel(isHujan: boolean): RainfallTodayLevel {
 }
 
 /** Warna dot marker/legend/chip panel per level — SAMA PERSIS warna
- *  `CHIP_STYLE.aktif`/`CHIP_STYLE.tidak_aktif` di `MapStationList.tsx`
+ *  warna chip biru (`#0095FF`) / merah (`#EE443F`) panel Peta lama "Daftar Stasiun"
  *  (biru untuk status "baik"/biru, merah untuk "tidak") — satu sumber
  *  supaya tidak ada duplikasi hex di `rainfall-today-map.tsx`,
  *  `RainfallTodayLegend.tsx`, `RainfallTodayPanel.tsx`. */

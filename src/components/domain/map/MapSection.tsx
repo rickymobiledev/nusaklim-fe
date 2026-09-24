@@ -8,9 +8,8 @@ import { useWaterDeficitComparison } from "@/hooks/use-water-deficit-comparison"
 import { useDrySpellMap } from "@/hooks/use-dry-spell-map";
 import { useRainfallToday } from "@/hooks/use-rainfall-today";
 import { Skeleton } from "@/components/ui/skeleton";
-import { media } from "@/lib/breakpoints";
 import { MapTabs, type MapTab } from "./MapTabs";
-import { MapStationList } from "./MapStationList";
+import { StationInfoCard } from "./StationInfoCard";
 import { DynamicStationMap } from "./dynamic-station-map";
 import { DynamicWaterDeficitMap } from "./dynamic-water-deficit-map";
 import { WaterDeficitPanel } from "./WaterDeficitPanel";
@@ -37,7 +36,6 @@ export function MapSection() {
 
   const [activeTab, setActiveTab] = useState<MapTab>("status-stasiun");
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <Wrapper>
@@ -45,80 +43,62 @@ export function MapSection() {
 
       {activeTab === "status-stasiun" ? (
         isLoading ? (
-          <ContentRow>
-            <MapColumn>
-              <Skeleton className="h-140 w-full rounded-[20px]" />
-            </MapColumn>
-            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
-          </ContentRow>
+          <Wrapper>
+            <Skeleton className="h-140 w-full rounded-[20px]" />
+            <Skeleton className="h-96 w-full rounded-[16px]" />
+          </Wrapper>
         ) : (
-          <ContentRow>
-            <MapColumn>
-              <DynamicStationMap
-                stations={stations}
-                selectedStationId={selectedStationId}
-                onSelectStation={setSelectedStationId}
-              />
-            </MapColumn>
-
-            <MapStationList
+          <Wrapper>
+            <DynamicStationMap
               stations={stations}
-              searchTerm={searchTerm}
-              onSearchTermChange={setSearchTerm}
               selectedStationId={selectedStationId}
               onSelectStation={setSelectedStationId}
             />
-          </ContentRow>
+
+            <StationInfoCard
+              stations={stations}
+              selectedStationId={selectedStationId}
+              onSelectStation={setSelectedStationId}
+            />
+          </Wrapper>
         )
       ) : activeTab === "keseimbangan-air" ? (
         isWaterDeficitLoading || isComparisonLoading ? (
-          <ContentRow>
-            <MapColumn>
-              <Skeleton className="h-140 w-full rounded-[20px]" />
-            </MapColumn>
-            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
-          </ContentRow>
+          <Wrapper>
+            <Skeleton className="h-140 w-full rounded-[20px]" />
+            <Skeleton className="h-96 w-full rounded-[16px]" />
+          </Wrapper>
         ) : (
-          <ContentRow>
-            <MapColumn>
-              <DynamicWaterDeficitMap rows={waterDeficitRows} />
-            </MapColumn>
+          <Wrapper>
+            <DynamicWaterDeficitMap rows={waterDeficitRows} />
 
             <WaterDeficitPanel rows={waterDeficitComparisonRows} />
-          </ContentRow>
+          </Wrapper>
         )
       ) : activeTab === "dry-spell" ? (
         isDrySpellLoading ? (
-          <ContentRow>
-            <MapColumn>
-              <Skeleton className="h-140 w-full rounded-[20px]" />
-            </MapColumn>
-            <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
-          </ContentRow>
+          <Wrapper>
+            <Skeleton className="h-140 w-full rounded-[20px]" />
+            <Skeleton className="h-96 w-full rounded-[16px]" />
+          </Wrapper>
         ) : (
-          <ContentRow>
-            <MapColumn>
-              <DynamicDrySpellMap rows={drySpellRows} />
-            </MapColumn>
+          <Wrapper>
+            <DynamicDrySpellMap rows={drySpellRows} />
 
             <DrySpellPanel rows={drySpellRows} />
-          </ContentRow>
+          </Wrapper>
         )
       ) : isRainfallTodayLoading ? (
-        <ContentRow>
-          <MapColumn>
-            <Skeleton className="h-140 w-full rounded-[20px]" />
-          </MapColumn>
-          <Skeleton className="h-140 xl:w-75 w-full shrink-0 rounded-[20px]" />
-        </ContentRow>
+        <Wrapper>
+          <Skeleton className="h-140 w-full rounded-[20px]" />
+          <Skeleton className="h-96 w-full rounded-[16px]" />
+        </Wrapper>
       ) : (
-        <ContentRow>
-          <MapColumn>
-            <DynamicRainfallTodayMap rows={rainfallTodayRows} />
-          </MapColumn>
+        <Wrapper>
+          <DynamicRainfallTodayMap rows={rainfallTodayRows} />
 
           <RainfallTodayPanel rows={rainfallTodayRows} />
-        </ContentRow>
+        </Wrapper>
       )}
     </Wrapper>
   );
@@ -128,20 +108,4 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-`;
-
-const ContentRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  ${media.desktop} {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-`;
-
-const MapColumn = styled.div`
-  min-width: 0;
-  flex: 1;
 `;

@@ -48,7 +48,7 @@ export type NavItem = {
   }[];
 };
 
-/** Sidebar nav — mirrors the existing app's menu (Beranda, Peta, Monitoring, Unduh Data).
+/** Sidebar nav — mirrors the existing app's menu (Beranda, Sebaran Spasial, Monitoring, Unduh Data).
  *  "Lainnya" (admin-only) dropdown-nya redesign: "Ramalan Cuaca" DIPINDAH
  *  ke sini dari pill top-level (menghindari dobel di drawer mobile yang
  *  flatten `children`), + "Missing Data" (BARU, disabled — belum ada
@@ -58,7 +58,7 @@ export type NavItem = {
  *  walau bukan lagi top-level NAV_ITEMS. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon },
-  { label: "Peta", href: "/map", icon: MapIcon },
+  { label: "Sebaran Spasial", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
   {

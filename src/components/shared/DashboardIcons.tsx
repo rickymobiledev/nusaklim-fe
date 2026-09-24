@@ -77,6 +77,37 @@ export function WarningTriangleIcon({
   );
 }
 
+/** Versi 14px (outline tipis) untuk dot status berdiameter 24px. */
+export function AlertTriangleIcon({
+  size = 14,
+  color = "#FFFFFF",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 14 14"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10.2511 12.2497H3.74856C2.21053 12.2497 1.24808 10.5861 2.01474 9.25274L5.26603 3.59833C6.03504 2.26092 7.96464 2.26092 8.73365 3.59833L11.9849 9.25273C12.7516 10.5861 11.7891 12.2497 10.2511 12.2497Z"
+        stroke={color}
+        strokeLinecap="round"
+      />
+      <path d="M7 5.25V7.58333" stroke={color} strokeLinecap="round" />
+      <path
+        d="M7 9.92283L7.00583 9.91634"
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CheckCircleIcon({ size = 12, color = "#FFFFFF", className }: IconProps) {
   return (
     <svg
@@ -154,6 +185,34 @@ export function NavArrowDownIcon({ size = 24, color = "#1D2520", className }: Ic
   );
 }
 
+export function SearchIcon({ size = 24, className }: Omit<IconProps, "color">) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M17 17L21 21"
+        stroke="#8B9C90"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 11C3 15.4183 6.58172 19 11 19C13.213 19 15.2161 18.1015 16.6644 16.6493C18.1077 15.2022 19 13.2053 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11Z"
+        stroke="#1D2520"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ArrowDownIcon({ size = 16, color = "#175FE2", className }: IconProps) {
   return (
     <svg
@@ -191,6 +250,106 @@ export function NavArrowRightIcon({
     >
       <path
         d="M6.75 4.5L11.25 9L6.75 13.5"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function DataTransferBothIcon({
+  size = 24,
+  color = "#175FE2",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M17 20V4M14 7L17 4L20 7"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 4V20M4 17L7 20L10 17"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function CheckIcon({ size = 14, color = "#FFFFFF", className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 14 14"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.91675 7.58301L5.25008 9.91634L11.0834 4.08301"
+        stroke={color}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function MinusIcon({ size = 14, color = "#FFFFFF", className }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 14 14"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M3.5 7H10.5" stroke={color} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Versi 20px (outline tebal 1.5) — beda dari `WarningTriangleIcon` 12px di atas. */
+export function WarningTriangleLargeIcon({
+  size = 20,
+  color = "#6B4700",
+  className,
+}: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M16.1264 17.4997H3.8738C2.33577 17.4997 1.37332 15.8361 2.13999 14.5027L8.26627 3.84833C9.03528 2.51092 10.9649 2.51092 11.7339 3.84833L17.8602 14.5027C18.6268 15.8361 17.6644 17.4997 16.1264 17.4997Z"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path d="M10 7.5V10.8333" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M10 14.1753L10.0083 14.1661"
         stroke={color}
         strokeWidth="1.5"
         strokeLinecap="round"

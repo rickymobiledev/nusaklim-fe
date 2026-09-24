@@ -4,145 +4,195 @@ import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { format, subMonths } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { ArrowUpDown, Check, Info, TriangleAlert } from "lucide-react";
+import {
+  CheckIcon,
+  DataTransferBothIcon,
+  InfoEmptyIcon,
+  MinusIcon,
+  SearchIcon,
+  WarningTriangleLargeIcon,
+} from "@/components/shared/DashboardIcons";
+import { DownloadDataPagination } from "@/components/domain/download-data/DownloadDataTable";
+import { getWaterDeficitLevel, WATER_DEFICIT_COLOR } from "@/lib/water-deficit-level";
 import { media } from "@/lib/breakpoints";
 import type { StationWaterDeficit } from "@/types/domain";
 
 type SortDirection = "desc" | "asc";
 
-/** Panel kanan tab Peta > Keseimbangan Air — analog `MapStationList.tsx`
- *  (Status Stasiun), tapi isinya perbandingan defisit air (bukan daftar
- *  stasiun + search). Layout & urutan section mengikuti Figma: alert info
- *  periode, heading + toggle sort, list perbandingan, link ringkasan
- *  stasiun tertinggi, alert warning ambang kekeringan. */
+/** Kartu "Perbandingan Defisit Air" tab Peta > Keseimbangan Air — layout
+ *  Figma baru: di BAWAH peta full-width (bukan panel kanan 300px lagi), pola
+ *  sama `StationInfoCard.tsx` (tab Status Stasiun). Data masih mock
+ *  (`useWaterDeficitComparison`), beda sumber dari peta. */
 export function WaterDeficitPanel({ rows }: { rows: StationWaterDeficit[] }) {
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Bulan LALU (bulan penuh terakhir), bukan bulan berjalan — konsisten
-  // dengan periode default yang dipakai peta real (lihat
-  // getDefaultWaterDeficitPeriod di lib/api/water-deficit-api.ts), meski
-  // data panel ini sendiri masih mock.
-  const bulanIni = useMemo(
+  // dengan periode default peta real (getDefaultWaterDeficitPeriod di
+  // lib/api/water-deficit-api.ts).
+  const bulanLalu = useMemo(
     () => format(subMonths(new Date(), 1), "MMMM", { locale: idLocale }),
     [],
   );
 
+  const lastSync = useMemo(() => {
+    const times = rows
+      .map((r) => (r.sinkronisasiTerakhir ? new Date(r.sinkronisasiTerakhir) : null))
+      .filter((d): d is Date => d !== null && !Number.isNaN(d.getTime()));
+    if (times.length === 0) return "-";
+    const latest = new Date(Math.max(...times.map((d) => d.getTime())));
+    return format(latest, "dd-MM-yyyy HH:mm");
+  }, [rows]);
+
   const sorted = useMemo(() => {
-    const withData = rows.filter(
+    const keyword = searchTerm.trim().toLowerCase();
+    const matched = rows.filter((r) => r.nama.toLowerCase().includes(keyword));
+    const withData = matched.filter(
       (r): r is StationWaterDeficit & { defisitAir: number } => r.defisitAir !== null,
     );
-    const withoutData = rows.filter((r) => r.defisitAir === null);
+    const withoutData = matched.filter((r) => r.defisitAir === null);
     withData.sort((a, b) =>
       sortDir === "desc" ? b.defisitAir - a.defisitAir : a.defisitAir - b.defisitAir,
     );
     return [...withData, ...withoutData];
-  }, [rows, sortDir]);
+  }, [rows, searchTerm, sortDir]);
 
-  const highest = useMemo(() => {
-    const withData = rows.filter(
-      (r): r is StationWaterDeficit & { defisitAir: number } => r.defisitAir !== null,
-    );
-    if (withData.length === 0) return null;
-    return withData.reduce((a, b) => (b.defisitAir > a.defisitAir ? b : a));
-  }, [rows]);
+  const total = sorted.length;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  // Derived, BUKAN useEffect+setPage (ditolak lint react-hooks/set-state-in-effect).
+  const effectivePage = Math.min(page, pageCount);
+  const start = (effectivePage - 1) * pageSize;
+  const pageRows = sorted.slice(start, start + pageSize);
 
   return (
-    <Card>
+    <>
       <InfoAlert>
-        <Info size={20} strokeWidth={1.5} color="#305ecc" />
-        <AlertText>Periode monitoring diambil dari bulan {bulanIni}.</AlertText>
+        <InfoEmptyIcon size={20} />
+        <AlertText>Periode monitoring diambil dari bulan {bulanLalu}</AlertText>
       </InfoAlert>
 
-      <Section>
-        <SectionHeader>
-          <Heading>Perbandingan Defisit Air</Heading>
-          <SortButton
-            type="button"
-            onClick={() => setSortDir((prev) => (prev === "desc" ? "asc" : "desc"))}
-          >
-            {sortDir === "desc" ? "Tertinggi" : "Terendah"}
-            <ArrowUpDown size={14} strokeWidth={1.5} />
-          </SortButton>
-        </SectionHeader>
+      <Card>
+        <Title>Perbandingan Defisit Air</Title>
 
-        <List>
-          {sorted.map((row) => (
-            <Row key={row.stationId}>
-              {row.defisitAir !== null ? (
-                <>
-                  <RowLeft>
-                    <CheckDot>
-                      <Check size={10} strokeWidth={3} color="#ffffff" />
-                    </CheckDot>
-                    <RowName>{row.nama}</RowName>
-                  </RowLeft>
-                  <RowValue>{row.defisitAir}</RowValue>
-                </>
-              ) : (
-                <>
-                  <RowName $muted>{row.nama}</RowName>
-                  <RowValue $muted>Tidak Ada Data</RowValue>
-                </>
-              )}
-            </Row>
-          ))}
+        <Toolbar>
+          <ToolbarLeft>
+            <SearchWrap>
+              <SearchInput
+                placeholder="Cari Stasiun"
+                aria-label="Cari Stasiun"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <SearchIcon size={24} />
+            </SearchWrap>
 
-          {sorted.length === 0 && <EmptyText>Belum ada data stasiun.</EmptyText>}
-        </List>
-      </Section>
+            <SortButton
+              type="button"
+              onClick={() => {
+                setSortDir((prev) => (prev === "desc" ? "asc" : "desc"));
+                setPage(1);
+              }}
+            >
+              {sortDir === "desc" ? "Tertinggi" : "Terendah"}
+              <DataTransferBothIcon size={24} />
+            </SortButton>
+          </ToolbarLeft>
 
-      {highest && (
-        <SummaryLink>
-          Curah Hujan terhadap stasiun tertinggi hari ini ({highest.nama},{" "}
-          {highest.defisitAir})
-        </SummaryLink>
-      )}
+          <SyncBadge>Sinkronisasi Terakhir: {lastSync}</SyncBadge>
+        </Toolbar>
 
-      <WarningAlert>
-        <TriangleAlert size={20} strokeWidth={1.5} color="#ffffff" />
-        <WarningText>
-          Defisit Air &gt; 200 mm/tahun akan menyebabkan cekaman kekeringan bagi tanaman
-          kelapa sawit
-        </WarningText>
-      </WarningAlert>
-    </Card>
+        <TableFrame>
+          <ScrollArea>
+            <Table>
+              <colgroup>
+                <col style={{ width: 200 }} />
+                <col style={{ width: 100 }} />
+                <col />
+                <col />
+                <col />
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  <Th $align="left">Nama Stasiun</Th>
+                  <Th $align="left">Kode</Th>
+                  <Th>Curah Hujan</Th>
+                  <Th>Defisit Air</Th>
+                  <Th>Hari Hujan</Th>
+                  <Th>Kelebihan Air</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((row, index) => {
+                  const level = getWaterDeficitLevel(row.defisitAir);
+                  return (
+                    <Tr key={row.stationId} $odd={index % 2 === 0}>
+                      <Td $align="left">{row.nama}</Td>
+                      <Td $align="left">{row.stationId}</Td>
+                      <Td>{formatValue(row.curahHujan, "mm")}</Td>
+                      <Td>
+                        <DeficitCell>
+                          <StatusDot $bg={WATER_DEFICIT_COLOR[level]}>
+                            {level === "tidak_ada" ? <MinusIcon /> : <CheckIcon />}
+                          </StatusDot>
+                          {formatValue(row.defisitAir, "mm")}
+                        </DeficitCell>
+                      </Td>
+                      <Td>{formatValue(row.hariHujan, "hari")}</Td>
+                      <Td>{formatValue(row.kelebihanAir, "mm")}</Td>
+                    </Tr>
+                  );
+                })}
+                {pageRows.length === 0 && (
+                  <tr>
+                    <EmptyCell colSpan={6}>Stasiun tidak ditemukan.</EmptyCell>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </ScrollArea>
+        </TableFrame>
+
+        <DownloadDataPagination
+          meta={{ page: effectivePage, pageSize, total }}
+          onPageChange={setPage}
+          onPageSizeChange={(next) => {
+            setPageSize(next);
+            setPage(1);
+          }}
+        />
+
+        <WarningAlert>
+          <WarningTriangleLargeIcon size={20} />
+          <WarningText>
+            Defisit air &gt; 200 mm/tahun akan menyebabkan cekaman kekeringan bagi tanaman
+            kelapa sawit
+          </WarningText>
+        </WarningAlert>
+      </Card>
+    </>
   );
 }
 
-const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  padding: 16px;
-  background: #ffffff;
-  border: 1px solid #ecefed;
-  border-radius: 20px;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge legacy */
-
-  &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Edge Chromium */
-  }
-
-  ${media.desktop} {
-    width: 300px;
-    height: 560px;
-    flex-shrink: 0;
-  }
-`;
+function formatValue(value: number | null, unit: string) {
+  return value === null ? "-" : `${value.toLocaleString("id-ID")} ${unit}`;
+}
 
 const InfoAlert = styled.div`
+  box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 16px;
   padding: 16px;
   background: #eff5ff;
   border: 1.5px solid #175fe2;
   border-radius: 12px;
-  flex: none;
-  flex-direction: row;
 
   svg {
     flex: none;
@@ -151,114 +201,218 @@ const InfoAlert = styled.div`
 
 const AlertText = styled.p`
   margin: 0;
-  font-family: var(--font-body), sans-serif;
-  font-size: 13px;
-  color: #667a6c;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 400;
-  line-height: 20px;
+  color: #667a6c;
 `;
 
-const Section = styled.div`
+const Card = styled.section`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #ecefed;
+  border-radius: 20px;
+`;
+
+const Title = styled.h2`
+  margin: 0;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #000000;
+`;
+
+const Toolbar = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+`;
+
+const ToolbarLeft = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: 16px;
 `;
 
-const SectionHeader = styled.div`
+const SearchWrap = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex: 1;
+  min-width: 0;
+
+  ${media.desktop} {
+    flex: none;
+    width: 300px;
+  }
+
+  svg {
+    position: absolute;
+    right: 12px;
+    pointer-events: none;
+  }
 `;
 
-const Heading = styled.span`
+const SearchInput = styled.input`
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  padding: 12px 48px 12px 12px;
+  background: #ffffff;
+  border: 1.5px solid #d6dcd8;
+  border-radius: 12px;
+  outline: none;
   font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: #000000;
+  font-size: 16px;
+  line-height: 24px;
+  color: #1d2520;
+
+  &::placeholder {
+    color: #8b9c90;
+  }
+
+  &:focus-visible {
+    border-color: #175fe2;
+  }
 `;
 
 const SortButton = styled.button`
   display: flex;
+  flex: none;
   align-items: center;
   gap: 4px;
+  padding: 0;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
   color: #175fe2;
 `;
 
-const List = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
-
-const Row = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 13px 16px;
-  border: 1px solid #e5e7ea;
-  border-radius: 8px;
-`;
-
-const RowLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const CheckDot = styled.span`
+const SyncBadge = styled.div`
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 48px;
+  padding: 8px 16px;
+  background: #eff5ff;
+  border: 1px solid #4f8cf5;
+  border-radius: 12px;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: #1d2520;
+  text-align: center;
+
+  ${media.desktop} {
+    font-size: 16px;
+    line-height: 24px;
+  }
+`;
+
+const TableFrame = styled.div`
+  background: #ffffff;
+  border: 1px solid #e5e7ea;
+  border-radius: 12px;
+  overflow: hidden;
+`;
+
+const ScrollArea = styled.div`
+  overflow-x: auto;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  table-layout: fixed;
+`;
+
+type Align = "left" | "center";
+
+const Th = styled.th<{ $align?: Align }>`
+  box-sizing: border-box;
+  height: 60px;
+  padding: 8px 12px;
+  background: #ffffff;
+  text-align: ${(p) => p.$align ?? "center"};
+  vertical-align: middle;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #003f6b;
+`;
+
+const Tr = styled.tr<{ $odd: boolean }>`
+  height: 50px;
+  background: ${(p) => (p.$odd ? "#f6f8f7" : "#ffffff")};
+  border-bottom: 1px solid #ecefed;
+`;
+
+const Td = styled.td<{ $align?: Align }>`
+  box-sizing: border-box;
+  height: 49px;
+  padding: 10px 12px;
+  text-align: ${(p) => p.$align ?? "center"};
+  vertical-align: middle;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #1d2520;
+`;
+
+const DeficitCell = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const StatusDot = styled.span<{ $bg: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
   width: 22px;
   height: 22px;
-  flex: none;
-  background: #43b75d;
-  border-radius: 50%;
+  background: ${(p) => p.$bg};
+  border-radius: 50px;
 `;
 
-const RowName = styled.span<{ $muted?: boolean }>`
-  font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: ${(p) => (p.$muted ? 500 : 500)};
-  color: ${(p) => (p.$muted ? "#667a6c" : "#1d2520")};
-`;
-
-const RowValue = styled.span<{ $muted?: boolean }>`
-  font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: ${(p) => (p.$muted ? "#667a6c" : "#1d2520")};
-`;
-
-const EmptyText = styled.p`
-  font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  color: #8b9c90;
+const EmptyCell = styled.td`
+  padding: 40px 12px;
   text-align: center;
-  padding: 16px 0;
-`;
-
-const SummaryLink = styled.p`
-  margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: #175fe2;
+  font-size: 14px;
+  color: #8b9c90;
 `;
 
 const WarningAlert = styled.div`
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   gap: 16px;
   padding: 16px;
   background: #ffaa00;
@@ -271,7 +425,9 @@ const WarningAlert = styled.div`
 
 const WarningText = styled.p`
   margin: 0;
-  font-family: var(--font-body), sans-serif;
-  font-size: 13px;
-  color: #ffffff;
+  font-family: "Plus Jakarta Sans", var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #6b4700;
 `;

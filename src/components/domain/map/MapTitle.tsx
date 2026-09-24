@@ -3,7 +3,7 @@
 import styled from "styled-components";
 
 export function MapTitle() {
-  return <Title>Peta</Title>;
+  return <Title>Sebaran Spasial</Title>;
 }
 
 const Title = styled.h1`

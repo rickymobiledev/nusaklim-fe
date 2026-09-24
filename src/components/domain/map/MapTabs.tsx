@@ -20,7 +20,7 @@ export function MapTabs({
   onChange: (tab: MapTab) => void;
 }) {
   return (
-    <Row role="tablist" aria-label="Tampilan Peta">
+    <Row role="tablist" aria-label="Tampilan Sebaran Spasial">
       {TABS.map((tab) => (
         <Pill
           key={tab.id}
@@ -43,6 +43,11 @@ const Row = styled.div`
   gap: 8px;
   width: 100%;
   overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Edge/Safari */
+  }
 `;
 
 const Pill = styled.button<{ $active: boolean }>`

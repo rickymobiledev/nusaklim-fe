@@ -99,7 +99,7 @@ function getProvinceLabelIcon(name: string): L.DivIcon {
 
 /** Child di dalam `MapContainer` (butuh `useMap()`) yang menerbangkan peta
  *  ke stasiun terpilih & buka popup-nya — dipicu dari klik item di panel
- *  kanan "Daftar Stasiun" (`MapStationList`), bukan dari klik marker
+ *  bawah "Informasi Stasiun" (`StationInfoCard`), bukan dari klik marker
  *  langsung (itu sudah ditangani `eventHandlers.click` tiap `Marker`). */
 function MapController({
   selectedStationId,
