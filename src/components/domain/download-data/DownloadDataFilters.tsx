@@ -90,8 +90,8 @@ export function DownloadDataFilters({
 const Row = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: stretch;
+  gap: 12px;
 
   ${media.desktop} {
     flex-direction: row;
@@ -102,13 +102,24 @@ const Row = styled.div`
 
 const Filters = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 `;
 
 const StationTrigger = styled(SelectTrigger)`
-  width: 250px;
+  width: 100%;
+
+  ${media.desktop} {
+    width: 250px;
+  }
+
   height: 48px;
   padding: 12px;
   background: #ffffff;
@@ -125,7 +136,12 @@ const StationTrigger = styled(SelectTrigger)`
 `;
 
 const GranularityTrigger = styled(SelectTrigger)`
-  width: 173px;
+  width: 100%;
+
+  ${media.desktop} {
+    width: 173px;
+  }
+
   height: 48px;
   padding: 12px;
   background: #ffffff;
@@ -160,6 +176,10 @@ const DownloadButton = styled.button`
   font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
+
+  ${media.desktop} {
+    align-self: auto;
+  }
 
   &:hover {
     background: #eff5ff;

@@ -9,8 +9,8 @@ import { Building2, Newspaper, Radio, User, Users, type LucideIcon } from "lucid
 /** Sub-nav "Manajemen" (BUKAN `NAV_ITEMS` di `constants/index.ts`, jadi
  *  boleh pakai icon lucide-react — pola sama `MonitoringDomainNav.tsx`
  *  yang juga icon lucide placeholder untuk domain yang belum ada asset
- *  PNG Figma-nya). Cuma "Pengguna" yang punya `href` & aktif — 4 item lain
- *  (Pengguna Aghris/Perusahaan/Stasiun/Berita) sengaja non-klik (fondasi
+ *  PNG Figma-nya). "Pengguna" & "Pengguna Aghris" punya `href` & aktif — 3 item lain
+ *  (Perusahaan/Stasiun/Berita) sengaja non-klik (fondasi
  *  buat dikerjakan menyusul), lihat CLAUDE.md. */
 const MENU_ITEMS: {
   key: string;
@@ -19,7 +19,12 @@ const MENU_ITEMS: {
   href: string | null;
 }[] = [
   { key: "pengguna", label: "Pengguna", icon: User, href: "/user-management/users" },
-  { key: "pengguna-aghris", label: "Pengguna Aghris", icon: Users, href: null },
+  {
+    key: "pengguna-aghris",
+    label: "Pengguna Aghris",
+    icon: Users,
+    href: "/user-management/aghris-users",
+  },
   { key: "perusahaan", label: "Perusahaan", icon: Building2, href: null },
   { key: "stasiun", label: "Stasiun", icon: Radio, href: null },
   { key: "berita", label: "Berita", icon: Newspaper, href: null },

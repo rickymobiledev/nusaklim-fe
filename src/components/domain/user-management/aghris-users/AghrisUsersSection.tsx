@@ -7,28 +7,28 @@ import styled from "styled-components";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataState } from "@/components/shared/DataState";
-import { useUsers, useDeleteUser } from "@/hooks/use-users";
-import { UsersList } from "./UsersList";
-import { UserDeleteDialog } from "./UserDeleteDialog";
-import { UserViewDialog } from "./UserViewDialog";
+import { useAghrisUsers, useDeleteAghrisUser } from "@/hooks/use-aghris-users";
+import { AghrisUsersList } from "./AghrisUsersList";
+import { AghrisUserDeleteDialog } from "./AghrisUserDeleteDialog";
+import { AghrisUserViewDialog } from "./AghrisUserViewDialog";
 import { media } from "@/lib/breakpoints";
-import type { ManagedUser } from "@/types/user-management";
+import type { AghrisUser } from "@/types/user-management";
 
-/** `/api/user-management/users` balikin SEMUA pengguna sekaligus (BE
- *  tidak punya pagination) — search & pagination 100% client-side, pola
- *  sama `DownloadDataSection.tsx`. `PAGE_SIZE` = 5 (persis contoh Figma
- *  "Menampilkan 1-5 dari 15 data"). */
+/** Search & pagination 100% client-side (endpoint balikin semua data),
+ *  pola sama `users/UsersSection.tsx`. */
 const PAGE_SIZE = 5;
 
-export function UsersSection() {
+const NEW_HREF = "/user-management/aghris-users/new";
+
+export function AghrisUsersSection() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [deleteTarget, setDeleteTarget] = useState<ManagedUser | null>(null);
-  const [viewTarget, setViewTarget] = useState<ManagedUser | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AghrisUser | null>(null);
+  const [viewTarget, setViewTarget] = useState<AghrisUser | null>(null);
 
-  const { data, isLoading, isError, error } = useUsers();
-  const deleteUser = useDeleteUser();
+  const { data, isLoading, isError, error } = useAghrisUsers();
+  const deleteUser = useDeleteAghrisUser();
 
   const allUsers = useMemo(() => data?.data ?? [], [data]);
 
@@ -38,15 +38,15 @@ export function UsersSection() {
     return allUsers.filter(
       (u) =>
         u.name.toLowerCase().includes(term) ||
-        u.username.toLowerCase().includes(term) ||
-        u.email.toLowerCase().includes(term),
+        u.nipSap.toLowerCase().includes(term) ||
+        u.roleName.toLowerCase().includes(term) ||
+        u.companyName.toLowerCase().includes(term),
     );
   }, [allUsers, searchTerm]);
 
   const total = filtered.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  // Derived, BUKAN useEffect+setPage (react-hooks/set-state-in-effect) —
-  // jaga-jaga kalau search menyusutkan total di bawah halaman aktif.
+  // Derived, BUKAN useEffect+setPage (react-hooks/set-state-in-effect).
   const effectivePage = Math.min(page, pageCount);
   const rows = useMemo(() => {
     const start = (effectivePage - 1) * PAGE_SIZE;
@@ -58,20 +58,16 @@ export function UsersSection() {
     setPage(1);
   }
 
-  function handleOpenEdit(user: ManagedUser) {
-    router.push(`/user-management/users/${user.id}/edit`);
+  function handleOpenEdit(user: AghrisUser) {
+    router.push(`/user-management/aghris-users/${user.id}/edit`);
   }
 
-  function handleOpenView(user: ManagedUser) {
-    setViewTarget(user);
-  }
-
-  function handleEditFromView(user: ManagedUser) {
+  function handleEditFromView(user: AghrisUser) {
     setViewTarget(null);
     handleOpenEdit(user);
   }
 
-  function handleDeleteFromView(user: ManagedUser) {
+  function handleDeleteFromView(user: AghrisUser) {
     setViewTarget(null);
     setDeleteTarget(user);
   }
@@ -89,43 +85,22 @@ export function UsersSection() {
       <Header>
         <HeaderText>
           <Title>
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.66669 26.6667V25.3333C6.66669 20.1787 10.8454 16 16 16C21.1547 16 25.3334 20.1787 25.3334 25.3333V26.6667"
-                stroke="#1D2520"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M16 15.9997C18.9455 15.9997 21.3334 13.6119 21.3334 10.6663C21.3334 7.72082 18.9455 5.33301 16 5.33301C13.0545 5.33301 10.6667 7.72082 10.6667 10.6663C10.6667 13.6119 13.0545 15.9997 16 15.9997Z"
-                stroke="#1D2520"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Pengguna
+            <TitleIcon />
+            Pengguna Aghris
           </Title>
-          <Subtitle>Kelola seluruh akun pengguna</Subtitle>
+          <Subtitle>Kelola seluruh akun pengguna aghris</Subtitle>
         </HeaderText>
         <AddButton asChild>
-          <Link href="/user-management/users/new">
+          <Link href={NEW_HREF}>
             <Plus size={16} />
-            Tambah Pengguna
+            Tambah Pengguna Aghris
           </Link>
         </AddButton>
       </Header>
 
       <SearchInputWrap>
         <SearchTextInput
-          placeholder="Cari Pengguna"
+          placeholder="Cari Pengguna Aghris"
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
         />
@@ -137,11 +112,13 @@ export function UsersSection() {
         isError={isError}
         error={error}
         isEmpty={rows.length === 0}
-        emptyMessage={searchTerm ? "Pengguna tidak ditemukan." : "Belum ada pengguna."}
+        emptyMessage={
+          searchTerm ? "Pengguna Aghris tidak ditemukan." : "Belum ada pengguna Aghris."
+        }
       >
-        <UsersList
+        <AghrisUsersList
           users={rows}
-          onView={handleOpenView}
+          onView={setViewTarget}
           onEdit={handleOpenEdit}
           onDelete={setDeleteTarget}
         />
@@ -173,15 +150,14 @@ export function UsersSection() {
         </Footer>
       )}
 
-      <UserDeleteDialog
+      <AghrisUserDeleteDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        user={deleteTarget}
         onConfirm={handleConfirmDelete}
         isDeleting={deleteUser.isPending}
       />
 
-      <UserViewDialog
+      <AghrisUserViewDialog
         open={!!viewTarget}
         onOpenChange={(open) => !open && setViewTarget(null)}
         user={viewTarget}
@@ -192,9 +168,50 @@ export function UsersSection() {
   );
 }
 
-/** Icon trailing search box "Cari Pengguna" — persis SVG "search" Figma
- *  (dekoratif, bukan tombol), pola sama icon inline lain di domain ini
- *  (mis. `MailIcon`/`MoreVertIcon` di `UsersList.tsx`). */
+/** Icon judul "user-cog" Figma (orang + gembok kecil) — pendekatan
+ *  dengan path sederhana, dekoratif. */
+function TitleIcon() {
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4 26.6667V25.3333C4 20.1787 8.17868 16 13.3333 16C14.5 16 15.6 16.2 16.6 16.55"
+        stroke="#1D2520"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.3333 16C16.2789 16 18.6667 13.6122 18.6667 10.6667C18.6667 7.72115 16.2789 5.33334 13.3333 5.33334C10.3878 5.33334 8 7.72115 8 10.6667C8 13.6122 10.3878 16 13.3333 16Z"
+        stroke="#1D2520"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect
+        x="20"
+        y="21"
+        width="8"
+        height="6"
+        rx="1"
+        stroke="#1D2520"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M22 21V19.5C22 18.4 22.9 17.5 24 17.5C25.1 17.5 26 18.4 26 19.5V21"
+        stroke="#1D2520"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function SearchIcon() {
   return (
     <svg

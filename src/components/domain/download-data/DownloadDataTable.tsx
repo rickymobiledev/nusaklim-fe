@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { media } from "@/lib/breakpoints";
 import type { ApiMeta } from "@/types/api";
 
 /** Tabel Unduh Data — SENGAJA tidak reuse `components/shared/DataTable.tsx`
@@ -212,11 +213,28 @@ const EmptyCell = styled.td`
   color: #6d717f;
 `;
 
+// Mobile: grid 2 kolom — baris 1 [page size | "Menampilkan..."], baris 2
+// [panah kiri | panah kanan]. Desktop: satu baris flex.
 const Footer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 12px;
+  row-gap: 16px;
+  column-gap: 12px;
+
+  & > :nth-child(2) {
+    justify-self: end;
+  }
+
+  & > :nth-child(4) {
+    justify-self: end;
+  }
+
+  ${media.desktop} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 `;
 
 const PageSizeGroup = styled.div`

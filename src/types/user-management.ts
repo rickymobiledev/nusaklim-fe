@@ -53,3 +53,28 @@ export interface UpdateUserInput {
   userRoleId: string;
   companyId: string;
 }
+
+/** Pengguna Aghris — kontrak BE belum ada, bentuk mengikuti Figma
+ *  (nama, NIP SAP, peran, perusahaan). Sementara dilayani mock, lihat
+ *  `lib/api/aghris-users-client.ts`. */
+export interface AghrisUser {
+  id: string;
+  name: string;
+  nipSap: string;
+  imageUrl: string | null;
+  /** Kosong untuk data mock awal — form Edit mencocokkan lewat `roleName`. */
+  roleId: string;
+  roleName: string;
+  companyName: string;
+}
+
+export interface CreateAghrisUserInput {
+  nipSap: string;
+  roleId: string;
+}
+
+export interface UpdateAghrisUserInput {
+  id: string;
+  nipSap: string;
+  roleId: string;
+}

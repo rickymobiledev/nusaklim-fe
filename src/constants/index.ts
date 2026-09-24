@@ -104,6 +104,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/wind-direction": "Arah Mata Angin",
   "/login": "Masuk",
   "/user-management/users": "Manajemen",
+  "/user-management/aghris-users": "Manajemen",
 };
 
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan
