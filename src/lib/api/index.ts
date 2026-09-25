@@ -15,6 +15,7 @@ import { downloadClient } from "./download-client";
 import { stationApi as stationClient } from "./station-client";
 import { usersClient } from "./users-client";
 import { companiesClient } from "./companies-client";
+import { stationsAdminClient } from "./stations-admin-client";
 import { userRolesClient } from "./user-roles-client";
 import { missingDataClient } from "./missing-data-client";
 import { aghrisUsersClient } from "./aghris-users-client";
@@ -30,6 +31,7 @@ import type { NewsApi } from "./news-api";
 import type { NotificationApi } from "./notification-api";
 import type { UsersApi } from "./users-api";
 import type { CompaniesApi } from "./companies-api";
+import type { StationsAdminApi } from "./stations-admin-api";
 import type { UserRolesApi } from "./user-roles-api";
 import type { MissingDataApi } from "./missing-data-api";
 import type { AghrisUsersApi } from "./aghris-users-api";
@@ -95,6 +97,8 @@ export const notificationApi: NotificationApi = notificationClient;
 // `GET /user_roles`, dikonfirmasi curl langsung ke backend asli).
 export const usersApi: UsersApi = usersClient;
 export const companiesApi: CompaniesApi = companiesClient;
+// Manajemen > Stasiun (admin-only): daftar real, CRUD SEMENTARA mock.
+export const stationsAdminApi: StationsAdminApi = stationsAdminClient;
 export const userRolesApi: UserRolesApi = userRolesClient;
 // Domain "Missing Data" (admin-only) — SEMENTARA mock di dalam
 // `missing-data-client.ts` (`TEMP_USE_MOCK_MISSING_DATA`), endpoint asli

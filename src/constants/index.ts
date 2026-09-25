@@ -106,6 +106,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/user-management/users": "Manajemen",
   "/user-management/aghris-users": "Manajemen",
   "/user-management/companies": "Manajemen",
+  "/user-management/stations": "Manajemen",
 };
 
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan
@@ -164,3 +165,11 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
 
   return crumbs;
 }
+
+/** Pilihan "Merek" di form Manajemen > Stasiun — 3 brand device yang dikenal
+ *  backend Nusaklim (lihat `weather-brand-adapter.ts`). */
+export const STATION_BRANDS = [
+  "Davis Instruments",
+  "Meteo Nusantara Instrumen",
+  "Merapi Tani Instrumen",
+] as const;

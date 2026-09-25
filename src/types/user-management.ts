@@ -88,3 +88,19 @@ export interface UpdateAghrisUserInput {
   nipSap: string;
   roleId: string;
 }
+
+/** Form Tambah/Edit Stasiun (Manajemen > Stasiun). Foto BELUM ikut (kontrak upload BE belum ada). */
+export interface StationFields {
+  name: string;
+  companyCode: string;
+  brand: string;
+  latitude: number;
+  longitude: number;
+}
+
+/** `id` diisi user saat Tambah (ID Stasiun/device_id), terkunci saat Edit. */
+export interface CreateStationInput extends StationFields {
+  id: string;
+}
+
+export type UpdateStationInput = CreateStationInput;

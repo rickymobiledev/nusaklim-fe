@@ -61,7 +61,7 @@ export function CompaniesGrid({
   );
 }
 
-function MoreVertIcon() {
+export function MoreVertIcon() {
   return (
     <svg
       width="24"
@@ -77,7 +77,7 @@ function MoreVertIcon() {
   );
 }
 
-function EyeIcon() {
+export function EyeIcon() {
   return (
     <svg
       width="20"
@@ -104,7 +104,7 @@ function EyeIcon() {
   );
 }
 
-function PencilIcon() {
+export function PencilIcon() {
   return (
     <svg
       width="20"
@@ -124,7 +124,7 @@ function PencilIcon() {
   );
 }
 
-function TrashIcon() {
+export function TrashIcon() {
   return (
     <svg
       width="20"
