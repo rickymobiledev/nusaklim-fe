@@ -104,3 +104,15 @@ export interface CreateStationInput extends StationFields {
 }
 
 export type UpdateStationInput = CreateStationInput;
+
+/** Manajemen > Berita. `cover` = File baru yang diunggah (null = tidak ada). */
+export interface CreateNewsInput {
+  title: string;
+  /** HTML dari editor rich-text. */
+  content: string;
+  cover: File | null;
+}
+
+export interface UpdateNewsInput extends CreateNewsInput {
+  id: string;
+}

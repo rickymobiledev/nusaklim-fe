@@ -107,6 +107,7 @@ const EXTRA_TITLES: Record<string, string> = {
   "/user-management/aghris-users": "Manajemen",
   "/user-management/companies": "Manajemen",
   "/user-management/stations": "Manajemen",
+  "/user-management/news": "Manajemen",
 };
 
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan

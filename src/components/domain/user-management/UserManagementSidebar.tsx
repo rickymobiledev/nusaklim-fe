@@ -32,7 +32,7 @@ const MENU_ITEMS: {
     href: "/user-management/companies",
   },
   { key: "stasiun", label: "Stasiun", icon: Radio, href: "/user-management/stations" },
-  { key: "berita", label: "Berita", icon: Newspaper, href: null },
+  { key: "berita", label: "Berita", icon: Newspaper, href: "/user-management/news" },
 ];
 
 export function UserManagementSidebar() {

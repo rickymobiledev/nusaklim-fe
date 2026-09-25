@@ -510,6 +510,13 @@ export interface NewsItem {
   createdAt: string;
 }
 
+/** Detail berita (`GET /news?id=`) untuk form Ubah/dialog Lihat di Manajemen
+ *  Berita — `content` = HTML dari editor rich-text (WAJIB disanitasi sebelum
+ *  ditampilkan). */
+export interface NewsDetail extends NewsItem {
+  content: string;
+}
+
 /** Notifikasi user (bell icon Header) — `GET /notification`, polymorphic
  *  per-user ala Laravel (`notifiable_type`+`notifiable_id`), BELUM
  *  dikonfirmasi lewat tes langsung (cuma screenshot tabel DB, lihat
