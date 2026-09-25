@@ -90,6 +90,7 @@ export const DATA_GRANULARITY = [
  *  Labelnya tetap Bahasa Indonesia meski slug URL "dry-spell" pakai Bahasa Inggris. */
 const EXTRA_TITLES: Record<string, string> = {
   "/forecast": "Ramalan Cuaca",
+  "/news": "Berita Pilihan",
   "/missing-data": "Missing Data",
   "/monitoring/water-balance": "Keseimbangan Air",
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
@@ -110,6 +111,11 @@ const EXTRA_TITLES: Record<string, string> = {
   "/user-management/news": "Manajemen",
 };
 
+/** Halaman detail berita (`/news/[id]`) — judul berita dinamis tidak ada
+ *  di sini, trail-nya cuma "Beranda > Berita Pilihan > Detail Berita". */
+const NEWS_DETAIL_PREFIX = "/news/";
+const NEWS_DETAIL_TITLE = "Detail Berita";
+
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan
  *  by prefix terpanjang, mengecualikan "/" (supaya "/" tidak match SEMUA
  *  path). Dipakai bareng oleh `getPageTitle()`, `getBreadcrumbTrail()`,
@@ -124,6 +130,7 @@ function resolveTopLevelNavItem(pathname: string): NavItem | undefined {
 /** Dipakai Topbar untuk menentukan judul halaman otomatis dari pathname. */
 export function getPageTitle(pathname: string): string {
   if (EXTRA_TITLES[pathname]) return EXTRA_TITLES[pathname];
+  if (pathname.startsWith(NEWS_DETAIL_PREFIX)) return NEWS_DETAIL_TITLE;
   const exact = NAV_ITEMS.find((item) => item.href === pathname);
   if (exact) return exact.label;
   return resolveTopLevelNavItem(pathname)?.label ?? "Beranda";
@@ -146,6 +153,12 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
   if (pathname === "/") return [{ label: "Beranda", href: "/" }];
 
   const crumbs: BreadcrumbCrumb[] = [{ label: "Beranda", href: "/" }];
+
+  if (pathname.startsWith(NEWS_DETAIL_PREFIX)) {
+    crumbs.push({ label: EXTRA_TITLES["/news"], href: "/news" });
+    crumbs.push({ label: NEWS_DETAIL_TITLE, href: pathname });
+    return crumbs;
+  }
 
   const topLevel = resolveTopLevelNavItem(pathname);
 

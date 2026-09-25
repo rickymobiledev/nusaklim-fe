@@ -107,10 +107,10 @@ export const newsContentStyles = css`
 
 /** Render HTML berita yang SUDAH disanitasi (DOMPurify) — konten disimpan
  *  mentah di BE, jangan pernah `dangerouslySetInnerHTML` tanpa ini. */
-export function NewsHtml({ html }: { html: string }) {
+export function NewsHtml({ html, className }: { html: string; className?: string }) {
   // DOMPurify butuh DOM — komponen ini cuma dirender setelah data dimuat di client.
   const clean = typeof window === "undefined" ? "" : DOMPurify.sanitize(html);
-  return <Body dangerouslySetInnerHTML={{ __html: clean }} />;
+  return <Body className={className} dangerouslySetInnerHTML={{ __html: clean }} />;
 }
 
 const Body = styled.div`

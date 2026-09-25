@@ -14,9 +14,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export function Breadcrumb() {
+/** `currentLabel` (opsional) menggantikan label crumb TERAKHIR — dipakai
+ *  halaman dengan judul dinamis (mis. detail berita). */
+export function Breadcrumb({ currentLabel }: { currentLabel?: string }) {
   const pathname = usePathname();
-  const trail = getBreadcrumbTrail(pathname);
+  const trail = getBreadcrumbTrail(pathname).map((crumb, index, all) =>
+    currentLabel && index === all.length - 1 ? { ...crumb, label: currentLabel } : crumb,
+  );
 
   return (
     <div className="py-3">
