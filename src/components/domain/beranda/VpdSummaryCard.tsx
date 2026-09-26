@@ -1,55 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { format } from "date-fns";
 import styled from "styled-components";
-import { useVPD } from "@/hooks/use-vpd";
+import { useDashboardVpd } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
 import { getErrorMessage } from "@/lib/api/error-messages";
 import { media } from "@/lib/breakpoints";
-import {
-  DEFAULT_BATAS_AMAN_KPA,
-  formatKpa,
-  getVpdMessage,
-  pickLatestVpd,
-} from "@/lib/vpd-summary";
 
-/** Kartu "VPD" di sidebar kanan Beranda. Endpoint per-stasiun yang SAMA
- *  dengan Monitoring > VPD (`useVPD`), rentang 1 Jan tahun berjalan s/d
- *  hari ini, lalu ambil baris bermakna TERBARU (`pickLatestVpd`) —
- *  mengikuti project lama (acuan kebenaran) yang menampilkan baris
- *  terakhir: BE belum punya baris hari ini, jadi yang tampil data kemarin
- *  (bukti: nilai 20 Sep pada screenshot project lama). BEDA dari kartu
- *  Lama Penyinaran yang memang hari ini saja (project lama-nya `--`).
- *  Rentang 1 Jan adalah dugaan dari bentuk respons project lama — kalau
- *  ternyata jendelanya lain, cukup ganti `dateFrom`. Respons "tidak ada
- *  baris" (HTTP 404 dari BE) sudah dijadikan daftar kosong di
- *  `vpd-client.ts`. "Batas Aman" dari baris BE, fallback
- *  `DEFAULT_BATAS_AMAN_KPA` tanpa baris (Figma & project lama tetap
- *  menampilkan "1.7 kPa"). Angka ditampilkan apa adanya (maks 6 desimal).
- *
- *  Ikon info di header dekoratif — Figma tidak menunjukkan isi tooltip-nya
- *  (TODO kalau user mau tooltip penjelasan VPD). Catatan data: nilai `SVP`
- *  asli ~600–7600 tampak satuan Pa, tapi Figma & project lama menulis
- *  "kPa" — diikuti apa adanya, butuh konfirmasi BE/Data Analyst. */
+/** Kartu "VPD" di sidebar kanan Beranda.
+ *  Hit `/api/v2/dashboards/vpd?weather_station_id=...` */
 export function VpdSummaryCard({ stationId }: { stationId?: string }) {
-  const now = new Date();
-  const { data, isLoading, isError, error } = useVPD({
-    stationId,
-    dateFrom: `${now.getFullYear()}-01-01`,
-    dateTo: format(now, "yyyy-MM-dd"),
-  });
-
-  const row = pickLatestVpd(data ?? []);
+  const { data, isLoading, isError, error } = useDashboardVpd(stationId);
   const pending = !stationId || isLoading;
 
-  const emptyText = pending ? "Memuat data..." : "—";
+  const maxThresholdText = pending ? "..." : (data?.max_threshold ?? "2.1 kPa");
+  const vpdText = pending ? "..." : (data?.vpd ?? "—");
 
-  let message: string;
+  let message = "";
   if (isError) message = getErrorMessage(error);
-  else if (pending) message = "Memuat data...";
-  else message = getVpdMessage(row);
+  else if (data?.insight) message = data.insight;
 
   return (
     <Card>
@@ -61,20 +31,14 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
 
       <Row>
         <Label>Batas Aman</Label>
-        <Value $muted={false}>
-          {formatKpa(row?.batasAman ?? DEFAULT_BATAS_AMAN_KPA)}
-        </Value>
-      </Row>
-      <Row>
-        <Label>SVP</Label>
-        <Value $muted={!row}>{row ? formatKpa(row.svp) : emptyText}</Value>
+        <Value $muted={false}>{maxThresholdText}</Value>
       </Row>
       <Row>
         <Label>VPD</Label>
-        <Value $muted={!row}>{row ? formatKpa(row.vpd) : emptyText}</Value>
+        <Value $muted={!data}>{vpdText}</Value>
       </Row>
 
-      <SidePanelWarningBanner message={message} />
+      {message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }

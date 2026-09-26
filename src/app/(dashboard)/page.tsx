@@ -11,10 +11,31 @@ import { StationSyncCard } from "@/components/domain/beranda/StationSyncCard";
 import { StationStatsCard } from "@/components/domain/beranda/StationStatsCard";
 import { BerandaHeroBanner } from "@/components/domain/beranda/BerandaHeroBanner";
 import { WeatherSummaryCard } from "@/components/domain/beranda/WeatherSummaryCard";
-import { useWeatherMetrics } from "@/hooks/use-weather-metrics";
+import { useLatestWeather, computeDayTrend } from "@/hooks/use-latest-weather";
+import type { LatestWeatherItem } from "@/lib/api/latest-weather-client";
 import { useStations } from "@/hooks/use-stations";
 import { Skeleton } from "@/components/ui/skeleton";
-import { degreesToCardinal } from "@/lib/cardinal-direction";
+
+function toCardProps(item?: LatestWeatherItem, isWindDirection = false) {
+  return {
+    displayValue: item?.latest_10_min ?? "--",
+    days:
+      item?.last_3_days?.map((d) => ({
+        date: d.date,
+        valueText: isWindDirection
+          ? (d.average_direction ?? d.average ?? "--")
+          : (d.average ?? d.sum ?? "--"),
+      })) ?? [],
+    trendPercent: isWindDirection ? null : computeDayTrend(item?.last_3_days),
+    status: {
+      tone: "warning" as const,
+      message:
+        item?.interpretation && item.interpretation !== "---"
+          ? item.interpretation
+          : "",
+    },
+  };
+}
 
 export default function BerandaPage() {
   const [stationId, setStationId] = useState<string>();
@@ -22,8 +43,20 @@ export default function BerandaPage() {
   const { data: stationsResponse } = useStations();
   const selectedStationId = stationId ?? stationsResponse?.data[0]?.id;
 
-  const { data: snapshot, isLoading: loadingSnapshot } =
-    useWeatherMetrics(selectedStationId);
+  const {
+    weatherMap,
+    lastSync,
+    isLoading: loadingWeather,
+  } = useLatestWeather(selectedStationId);
+
+  const rainfallProps = toCardProps(weatherMap["rainfall"]);
+  const humidityProps = toCardProps(weatherMap["humidity"]);
+  const tempProps = toCardProps(weatherMap["temperature"]);
+  const solarProps = toCardProps(weatherMap["solar_radiation"]);
+  const pressureProps = toCardProps(weatherMap["air_pressure"]);
+  const windSpeedProps = toCardProps(weatherMap["wind_speed"]);
+  const windDirItem = weatherMap["wind_direction"];
+  const windDirProps = toCardProps(windDirItem, true);
 
   return (
     <div className="flex flex-col gap-6" data-page="beranda">
@@ -36,12 +69,16 @@ export default function BerandaPage() {
             <StationStatsCard />
           </div>
 
-          <StationSyncCard value={selectedStationId} onChange={setStationId} />
+          <StationSyncCard
+            value={selectedStationId}
+            onChange={setStationId}
+            lastSync={lastSync}
+          />
         </div>
       </div>
 
       <div className="relative z-10">
-        {loadingSnapshot ? (
+        {loadingWeather ? (
           <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
             <div className="grid gap-4 sm:grid-cols-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -50,7 +87,7 @@ export default function BerandaPage() {
             </div>
             <div />
           </div>
-        ) : snapshot ? (
+        ) : selectedStationId ? (
           <div className="grid min-w-0 gap-4 lg:grid-cols-[1fr_300px]">
             <div className="flex min-w-0 flex-col gap-4">
               <div className="grid min-w-0 gap-4 sm:grid-cols-2">
@@ -59,12 +96,7 @@ export default function BerandaPage() {
                   <WeatherSummaryCard
                     label="Curah Hujan"
                     illustrationSrc="/brand/rainy.png"
-                    value={snapshot.rainfall.value}
-                    unit={snapshot.rainfall.unit}
-                    chart={snapshot.rainfallDetail?.chart ?? []}
-                    status={
-                      snapshot.rainfallDetail?.status ?? { tone: "success", message: "" }
-                    }
+                    {...rainfallProps}
                   />
                 </Link>
               </div>
@@ -73,96 +105,44 @@ export default function BerandaPage() {
                   <WeatherSummaryCard
                     label="Kelembapan Relatif"
                     illustrationSrc="/brand/humidity.png"
-                    value={snapshot.airHumidity.value}
-                    unit={snapshot.airHumidity.unit}
-                    chart={snapshot.humidityDetail?.chart ?? []}
-                    status={
-                      snapshot.humidityDetail?.status ?? { tone: "success", message: "" }
-                    }
+                    {...humidityProps}
                   />
                 </Link>
                 <Link href="/air-temperature" className="flex">
                   <WeatherSummaryCard
                     label="Temperatur Udara"
                     illustrationSrc="/brand/temperature.png"
-                    value={snapshot.airTemperature.value}
-                    unit={snapshot.airTemperature.unit}
-                    chart={snapshot.temperatureDetail?.chart ?? []}
-                    status={
-                      snapshot.temperatureDetail?.status ?? {
-                        tone: "success",
-                        message: "",
-                      }
-                    }
+                    {...tempProps}
                   />
                 </Link>
                 <Link href="/solar-radiation" className="flex">
                   <WeatherSummaryCard
                     label="Radiasi Matahari"
                     illustrationSrc="/brand/weather-sunny.png"
-                    value={snapshot.solarRadiation.value}
-                    unit={snapshot.solarRadiation.unit}
-                    chart={snapshot.solarRadiationDetail?.chart ?? []}
-                    status={
-                      snapshot.solarRadiationDetail?.status ?? {
-                        tone: "success",
-                        message: "",
-                      }
-                    }
+                    {...solarProps}
                   />
                 </Link>
                 <Link href="/air-pressure" className="flex">
                   <WeatherSummaryCard
                     label="Tekanan Udara"
                     illustrationSrc="/brand/air-pressure.png"
-                    value={snapshot.airPressure.value}
-                    unit={snapshot.airPressure.unit}
-                    chart={snapshot.airPressureDetail?.chart ?? []}
-                    status={
-                      snapshot.airPressureDetail?.status ?? {
-                        tone: "success",
-                        message: "",
-                      }
-                    }
+                    {...pressureProps}
                   />
                 </Link>
                 <Link href="/wind-speed" className="flex">
                   <WeatherSummaryCard
                     label="Kecepatan Angin"
                     illustrationSrc="/brand/wind-speed.png"
-                    value={snapshot.windSpeed.value}
-                    unit={snapshot.windSpeed.unit}
-                    chart={snapshot.windSpeedDetail?.chart ?? []}
-                    status={
-                      snapshot.windSpeedDetail?.status ?? {
-                        tone: "success",
-                        message: "",
-                      }
-                    }
+                    {...windSpeedProps}
                   />
                 </Link>
                 <Link href="/wind-direction" className="flex">
                   <WeatherSummaryCard
                     label="Arah Mata Angin"
                     illustrationSrc="/brand/wind-direction.png"
-                    value={snapshot.windDirection.value}
-                    unit={snapshot.windDirection.unit}
-                    chart={snapshot.windDirectionDetail?.chart ?? []}
-                    status={
-                      snapshot.windDirectionDetail?.status ?? {
-                        tone: "success",
-                        message: "",
-                      }
-                    }
+                    {...windDirProps}
                     showTrend={false}
-                    valueSuffix={
-                      snapshot.windDirection.value === null
-                        ? undefined
-                        : degreesToCardinal(snapshot.windDirection.value)
-                    }
-                    formatDayValue={(deg) =>
-                      deg === null ? "--" : degreesToCardinal(deg)
-                    }
+                    valueSuffix={windDirItem?.latest_10_min_direction}
                   />
                 </Link>
               </div>

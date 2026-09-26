@@ -16,17 +16,21 @@ import {
 export function StationSyncCard({
   value,
   onChange,
+  lastSync,
 }: {
   value?: string;
   onChange: (stationId: string) => void;
+  lastSync?: string;
 }) {
   const { data: stationsResponse, isLoading, isFetching, refetch } = useStations();
   const stations = stationsResponse?.data;
   const selectedStation = stations?.find((s) => s.id === value);
 
-  const syncText = selectedStation?.sinkronisasiTerakhir
-    ? `${format(new Date(selectedStation.sinkronisasiTerakhir), "dd-MM-yyyy HH:mm")}.`
-    : "Belum ada data.";
+  const syncText = lastSync
+    ? lastSync
+    : selectedStation?.sinkronisasiTerakhir
+      ? `${format(new Date(selectedStation.sinkronisasiTerakhir), "dd-MM-yyyy HH:mm")}.`
+      : "Belum ada data.";
 
   return (
     <Card>

@@ -5,7 +5,7 @@ import styled from "styled-components";
 export function DashboardFooter() {
   return (
     <Wrapper>
-      <Version>Nusaklim v2.0</Version>
+      <Version>Nusaklim v3.0</Version>
       <Divider aria-hidden />
       <Copyright>2026 Nusaklim, All right Reserved</Copyright>
     </Wrapper>

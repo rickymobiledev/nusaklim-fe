@@ -17,6 +17,14 @@ export interface RawNotification {
   updated_at: string;
 }
 
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** `data` mentah = string JSON `{title, message}` — dibungkus try/catch,
  *  fallback string kosong kalau satu baris korup, JANGAN sampai gagalkan
  *  seluruh list gara-gara satu notifikasi tidak valid. */
@@ -28,7 +36,7 @@ function parseNotificationData(raw: string): { title: string; message: string } 
       message: typeof parsed.message === "string" ? parsed.message : "",
     };
   } catch {
-    return { title: "", message: "" };
+    return { title: "", message: typeof raw === "string" ? raw : "" };
   }
 }
 
@@ -36,7 +44,7 @@ export function mapRawNotification(raw: RawNotification): NotificationItem {
   const { title, message } = parseNotificationData(raw.data);
   return {
     id: String(raw.id),
-    judul: title,
+    judul: title || "Notifikasi",
     pesan: message,
     sudahDibaca: raw.read_at !== null,
     dibuatPada: raw.created_at,

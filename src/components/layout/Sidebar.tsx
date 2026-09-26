@@ -71,7 +71,7 @@ export function Sidebar() {
         </NavList>
 
         <Footer>
-          <FooterVersion>Nusaklim v2.0</FooterVersion>
+          <FooterVersion>Nusaklim v3.0</FooterVersion>
           <FooterCopyright>2026 Nusaklim, All right Reserved</FooterCopyright>
         </Footer>
       </Aside>

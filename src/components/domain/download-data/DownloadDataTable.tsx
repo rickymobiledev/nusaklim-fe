@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { media } from "@/lib/breakpoints";
 import type { ApiMeta } from "@/types/api";
 
 /** Tabel Unduh Data — SENGAJA tidak reuse `components/shared/DataTable.tsx`
@@ -28,10 +29,14 @@ export function DownloadDataTable<T>({
   columns,
   data,
   emptyMessage = "Data Tidak Tersedia",
+  headerHeight = 88,
 }: {
   columns: ColumnDef<T>[];
   data: T[];
   emptyMessage?: string;
+  /** Tinggi baris header (px) — default 88 (Unduh Data), halaman lain
+   *  yang reuse tabel ini boleh override (mis. Missing Data: 64). */
+  headerHeight?: number;
 }) {
   const table = useReactTable({
     data,
@@ -54,7 +59,7 @@ export function DownloadDataTable<T>({
           {headerGroups.map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Th key={header.id}>
+                <Th key={header.id} $height={headerHeight}>
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -167,9 +172,9 @@ const Table = styled.table`
   table-layout: fixed;
 `;
 
-const Th = styled.th`
+const Th = styled.th<{ $height: number }>`
   box-sizing: border-box;
-  height: 88px;
+  height: ${(p) => p.$height}px;
   padding: 8px 12px;
   background: #ffffff;
   text-align: center;
@@ -208,11 +213,28 @@ const EmptyCell = styled.td`
   color: #6d717f;
 `;
 
+// Mobile: grid 2 kolom — baris 1 [page size | "Menampilkan..."], baris 2
+// [panah kiri | panah kanan]. Desktop: satu baris flex.
 const Footer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 12px;
+  row-gap: 16px;
+  column-gap: 12px;
+
+  & > :nth-child(2) {
+    justify-self: end;
+  }
+
+  & > :nth-child(4) {
+    justify-self: end;
+  }
+
+  ${media.desktop} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
 `;
 
 const PageSizeGroup = styled.div`

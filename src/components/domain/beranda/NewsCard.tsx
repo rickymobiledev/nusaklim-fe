@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styled from "styled-components";
 import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
@@ -11,24 +12,26 @@ import { JournalIcon } from "@/components/shared/DashboardIcons";
 import { media } from "@/lib/breakpoints";
 import type { NewsItem } from "@/types/domain";
 
-/** "Berita Pilihan" — card ringkas di Beranda, sampai 5 berita terbaru
- *  dari `GET /news` (`useNews()`). Link "Lihat Semua" di Figma SENGAJA
- *  disembunyikan — belum ada halaman daftar berita penuh, keputusan
- *  eksplisit user. Card TIDAK diberi `<Link>` per-item juga (tidak ada
- *  halaman detail berita di scope ini), murni tampilan statis.
+/** "Berita Pilihan" — card ringkas di Beranda, sampai 4 berita terbaru
+ *  dari `GET /news/published` via `useNews()`. 1 kartu \"featured\" besar
+ *  (gambar + overlay gradasi, teks putih) + 3 kartu kecil. Featured sudah
+ *  di-sort ke depan oleh `compareNews` di `news-client.ts`. \"Lihat Semua\"
+ *  → `/news` (daftar penuh), tiap kartu → `/news/[id]` (detail).
  *
  *  Struktur mengikuti CSS Figma persis (bukan approksimasi lagi): 1
- *  kartu "featured" besar (gambar + overlay gradasi, teks putih) + 4
- *  kartu kecil (bg putih polos, thumbnail tanpa overlay, teks tanpa
- *  ringkasan). BEDA dari kebanyakan card Beranda lain: `Section`
- *  (wrapper terluar) SENGAJA tanpa background/border/padding — Figma
- *  ("Frame 3") menaruh section ini polos di atas background halaman,
- *  radius cuma ada di tiap kartu artikel individual. */
+ *  kartu \"featured\" besar (gambar + overlay gradasi, teks putih) + kartu
+ *  kecil (bg putih polos, thumbnail tanpa overlay, teks tanpa ringkasan).
+ *  BEDA dari kebanyakan card Beranda lain: `Section` (wrapper terluar)
+ *  SENGAJA tanpa background/border/padding — Figma (\"Frame 3\") menaruh
+ *  section ini polos di atas background halaman, radius cuma ada di tiap
+ *  kartu artikel individual. */
 export function NewsCard() {
   const { data, isLoading, isError, error } = useNews();
-  const items = data ?? [];
+  /** Ambil maksimal 4 item — featured di depan (sudah disortir BE+client),
+   *  sisanya 3 kartu kecil. */
+  const items = (data ?? []).slice(0, 4);
   const featured = items[0];
-  const smallItems = items.slice(1, 5);
+  const smallItems = items.slice(1);
 
   return (
     <>
@@ -39,6 +42,7 @@ export function NewsCard() {
             <JournalIcon size={20} />
             <Title>Berita Pilihan</Title>
           </HeaderLeft>
+          <SeeAllLink href="/news">Lihat Semua</SeeAllLink>
         </HeaderRow>
 
         <DataState
@@ -65,7 +69,7 @@ function FeaturedArticleCard({ item }: { item: NewsItem }) {
   const showImage = !!item.coverImage && !imageFailed;
 
   return (
-    <FeaturedArticle>
+    <FeaturedArticle href={`/news/${item.id}`}>
       {showImage ? (
         <Image
           src={item.coverImage!}
@@ -95,7 +99,7 @@ function SmallArticleCard({ item }: { item: NewsItem }) {
   const showImage = !!item.coverImage && !imageFailed;
 
   return (
-    <SmallArticle>
+    <SmallArticle href={`/news/${item.id}`}>
       <SmallImageFrame>
         {showImage ? (
           <Image
@@ -161,6 +165,14 @@ const Title = styled.h2`
   color: #667a6c;
 `;
 
+const SeeAllLink = styled(Link)`
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #175fe2;
+`;
+
 const CardsRow = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -174,7 +186,7 @@ const ImagePlaceholder = styled.div`
   background: #d4d4d4;
 `;
 
-const FeaturedArticle = styled.div`
+const FeaturedArticle = styled(Link)`
   position: relative;
   flex: 1 1 530px;
   max-width: 530px;
@@ -238,7 +250,7 @@ const FeaturedExcerpt = styled.p`
  * (height204/gambar100/judul14-20) — dikonfirmasi CSS Figma mobile
  * persis, kartu kecil mobile lebih tinggi & teksnya lebih besar,
  * BUKAN cuma versi diperkecil dari desktop. */
-const SmallArticle = styled.div`
+const SmallArticle = styled(Link)`
   flex: 1 1 180px;
   max-width: 260px;
   height: 241px;

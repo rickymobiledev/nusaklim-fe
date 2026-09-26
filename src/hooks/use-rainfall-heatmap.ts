@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   eachDayOfInterval,
   endOfMonth,
@@ -10,45 +11,73 @@ import {
   startOfMonth,
 } from "date-fns";
 import { id as localeId } from "date-fns/locale";
-import { useRainfallChart } from "./use-rainfall-chart";
+import { fetchJson } from "@/lib/api/client-fetch";
 import { getRainfallHeatmapLevel } from "@/lib/rainfall-heatmap-level";
 import type { RainfallHeatmapHari } from "@/types/domain";
+import type { RawRainfallHeatmapData } from "@/lib/api/rainfall-heatmap-client";
 
-/** Data kartu "Heatmap Curah Hujan" Beranda — REUSE `useRainfallChart()`
- *  (endpoint & fetch logic SAMA dengan halaman `/rainfall`), TIDAK ada
- *  route/API baru. Hook ini murni shaping di client: (1) paksa rentang
- *  = bulan BERJALAN (statis, tanpa navigasi prev/next, sesuai keputusan
- *  user), (2) zip `points[i]` dari `fetchRainfallRange` dengan
- *  `eachDayOfInterval` (aman index-by-index karena urutan keduanya
- *  dijamin sama — lihat loop berurutan dari `startDate` di
- *  `fetchRainfallRange`, `lib/api/weather-daily-client.ts`), (3) override
- *  level jadi `tidak_ada_data` untuk tanggal > hari ini (BE tidak bisa
- *  membedakan dari default 0mm-nya `fetchRainfallRange`), (4) tambah sel
- *  padding `null` di awal/akhir grid 7 kolom (Min..Sab). */
-export function useRainfallHeatmap(stationId?: string) {
+/** Hook data kartu "Heatmap Curah Hujan" Beranda — hit endpoint dedicated
+ *  `/api/v2/dashboards/rainfall_heatmap?weather_station_id=&year=&month=`.
+ *  Jika stasiun, tahun, atau bulan berubah, query otomatis fetch ulang data baru. */
+export function useRainfallHeatmap(
+  stationId?: string,
+  year?: number,
+  month?: number,
+) {
+  const now = new Date();
+  const currentYear = year ?? now.getFullYear();
+  const currentMonth = month ?? now.getMonth() + 1; // 1-12
+
   const { start, end, today } = useMemo(() => {
-    const now = new Date();
-    return { start: startOfMonth(now), end: endOfMonth(now), today: startOfDay(now) };
-  }, []);
+    const monthDate = new Date(currentYear, currentMonth - 1, 1);
+    return {
+      start: startOfMonth(monthDate),
+      end: endOfMonth(monthDate),
+      today: startOfDay(new Date()),
+    };
+  }, [currentYear, currentMonth]);
 
-  const stationIds = useMemo(() => (stationId ? [stationId] : []), [stationId]);
-
-  const { data, isLoading } = useRainfallChart(stationIds, { from: start, to: end });
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["rainfall-heatmap", stationId, currentYear, currentMonth],
+    queryFn: () =>
+      fetchJson<{ status: boolean; data: RawRainfallHeatmapData }>(
+        `/api/dashboards/rainfall_heatmap?weather_station_id=${encodeURIComponent(
+          stationId ?? "",
+        )}&year=${currentYear}&month=${currentMonth}`,
+      ),
+    enabled: !!stationId && !!currentYear && !!currentMonth,
+    select: (res) => res.data,
+  });
 
   const hariKalender = useMemo<(RainfallHeatmapHari | null)[]>(() => {
-    const points = data?.[0]?.points ?? [];
-    const hariDalamBulan: RainfallHeatmapHari[] = eachDayOfInterval({ start, end }).map(
-      (tanggal, i) => {
-        const masaDepan = isAfter(startOfDay(tanggal), today);
-        const curahHujan = masaDepan ? null : (points[i]?.value ?? 0);
-        return {
-          tanggal: format(tanggal, "yyyy-MM-dd"),
-          tanggalAngka: tanggal.getDate(),
-          curahHujan,
-          level: getRainfallHeatmapLevel(curahHujan, masaDepan),
-        };
-      },
-    );
+    const weathers = data?.weathers ?? [];
+    const weatherMap = new Map<string, number>();
+    weathers.forEach((w) => {
+      const val =
+        typeof w.rainfall === "number"
+          ? w.rainfall
+          : parseFloat(String(w.rainfall)) || 0;
+      weatherMap.set(w.date, val);
+    });
+
+    const hariDalamBulan: RainfallHeatmapHari[] = eachDayOfInterval({
+      start,
+      end,
+    }).map((tanggal) => {
+      const dateStr = format(tanggal, "yyyy-MM-dd");
+      const masaDepan = isAfter(startOfDay(tanggal), today);
+      const curahHujan = masaDepan
+        ? null
+        : weatherMap.has(dateStr)
+          ? weatherMap.get(dateStr)!
+          : 0;
+      return {
+        tanggal: dateStr,
+        tanggalAngka: tanggal.getDate(),
+        curahHujan,
+        level: getRainfallHeatmapLevel(curahHujan, masaDepan),
+      };
+    });
 
     // Min=0 ... Sab=6, sejajar urutan kolom weekday di Figma
     const leading = Array<null>(start.getDay()).fill(null);
@@ -60,7 +89,10 @@ export function useRainfallHeatmap(stationId?: string) {
 
   return {
     isLoading,
+    isError,
+    error,
     bulanLabel: format(start, "MMMM yyyy", { locale: localeId }),
+    stationName: data?.weather_station_name,
     hariKalender,
   };
 }

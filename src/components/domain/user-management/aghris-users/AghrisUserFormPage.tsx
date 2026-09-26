@@ -1,0 +1,322 @@
+"use client";
+
+import { useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import styled from "styled-components";
+import { ChevronRight } from "lucide-react";
+import { DataState } from "@/components/shared/DataState";
+import { SaveFloppyDiskIcon } from "@/components/shared/SaveFloppyDiskIcon";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  useAghrisUsers,
+  useCreateAghrisUser,
+  useUpdateAghrisUser,
+} from "@/hooks/use-aghris-users";
+import { useUserRoles } from "@/hooks/use-user-roles";
+import { media } from "@/lib/breakpoints";
+import type { AghrisUser, UserRoleOption } from "@/types/user-management";
+import { Field, FieldError, FieldLabel, UserFormField } from "../users/UserFormField";
+
+const LIST_HREF = "/user-management/aghris-users";
+
+const schema = z.object({
+  nipSap: z.string().trim().min(1, "NIK SAP wajib diisi"),
+  roleId: z.string().min(1, "Peran wajib dipilih"),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+/** Form Tambah/Edit Pengguna Aghris — Figma cuma punya NIK SAP + Peran.
+ *  Label "NIK SAP" ikut Figma form (list Figma menulis "NIP SAP"); field
+ *  kode tetap `nipSap`. Dropdown Peran reuse `useUserRoles()` (belum ada
+ *  daftar peran khusus Aghris). Breadcrumb Figma menulis "Pengguna" (kemungkinan
+ *  salah salin dari halaman Pengguna) — dipakai "Pengguna Aghris". */
+export function AghrisUserFormPage({
+  mode,
+  userId,
+}: {
+  mode: "create" | "edit";
+  userId?: string;
+}) {
+  const users = useAghrisUsers();
+  const roles = useUserRoles();
+  const user = useMemo(
+    () => (mode === "edit" ? users.data?.data.find((u) => u.id === userId) : undefined),
+    [mode, users.data, userId],
+  );
+  const title = mode === "create" ? "Tambah Pengguna Aghris" : "Edit Pengguna Aghris";
+
+  // Form dirender SETELAH daftar peran (dan user, mode edit) termuat —
+  // `defaultValues` react-hook-form cuma dibaca sekali.
+  const isLoading = roles.isLoading || (mode === "edit" && users.isLoading);
+  const isError = roles.isError || (mode === "edit" && users.isError);
+  const error = roles.error ?? (mode === "edit" ? users.error : null);
+  const roleOptions = roles.data?.data ?? [];
+
+  return (
+    <Page>
+      <Crumbs aria-label="Breadcrumb">
+        <CrumbLink href={LIST_HREF}>Manajemen</CrumbLink>
+        <ChevronRight size={16} strokeWidth={1.5} color="#8B9C90" />
+        <CrumbLink href={LIST_HREF}>Pengguna Aghris</CrumbLink>
+        <ChevronRight size={16} strokeWidth={1.5} color="#8B9C90" />
+        <CrumbCurrent>{title}</CrumbCurrent>
+      </Crumbs>
+      <Title>{title}</Title>
+      <Card>
+        <DataState
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+          isEmpty={mode === "edit" && !isLoading && !user}
+          emptyMessage="Pengguna Aghris tidak ditemukan."
+        >
+          <AghrisUserForm mode={mode} user={user} roles={roleOptions} />
+        </DataState>
+      </Card>
+    </Page>
+  );
+}
+
+function AghrisUserForm({
+  mode,
+  user,
+  roles,
+}: {
+  mode: "create" | "edit";
+  user?: AghrisUser;
+  roles: UserRoleOption[];
+}) {
+  const router = useRouter();
+  const createUser = useCreateAghrisUser();
+  const updateUser = useUpdateAghrisUser();
+  const isSubmitting = createUser.isPending || updateUser.isPending;
+
+  // Data mock awal belum punya `roleId` — cocokkan lewat nama peran.
+  const initialRoleId =
+    user?.roleId || roles.find((r) => r.name === user?.roleName)?.id || "";
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { nipSap: user?.nipSap ?? "", roleId: initialRoleId },
+  });
+
+  function goToList() {
+    router.push(LIST_HREF);
+  }
+
+  function onSubmit(values: FormValues) {
+    if (mode === "create") {
+      createUser.mutate(values, { onSuccess: goToList });
+      return;
+    }
+    if (!user) return;
+    updateUser.mutate({ id: user.id, ...values }, { onSuccess: goToList });
+  }
+
+  return (
+    <Panel onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Fields>
+        <UserFormField
+          id="nipSap"
+          label="NIK SAP"
+          placeholder="e.g. 2365236"
+          inputMode="numeric"
+          error={errors.nipSap?.message}
+          {...register("nipSap")}
+        />
+
+        <Field>
+          <FieldLabel>Peran</FieldLabel>
+          <Controller
+            control={control}
+            name="roleId"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <FormSelectTrigger $invalid={!!errors.roleId}>
+                  <SelectValue placeholder="Pilih Peran" />
+                </FormSelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.roleId && <FieldError>{errors.roleId.message}</FieldError>}
+        </Field>
+      </Fields>
+
+      <Actions>
+        <SaveButton type="submit" disabled={isSubmitting}>
+          <SaveFloppyDiskIcon color="#FFFFFF" />
+          {isSubmitting ? "Menyimpan..." : "Simpan"}
+        </SaveButton>
+        <CancelButton type="button" onClick={goToList} disabled={isSubmitting}>
+          Batal
+        </CancelButton>
+      </Actions>
+    </Panel>
+  );
+}
+
+const Page = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const Crumbs = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+`;
+
+const crumbFont = `
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+`;
+
+const CrumbLink = styled(Link)`
+  ${crumbFont}
+  color: #8b9c90;
+  text-decoration: none;
+
+  &:hover {
+    color: #175fe2;
+  }
+`;
+
+const CrumbCurrent = styled.span`
+  ${crumbFont}
+  color: #175fe2;
+`;
+
+const Title = styled.h1`
+  margin: 0;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 700;
+  color: #000000;
+`;
+
+const Card = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #ecefed;
+  border-radius: 16px;
+
+  ${media.desktop} {
+    padding: 24px;
+  }
+`;
+
+const Panel = styled.form`
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #ecefed;
+  border-radius: 8px;
+
+  ${media.desktop} {
+    width: 662px;
+    align-self: flex-start;
+  }
+`;
+
+const Fields = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+/** Gaya kotak sama `UserFormField` (48px, border 1.5px `#D6DCD8`, radius
+ *  12) — `&&` menang atas class Tailwind bawaan `SelectTrigger`. */
+const FormSelectTrigger = styled(SelectTrigger)<{ $invalid?: boolean }>`
+  && {
+    box-sizing: border-box;
+    width: 100%;
+    height: 48px;
+    padding: 12px;
+    background: #ffffff;
+    border: 1.5px solid ${(p) => (p.$invalid ? p.theme.colors.danger[600] : "#d6dcd8")};
+    border-radius: 12px;
+    font-family: var(--font-plus-jakarta-sans), sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    color: #1d2520;
+  }
+
+  &&[data-placeholder] {
+    color: #8b9c90;
+  }
+`;
+
+const Actions = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+`;
+
+const buttonBase = `
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const SaveButton = styled.button`
+  ${buttonBase}
+  background: #175fe2;
+  color: #ffffff;
+`;
+
+const CancelButton = styled.button`
+  ${buttonBase}
+  background: transparent;
+  color: #667a6c;
+`;

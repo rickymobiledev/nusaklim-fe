@@ -1,41 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import { format, parseISO } from "date-fns";
-import { id } from "date-fns/locale";
 import styled from "styled-components";
-import { useDrySpell } from "@/hooks/use-dry-spell";
+import { useDashboardDrySpell } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { getErrorMessage } from "@/lib/api/error-messages";
-import {
-  DRY_SPELL_MESSAGE,
-  getDrySpellLevel,
-  pickLatestDrySpellReport,
-} from "@/lib/dry-spell-level";
 
 /** Kartu "Deret Hari Terpanjang Tidak Hujan" di sidebar kanan Beranda.
- *  Pakai endpoint per-stasiun yang SAMA dengan Monitoring > Deret Hari
- *  Tanpa Hujan (`useDrySpell`), rentang 1 Jan tahun berjalan s/d hari ini
- *  — BUKAN `useDrySpellMap` (endpoint company-wide tab Peta). Warna kartu
- *  tetap kuning untuk semua level (keputusan user, Figma cuma punya satu
- *  varian) — hanya kalimat banner yang berganti. */
+ *  Hit `/api/v2/dashboards/dry_spell?weather_station_id=...` */
 export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
-  const today = new Date();
-  const { data, isLoading, isError, error } = useDrySpell({
-    stationId,
-    dateFrom: `${today.getFullYear()}-01-01`,
-    dateTo: format(today, "yyyy-MM-dd"),
-  });
-
-  const latest = pickLatestDrySpellReport(data ?? []);
-  const level = getDrySpellLevel(latest?.totalHariKering ?? null);
+  const { data, isLoading, isError, error } = useDashboardDrySpell(stationId);
 
   let dateText: string;
   if (!stationId || isLoading) dateText = "Memuat data...";
   else if (isError) dateText = "Data tidak dapat dimuat";
-  else if (!latest) dateText = "Belum ada periode tercatat tahun ini";
-  else
-    dateText = `${formatDate(latest.tanggalMulai)} — ${formatDate(latest.tanggalSelesai)}`;
+  else if (!data?.date) dateText = "Belum ada periode tercatat";
+  else dateText = data.date;
+
+  const valueText = !stationId || isLoading ? "..." : (data?.total_dry_spell ?? "—");
+  const message = isError ? getErrorMessage(error) : (data?.insight ?? "");
 
   return (
     <Card>
@@ -47,21 +30,15 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
         <Title>Deret Hari Terpanjang Tidak Hujan</Title>
         <ValueRow>
           <Image src="/brand/dry-spell.png" alt="" width={50} height={50} />
-          <Value>{latest ? `${latest.totalHariKering} Hari` : "—"}</Value>
+          <Value>{valueText}</Value>
         </ValueRow>
       </Content>
 
       <DateText>{dateText}</DateText>
 
-      <SidePanelWarningBanner
-        message={isError ? getErrorMessage(error) : DRY_SPELL_MESSAGE[level]}
-      />
+      {message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
-}
-
-function formatDate(value: string): string {
-  return format(parseISO(value), "d MMM yyyy", { locale: id });
 }
 
 const Card = styled.div`

@@ -11,7 +11,7 @@ export async function GET() {
   if (!user) return unauthorized;
 
   try {
-    const result = await notificationApi.getNotifications();
+    const result = await notificationApi.getNotifications(user.id);
     return NextResponse.json(result);
   } catch (error) {
     return apiErrorResponse(error);

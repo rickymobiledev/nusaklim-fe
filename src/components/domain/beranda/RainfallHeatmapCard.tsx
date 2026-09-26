@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import styled from "styled-components";
+import { addMonths, subMonths } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRainfallHeatmap } from "@/hooks/use-rainfall-heatmap";
 import { CalendarOutlineIcon, InfoEmptyIcon } from "@/components/shared/DashboardIcons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,7 +20,15 @@ import type { RainfallHeatmapLevel } from "@/types/domain";
 const WEEKDAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 export function RainfallHeatmapCard({ stationId }: { stationId?: string }) {
-  const { isLoading, bulanLabel, hariKalender } = useRainfallHeatmap(stationId);
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth() + 1;
+
+  const { isLoading, bulanLabel, hariKalender } = useRainfallHeatmap(
+    stationId,
+    year,
+    month,
+  );
 
   return (
     <Card>
@@ -25,7 +36,21 @@ export function RainfallHeatmapCard({ stationId }: { stationId?: string }) {
         <Title>Heatmap Curah Hujan</Title>
         <MonthBadge>
           <CalendarOutlineIcon size={20} />
+          <NavArrowButton
+            type="button"
+            onClick={() => setCurrentDate((d) => subMonths(d, 1))}
+            aria-label="Bulan sebelumnya"
+          >
+            <ChevronLeft size={16} />
+          </NavArrowButton>
           <MonthLabel>{bulanLabel}</MonthLabel>
+          <NavArrowButton
+            type="button"
+            onClick={() => setCurrentDate((d) => addMonths(d, 1))}
+            aria-label="Bulan berikutnya"
+          >
+            <ChevronRight size={16} />
+          </NavArrowButton>
         </MonthBadge>
       </HeaderRow>
 
@@ -137,6 +162,27 @@ const MonthLabel = styled.span`
   line-height: 24px;
   color: #1d2520;
   white-space: nowrap;
+`;
+
+const NavArrowButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #d6dcd8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #667a6c;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f0f3f1;
+    color: #1d2520;
+    border-color: #8b9c90;
+  }
 `;
 
 const EmptyMessage = styled.p`

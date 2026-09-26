@@ -3,41 +3,28 @@
 import { useState } from "react";
 import Image from "next/image";
 import styled from "styled-components";
-import { useWaterBalance } from "@/hooks/use-water-balance";
+import { useDashboardWaterBalance } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { getErrorMessage } from "@/lib/api/error-messages";
-import {
-  getLastCompletedMonth,
-  getWaterBalanceMessage,
-  pickLatestWaterBalanceMonth,
-} from "@/lib/water-balance-summary";
 
-/** Kartu "Keseimbangan Air" di sidebar kanan Beranda. Data 4 metrik SATU
- *  bulan: bulan terakhir yang sudah selesai (mulai bulan lalu) dan ada
- *  datanya, dari endpoint per-stasiun yang SAMA dengan Monitoring >
- *  Keseimbangan Air (`useWaterBalance`) — BUKAN `/devices/water_deficit`
- *  (company-wide tab Peta). */
+/** Kartu "Keseimbangan Air" di sidebar kanan Beranda.
+ *  Hit `/api/v2/dashboards/water_balance?weather_station_id=...` */
 export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
   const [rainFailed, setRainFailed] = useState(false);
 
-  const target = getLastCompletedMonth(new Date());
-  const { data, isLoading, isError, error } = useWaterBalance({
-    stationId,
-    years: [target.year],
-  });
+  const { data, isLoading, isError, error } = useDashboardWaterBalance(stationId);
 
-  const month = pickLatestWaterBalanceMonth(data?.[0], target.monthIndex);
-
-  let message: string;
+  let message = "";
   if (isError) message = getErrorMessage(error);
-  else if (!stationId || isLoading) message = "Memuat data...";
-  else message = getWaterBalanceMessage(month);
+  else if (data?.insight) message = data.insight;
+
+  const rainfall = parseValueAndUnit(isLoading ? "..." : data?.total_rainfall);
+  const rainyDay = parseValueAndUnit(isLoading ? "..." : data?.total_rainy_day);
+  const deficit = parseValueAndUnit(isLoading ? "..." : data?.total_water_deficit);
+  const surplus = parseValueAndUnit(isLoading ? "..." : data?.total_water_surplus);
 
   return (
     <Card>
-      {/* Aset hujan Figma (rain-png-45866) menyusul dari user — kalau file
-          belum ada, disembunyikan saja supaya tidak muncul ikon gambar
-          rusak, kartu tetap tampil normal. */}
       {!rainFailed && (
         <BackgroundFrame aria-hidden>
           <Rain
@@ -56,28 +43,26 @@ export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
       </Header>
 
       <TileRow>
-        <MetricTile label="Curah Hujan" value={formatDecimal(month?.rainfall)} />
-        <MetricTile
-          label="Hari Hujan"
-          value={month?.rainyDays == null ? "—" : `${month.rainyDays} Hari`}
-        />
+        <MetricTile label="Curah Hujan" value={rainfall.val} unit={rainfall.unit} />
+        <MetricTile label="Hari Hujan" value={rainyDay.val} unit={rainyDay.unit} />
       </TileRow>
       <TileRow>
-        <MetricTile
-          label="Defisit Air"
-          value={formatDecimal(month?.waterDeficit)}
-          unit="mm"
-        />
-        <MetricTile
-          label="Kelebihan Air"
-          value={formatDecimal(month?.waterSurplus)}
-          unit="mm"
-        />
+        <MetricTile label="Defisit Air" value={deficit.val} unit={deficit.unit} />
+        <MetricTile label="Kelebihan Air" value={surplus.val} unit={surplus.unit} />
       </TileRow>
 
-      <SidePanelWarningBanner message={message} />
+      {message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
+}
+
+function parseValueAndUnit(str?: string | null) {
+  if (!str) return { val: "—", unit: "" };
+  const parts = str.trim().split(/\s+/);
+  if (parts.length > 1) {
+    return { val: parts[0], unit: parts.slice(1).join(" ") };
+  }
+  return { val: str, unit: "" };
 }
 
 function MetricTile({
@@ -94,14 +79,10 @@ function MetricTile({
       <TileLabel>{label}</TileLabel>
       <TileValue>
         {value}
-        {unit && value !== "—" && <Unit> {unit}</Unit>}
+        {unit && value !== "—" && value !== "..." && <Unit> {unit}</Unit>}
       </TileValue>
     </Tile>
   );
-}
-
-function formatDecimal(value: number | null | undefined): string {
-  return value == null ? "—" : value.toFixed(2);
 }
 
 const Card = styled.div`

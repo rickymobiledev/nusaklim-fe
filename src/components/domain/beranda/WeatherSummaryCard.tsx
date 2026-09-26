@@ -11,13 +11,24 @@ import {
 } from "@/components/shared/DashboardIcons";
 import type { WeatherChartPoint, WeatherStatus } from "@/types/domain";
 
-interface WeatherSummaryCardProps {
+export interface WeatherSummaryDayItem {
+  date: string;
+  valueText: string;
+}
+
+export interface WeatherSummaryCardProps {
   label: string;
   illustrationSrc: string;
-  value: number | null;
-  unit: string;
-  chart: WeatherChartPoint[];
+  value?: number | null;
+  /** Nilai siap-tampil lengkap dengan unit (mis. "28.6 °C"), mengabaikan `value` & `unit`. */
+  displayValue?: string;
+  unit?: string;
+  chart?: WeatherChartPoint[];
+  /** Daftar 3 hari terakhir siap-tampil, mengabaikan slice dari `chart`. */
+  days?: WeatherSummaryDayItem[];
   status: WeatherStatus;
+  /** Nilai persentase tren eksplisit (mis. dihitung dari 3 hari terakhir backend). */
+  trendPercent?: number | null;
   /** `false` = sembunyikan chip persentase (mis. arah angin: perubahan
    *  derajat tidak bermakna). */
   showTrend?: boolean;
@@ -39,16 +50,37 @@ export function WeatherSummaryCard({
   label,
   illustrationSrc,
   value,
-  unit,
+  displayValue,
+  unit = "",
   chart,
+  days,
   status,
+  trendPercent,
   showTrend = true,
   valueSuffix,
   formatDayValue,
 }: WeatherSummaryCardProps) {
-  // Titik terakhir `chart` = hari ini, jadi 3 kotak = 3 hari SEBELUM hari ini.
-  const recentDays = chart.slice(-(RECENT_DAYS + 1), -1);
-  const trend = showTrend ? computeTrendPercent(chart) : null;
+  // Jika `days` dikirim eksplisit, pakai itu; jika tidak, ambil 3 hari sebelum hari ini dari `chart`
+  const recentDays: WeatherSummaryDayItem[] =
+    days ??
+    (chart
+      ? chart.slice(-(RECENT_DAYS + 1), -1).map((day) => ({
+          date: day.date,
+          valueText: formatDayValue
+            ? formatDayValue(day.value)
+            : formatWithUnit(day.value, unit),
+        }))
+      : []);
+
+  const trend = showTrend
+    ? trendPercent !== undefined
+      ? trendPercent
+      : chart
+        ? computeTrendPercent(chart)
+        : null
+    : null;
+
+  const renderedValue = displayValue ?? formatWithUnit(value ?? null, unit);
 
   const [expanded, setExpanded] = useState(false);
   const statusTextRef = useRef<HTMLSpanElement>(null);
@@ -64,7 +96,7 @@ export function WeatherSummaryCard({
           <Content>
             <ValueRow>
               <ValueGroup>
-                <Value>{formatWithUnit(value, unit)}</Value>
+                <Value>{renderedValue}</Value>
                 {valueSuffix && <ValueSuffix>{valueSuffix}</ValueSuffix>}
               </ValueGroup>
               {trend !== null && (
@@ -78,11 +110,7 @@ export function WeatherSummaryCard({
               {recentDays.map((day) => (
                 <DayBox key={day.date}>
                   <DayLabel>{day.date}</DayLabel>
-                  <DayValue>
-                    {formatDayValue
-                      ? formatDayValue(day.value)
-                      : formatWithUnit(day.value, unit)}
-                  </DayValue>
+                  <DayValue>{day.valueText}</DayValue>
                 </DayBox>
               ))}
             </RecentDays>

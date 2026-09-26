@@ -1,48 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { format } from "date-fns";
 import styled from "styled-components";
-import { useSunshineDuration } from "@/hooks/use-sunshine-duration";
+import { useDashboardSunshineDuration } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { getErrorMessage } from "@/lib/api/error-messages";
 import { media } from "@/lib/breakpoints";
-import {
-  DEFAULT_BATAS_BAWAH_JAM,
-  formatHours,
-  getSunshineDurationMessage,
-  pickLatestSunshineDuration,
-} from "@/lib/sunshine-duration-summary";
 
-/** Kartu "Lama Penyinaran" di sidebar kanan Beranda. Endpoint per-stasiun
- *  yang SAMA dengan Monitoring > Lama Penyinaran (`useSunshineDuration`),
- *  tapi HANYA hari ini (dateFrom = dateTo) — sama project lama, yang jadi
- *  acuan kebenaran: baris hari ini belum ada (lama penyinaran baru lengkap
- *  sore/malam) → "Data Belum Tersedia". Sempat memakai fallback "baris
- *  terbaru dalam 7 hari" tapi itu menampilkan angka kemarin tanpa label
- *  tanggal dan berbeda dari project lama. Respons "tidak ada baris" (HTTP
- *  404 dari BE) sudah dijadikan daftar kosong di `sunshine-duration-client`.
- *  "Batas Bawah" dari baris BE, fallback `DEFAULT_BATAS_BAWAH_JAM` tanpa
- *  baris (Figma & project lama tetap menampilkan "3 Jam"). */
+/** Kartu "Lama Penyinaran" di sidebar kanan Beranda.
+ *  Hit `/api/v2/dashboards/solar_sunshine_duration?weather_station_id=...` */
 export function SunshineDurationSummaryCard({ stationId }: { stationId?: string }) {
-  const today = format(new Date(), "yyyy-MM-dd");
-  const { data, isLoading, isError, error } = useSunshineDuration({
-    stationId,
-    dateFrom: today,
-    dateTo: today,
-  });
+  const { data, isLoading, isError, error } = useDashboardSunshineDuration(stationId);
 
-  const row = pickLatestSunshineDuration(data ?? []);
   const pending = !stationId || isLoading;
 
   let durationText = "Data Belum Tersedia";
   if (pending) durationText = "Memuat data...";
-  else if (row) durationText = formatHours(row.lamaPenyinaranJam);
+  else if (data?.total_solar_sunshine_duration) durationText = data.total_solar_sunshine_duration;
 
-  let message: string;
+  const minThresholdText = pending ? "..." : (data?.min_threshold ?? "3 jam");
+
+  let message = "";
   if (isError) message = getErrorMessage(error);
-  else if (pending) message = "Memuat data...";
-  else message = getSunshineDurationMessage(row);
+  else if (data?.insight) message = data.insight;
 
   return (
     <Card>
@@ -53,16 +33,14 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
 
       <Row>
         <Label>Batas Bawah</Label>
-        <Value $muted={false}>
-          {formatHours(row?.batasBawahJam ?? DEFAULT_BATAS_BAWAH_JAM)}
-        </Value>
+        <Value $muted={false}>{minThresholdText}</Value>
       </Row>
       <Row>
         <Label>Lama Penyinaran</Label>
-        <Value $muted={!row}>{durationText}</Value>
+        <Value $muted={!data}>{durationText}</Value>
       </Row>
 
-      <SidePanelWarningBanner message={message} />
+      {message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }

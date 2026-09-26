@@ -51,8 +51,8 @@ export type NavItem = {
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Sebaran Spasial, Monitoring, Unduh Data).
  *  "Lainnya" (admin-only) dropdown-nya redesign: "Ramalan Cuaca" DIPINDAH
  *  ke sini dari pill top-level (menghindari dobel di drawer mobile yang
- *  flatten `children`), + "Missing Data" (BARU, disabled — belum ada
- *  halaman sama sekali) + "Manajemen" (sudah ada). `/forecast` masih bisa
+ *  flatten `children`), + "Missing Data" (`/missing-data`, admin-only) +
+ *  "Manajemen" (sudah ada). `/forecast` masih bisa
  *  diakses langsung via URL / kartu Ramalan Cuaca di Beranda — lihat
  *  `EXTRA_TITLES["/forecast"]` di bawah supaya title/breadcrumb tetap benar
  *  walau bukan lagi top-level NAV_ITEMS. */
@@ -72,7 +72,6 @@ export const NAV_ITEMS: NavItem[] = [
         label: "Missing Data",
         href: "/missing-data",
         icon: MissingDataIcon,
-        disabled: true,
       },
       { label: "Manajemen", href: "/user-management/users", icon: ManajemenIcon },
     ],
@@ -91,6 +90,8 @@ export const DATA_GRANULARITY = [
  *  Labelnya tetap Bahasa Indonesia meski slug URL "dry-spell" pakai Bahasa Inggris. */
 const EXTRA_TITLES: Record<string, string> = {
   "/forecast": "Ramalan Cuaca",
+  "/news": "Berita Pilihan",
+  "/missing-data": "Missing Data",
   "/monitoring/water-balance": "Keseimbangan Air",
   "/monitoring/dry-spell": "Deret Terpanjang Hari Tidak Hujan",
   "/monitoring/lama-penyinaran": "Lama Penyinaran",
@@ -104,7 +105,19 @@ const EXTRA_TITLES: Record<string, string> = {
   "/wind-direction": "Arah Mata Angin",
   "/login": "Masuk",
   "/user-management/users": "Manajemen",
+  "/user-management/aghris-users": "Manajemen",
+  "/user-management/companies": "Manajemen",
+  "/user-management/stations": "Manajemen",
+  "/user-management/news": "Manajemen",
 };
+
+/** Halaman detail berita (`/news/[id]`) — judul berita dinamis tidak ada
+ *  di sini, trail-nya cuma "Beranda > Berita Pilihan > Detail Berita". */
+const NEWS_DETAIL_PREFIX = "/news/";
+const NEWS_DETAIL_TITLE = "Detail Berita";
+
+const NOTIFICATION_DETAIL_PREFIX = "/notification/";
+const NOTIFICATION_DETAIL_TITLE = "Detail Notifikasi";
 
 /** Item `NAV_ITEMS` yang jadi "induk" konsep untuk `pathname` — dicocokkan
  *  by prefix terpanjang, mengecualikan "/" (supaya "/" tidak match SEMUA
@@ -120,17 +133,12 @@ function resolveTopLevelNavItem(pathname: string): NavItem | undefined {
 /** Dipakai Topbar untuk menentukan judul halaman otomatis dari pathname. */
 export function getPageTitle(pathname: string): string {
   if (EXTRA_TITLES[pathname]) return EXTRA_TITLES[pathname];
+  if (pathname.startsWith(NEWS_DETAIL_PREFIX)) return NEWS_DETAIL_TITLE;
+  if (pathname.startsWith(NOTIFICATION_DETAIL_PREFIX)) return NOTIFICATION_DETAIL_TITLE;
   const exact = NAV_ITEMS.find((item) => item.href === pathname);
-  if (exact) return exact.label;
   return resolveTopLevelNavItem(pathname)?.label ?? "Beranda";
 }
 
-/** Dipakai HeaderNav & Sidebar buat nentuin pill/item mana yang "aktif" —
- *  bukan exact match `pathname === item.href` (itu bikin halaman drill-
- *  down seperti /air-temperature atau sub-halaman Monitoring tidak
- *  nyalain apapun), tapi ikut induk konsepnya sama seperti
- *  `getPageTitle`/`getBreadcrumbTrail` ("/" sendiri otomatis fallback
- *  ke "/" karena tidak ada NAV_ITEM lain yang match). */
 export function getActiveNavHref(pathname: string): string {
   return resolveTopLevelNavItem(pathname)?.href ?? "/";
 }
@@ -142,6 +150,17 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
   if (pathname === "/") return [{ label: "Beranda", href: "/" }];
 
   const crumbs: BreadcrumbCrumb[] = [{ label: "Beranda", href: "/" }];
+
+  if (pathname.startsWith(NEWS_DETAIL_PREFIX)) {
+    crumbs.push({ label: EXTRA_TITLES["/news"], href: "/news" });
+    crumbs.push({ label: NEWS_DETAIL_TITLE, href: pathname });
+    return crumbs;
+  }
+
+  if (pathname.startsWith(NOTIFICATION_DETAIL_PREFIX)) {
+    crumbs.push({ label: NOTIFICATION_DETAIL_TITLE, href: pathname });
+    return crumbs;
+  }
 
   const topLevel = resolveTopLevelNavItem(pathname);
 
@@ -162,3 +181,11 @@ export function getBreadcrumbTrail(pathname: string): BreadcrumbCrumb[] {
 
   return crumbs;
 }
+
+/** Pilihan "Merek" di form Manajemen > Stasiun — 3 brand device yang dikenal
+ *  backend Nusaklim (lihat `weather-brand-adapter.ts`). */
+export const STATION_BRANDS = [
+  "Davis Instruments",
+  "Meteo Nusantara Instrumen",
+  "Merapi Tani Instrumen",
+] as const;

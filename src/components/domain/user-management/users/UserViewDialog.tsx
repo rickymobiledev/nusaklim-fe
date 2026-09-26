@@ -24,7 +24,7 @@ export function UserViewDialog({
   onEdit: (user: ManagedUser) => void;
   onDelete: (user: ManagedUser) => void;
 }) {
-  console.log(user)
+  console.log(user);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <Card showCloseButton={false}>

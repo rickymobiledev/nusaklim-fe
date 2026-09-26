@@ -12,10 +12,12 @@ export interface ApiMeta {
 export interface ApiListResponse<T> {
   data: T[];
   meta: ApiMeta;
+  message?: string;
 }
 
 export interface ApiItemResponse<T> {
   data: T;
+  message?: string;
 }
 
 export interface ApiErrorBody {

@@ -15,6 +15,16 @@ export interface Company {
   imageUrl: string | null;
 }
 
+/** Form Tambah/Edit Perusahaan. Logo BELUM ikut (kontrak upload BE belum ada). */
+export interface CreateCompanyInput {
+  name: string;
+  code: string;
+}
+
+export interface UpdateCompanyInput extends CreateCompanyInput {
+  id: number;
+}
+
 export interface UserRoleOption {
   id: string;
   code: UserRole;
@@ -52,4 +62,57 @@ export interface UpdateUserInput {
   username: string;
   userRoleId: string;
   companyId: string;
+}
+
+/** Pengguna Aghris — kontrak BE belum ada, bentuk mengikuti Figma
+ *  (nama, NIP SAP, peran, perusahaan). Sementara dilayani mock, lihat
+ *  `lib/api/aghris-users-client.ts`. */
+export interface AghrisUser {
+  id: string;
+  name: string;
+  nipSap: string;
+  imageUrl: string | null;
+  /** Kosong untuk data mock awal — form Edit mencocokkan lewat `roleName`. */
+  roleId: string;
+  roleName: string;
+  companyName: string;
+}
+
+export interface CreateAghrisUserInput {
+  nipSap: string;
+  roleId: string;
+}
+
+export interface UpdateAghrisUserInput {
+  id: string;
+  nipSap: string;
+  roleId: string;
+}
+
+/** Form Tambah/Edit Stasiun (Manajemen > Stasiun). Foto BELUM ikut (kontrak upload BE belum ada). */
+export interface StationFields {
+  name: string;
+  companyCode: string;
+  brand: string;
+  latitude: number;
+  longitude: number;
+}
+
+/** `id` diisi user saat Tambah (ID Stasiun/device_id), terkunci saat Edit. */
+export interface CreateStationInput extends StationFields {
+  id: string;
+}
+
+export type UpdateStationInput = CreateStationInput;
+
+/** Manajemen > Berita. `cover` = File baru yang diunggah (null = tidak ada). */
+export interface CreateNewsInput {
+  title: string;
+  /** HTML dari editor rich-text. */
+  content: string;
+  cover: File | null;
+}
+
+export interface UpdateNewsInput extends CreateNewsInput {
+  id: string;
 }

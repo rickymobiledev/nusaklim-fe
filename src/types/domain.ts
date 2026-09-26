@@ -514,6 +514,13 @@ export interface NewsItem {
   isFeatured: boolean;
 }
 
+/** Detail berita (`GET /news?id=`) untuk form Ubah/dialog Lihat di Manajemen
+ *  Berita — `content` = HTML dari editor rich-text (WAJIB disanitasi sebelum
+ *  ditampilkan). */
+export interface NewsDetail extends NewsItem {
+  content: string;
+}
+
 /** Notifikasi user (bell icon Header) — `GET /notification`, polymorphic
  *  per-user ala Laravel (`notifiable_type`+`notifiable_id`), BELUM
  *  dikonfirmasi lewat tes langsung (cuma screenshot tabel DB, lihat
@@ -527,4 +534,30 @@ export interface NotificationItem {
   pesan: string;
   sudahDibaca: boolean;
   dibuatPada: string;
+}
+
+/** Halaman "Missing Data" (admin-only) — satu baris = satu pembacaan
+ *  (stasiun + waktu) yang minimal satu parameternya hilang. Metrik `null`
+ *  = "Missing" (badge merah di tabel), bukan 0. Field Bahasa Indonesia
+ *  (konvensi default). `datetime` = `"dd-MM-yyyy HH:mm"`, format sama
+ *  seperti `DownloadDataRow.tanggal` untuk granularitas non-harian.
+ *  Kontrak asli `GET /weathers/missing` BELUM dikonfirmasi — bentuk ini
+ *  didasarkan pada Figma, lihat `lib/api/missing-data-client.ts`. */
+export interface MissingDataRow {
+  id: string;
+  stasiun: string;
+  datetime: string;
+  temperaturUdara: number | null;
+  kelembapanUdara: number | null;
+  curahHujan: number | null;
+  radiasiMatahari: number | null;
+  tekananUdara: number | null;
+  kecepatanAngin: number | null;
+  arahMataAngin: string | null;
+}
+
+/** Hasil `POST /import/aws` (upload Excel) — hanya jumlah baris yang
+ *  berhasil diimpor, cukup untuk toast sukses. */
+export interface MissingDataImportResult {
+  imported: number;
 }
