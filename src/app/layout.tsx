@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata } from "next";
 import {
   Geist,
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   description: "Dashboard monitoring stasiun cuaca & ramalan cuaca perkebunan",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="id"

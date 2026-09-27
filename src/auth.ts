@@ -2,25 +2,34 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { API_V2_URL } from "./constants";
+import { ROLE_ID_MAP } from "./types/auth";
 import type { BackendUserProfile, UserRole } from "./types/auth";
 
 /**
- * Backend TIDAK mengeluarkan token/JWT sendiri — cuma balikin profil user
- * (nik_sap, name, image_url, user_role_code, user_role_name, company_code,
- * company_name). Sesi yang dipakai app ini adalah JWT yang di-generate
- * Auth.js sendiri setelah verifikasi ke backend berhasil, bukan pass-through
- * token dari backend.
+ * Backend TIDAK mengeluarkan token/JWT sendiri — cuma balikin profil user.
+ * Sesi yang dipakai app ini adalah JWT yang di-generate Auth.js sendiri
+ * setelah verifikasi ke backend berhasil, bukan pass-through token dari backend.
+ *
+ * Response aktual `/authentications/login` mengembalikan `user_role_id` (int)
+ * dan `company_id` (int). Fallback ke `user_role_code` / `company_code` string
+ * jika tersedia (kompatibilitas ke endpoint lama).
  */
 function mapProfileToUser(profile: BackendUserProfile) {
+  const role: UserRole =
+    profile.user_role_code ??
+    (profile.user_role_id !== undefined
+      ? (ROLE_ID_MAP[profile.user_role_id] ?? "RESEARCHER")
+      : "RESEARCHER");
+
   return {
     id: profile.id,
     name: profile.name,
-    image: profile.image_url,
+    image: profile.image_url ?? null,
     nikSap: profile.id,
-    role: profile.user_role_code,
-    roleName: profile.user_role_name,
-    companyCode: profile.company_code,
-    companyName: profile.company_name,
+    role,
+    roleName: profile.user_role_name ?? role,
+    companyCode: profile.company_code ?? String(profile.company_id ?? ""),
+    companyName: profile.company_name ?? "",
   };
 }
 
@@ -29,48 +38,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        username: { label: "Username", type: "text" },
+        identifier: { label: "Identifier", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) return null;
+        if (!credentials?.identifier || !credentials?.password) return null;
 
-        const username = String(credentials.username);
+        const identifier = String(credentials.identifier);
 
-        // Login SELALU ke backend asli — tidak ada jalur mock (dihapus
-        // sengaja supaya tidak ada risiko demo/produksi ke-toggle balik
-        // ke kredensial contoh). Domain data lain (weather/monitoring/dst)
-        // masih mock, lihat lib/api/index.ts.
-        // Backend expose 3 cara login (NIK SAP / Email / Username) ke satu
-        // endpoint yang sama, body field beda per mode — app ini fix pakai
-        // mode "Username" (dikonfirmasi Postman). Endpoint asli expect
-        // x-www-form-urlencoded, bukan JSON. Header "api-key" wajib — di
-        // collection Postman ini di-set sebagai auth level collection
-        // (berlaku ke semua endpoint termasuk login), bukan cuma endpoint
-        // data lain.
-        const res = await fetch(`${API_V2_URL}/authentications`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "api-key": process.env.API_KEY ?? "",
-          },
-          body: new URLSearchParams({
-            username,
-            password: credentials.password as string,
-          }),
-        });
+        const url = `${API_V2_URL}/authentications/login`;
+        console.log("[auth] POST", url, "identifier=", identifier);
+
+        let res: Response;
+        try {
+          res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "api-key": process.env.API_KEY ?? "",
+            },
+            body: new URLSearchParams({
+              identifier,
+              password: credentials.password as string,
+            }),
+          });
+        } catch (err) {
+          console.error("[auth] fetch error:", err);
+          return null;
+        }
+
+        const text = await res.text();
+        console.log("[auth] HTTP", res.status, text.slice(0, 300));
 
         if (!res.ok) return null;
 
-        // Response asli dibungkus envelope { status, message, data } —
-        // BUKAN flat BackendUserProfile langsung (dikonfirmasi dari sample
-        // response asli, sama pola dengan /devices/status).
-        const body = (await res.json()) as {
-          status: boolean;
-          message: string;
-          data: BackendUserProfile;
-        };
-        if (!body.status) return null; // login ditolak BE meski HTTP 200
+        let body: { status: boolean; message: string; data: BackendUserProfile };
+        try {
+          body = JSON.parse(text);
+        } catch {
+          console.error("[auth] response is not JSON:", text.slice(0, 300));
+          return null;
+        }
+
+        if (!body.status) {
+          console.warn("[auth] login rejected by BE:", body.message);
+          return null;
+        }
 
         return mapProfileToUser(body.data);
       },

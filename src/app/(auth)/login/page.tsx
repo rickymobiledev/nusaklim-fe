@@ -44,7 +44,7 @@ export default function LoginPage() {
   async function onSubmit(values: LoginForm) {
     setFormError(null);
     const result = await signIn("credentials", {
-      username: values.username,
+      identifier: values.username,
       password: values.password,
       redirect: false,
     });

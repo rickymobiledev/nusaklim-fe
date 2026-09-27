@@ -62,17 +62,18 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
   {
+    label: "Missing Data",
+    href: "/missing-data",
+    icon: MissingDataIcon,
+  },
+
+    { label: "Ramalan Cuaca", href: "/forecast", icon: ForecastIcon },
+  {
     label: "Lainnya",
     href: "/user-management",
     icon: OthersIcon,
     roles: ["ADMINISTRATOR"],
     children: [
-      { label: "Ramalan Cuaca", href: "/forecast", icon: ForecastIcon },
-      {
-        label: "Missing Data",
-        href: "/missing-data",
-        icon: MissingDataIcon,
-      },
       { label: "Manajemen", href: "/user-management/users", icon: ManajemenIcon },
     ],
   },
