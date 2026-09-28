@@ -163,7 +163,7 @@ const DayColumn = styled.div`
   flex: 1 1 0;
   min-width: 0;
   gap: 8px;
-  padding: 8px;
+  padding: 8px 2px;
 
   &:not(:last-child) {
     border-right: 1px solid #ecefed;
@@ -171,6 +171,7 @@ const DayColumn = styled.div`
 
   ${media.desktop} {
     min-width: 70px;
+    padding: 8px;
   }
 `;
 
@@ -189,6 +190,7 @@ const DateText = styled.span`
   font-weight: 500;
   line-height: 16px;
   color: #1d2520;
+  white-space: nowrap;
 
   ${media.desktop} {
     font-size: 13px;
@@ -203,6 +205,7 @@ const DayName = styled.span`
   font-weight: 400;
   line-height: 16px;
   color: #667a6c;
+  white-space: nowrap;
 `;
 
 const StatusBlock = styled.div`
