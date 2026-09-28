@@ -8,11 +8,10 @@ import styled from "styled-components";
 import { ChevronDown } from "lucide-react";
 import { media } from "@/lib/breakpoints";
 
-/** Teks/icon sama persis `app/(dashboard)/monitoring/page.tsx` (landing
- *  grid 4 domain Monitoring) — nav pill ini versi ringkas yang dirender
- *  DI ATAS konten tiap halaman domain (bukan pengganti landing grid),
- *  supaya user bisa pindah antar domain tanpa balik ke `/monitoring`
- *  dulu, sesuai referensi Figma. Icon PNG asli Figma (bukan lucide lagi
+/** Nav 4 domain Monitoring yang dirender DI ATAS konten tiap halaman
+ *  domain — satu-satunya tempat memilih domain (halaman "home" `/monitoring`
+ *  sudah dihapus, sekarang cuma redirect ke Keseimbangan Air), sesuai
+ *  referensi Figma. Icon PNG asli Figma (bukan lucide lagi
  *  seperti Fase 2), pola sama `AirPressureTitle.tsx` — file-nya di
  *  `public/brand/<slug>.png`, ditaruh user sendiri, tidak perlu ubah
  *  kode ini lagi begitu file-nya ada/diganti. */
