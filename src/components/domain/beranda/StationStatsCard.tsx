@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import styled from "styled-components";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { useStations } from "@/hooks/use-stations";
 import { media } from "@/lib/breakpoints";
 
@@ -35,7 +36,7 @@ export function StationStatsCard() {
         </IconBadge>
         <TextBlock>
           <StatLabel>Total Stasiun</StatLabel>
-          <StatValue>{isLoading ? "--" : totalStasiun}</StatValue>
+          {isLoading ? <StatSkeleton /> : <StatValue>{totalStasiun}</StatValue>}
         </TextBlock>
       </Stat>
 
@@ -45,7 +46,7 @@ export function StationStatsCard() {
         </IconBadge>
         <TextBlock>
           <StatLabel>Stasiun Aktif</StatLabel>
-          <StatValue>{isLoading ? "--" : stasiunAktif}</StatValue>
+          {isLoading ? <StatSkeleton /> : <StatValue>{stasiunAktif}</StatValue>}
         </TextBlock>
       </Stat>
 
@@ -55,7 +56,7 @@ export function StationStatsCard() {
         </IconBadge>
         <TextBlock>
           <StatLabel>Tidak Aktif</StatLabel>
-          <StatValue>{isLoading ? "--" : stasiunTidakAktif}</StatValue>
+          {isLoading ? <StatSkeleton /> : <StatValue>{stasiunTidakAktif}</StatValue>}
         </TextBlock>
       </Stat>
     </Content>
@@ -141,6 +142,14 @@ const StatLabel = styled.span`
   ${media.desktop} {
     text-align: left;
   }
+`;
+
+/* Tinggi = line-height `StatValue` (48px) supaya kartu tidak melompat. */
+const StatSkeleton = styled(SkeletonBlock).attrs({ $tone: "light" as const })`
+  width: 56px;
+  height: 40px;
+  margin: 4px 0;
+  border-radius: 8px;
 `;
 
 const StatValue = styled.span`

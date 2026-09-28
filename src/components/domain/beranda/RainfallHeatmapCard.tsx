@@ -6,6 +6,7 @@ import { addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRainfallHeatmap } from "@/hooks/use-rainfall-heatmap";
 import { CalendarOutlineIcon, InfoEmptyIcon } from "@/components/shared/DashboardIcons";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { media } from "@/lib/breakpoints";
 import {
@@ -18,6 +19,9 @@ import {
 import type { RainfallHeatmapLevel } from "@/types/domain";
 
 const WEEKDAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+/** 5 baris x 7 kolom — bentuk kalender bulan umum saat data belum datang. */
+const HEATMAP_SKELETON_CELLS = 35;
 
 export function RainfallHeatmapCard({ stationId }: { stationId?: string }) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
@@ -54,33 +58,35 @@ export function RainfallHeatmapCard({ stationId }: { stationId?: string }) {
         </MonthBadge>
       </HeaderRow>
 
-      {!stationId ? (
-        <EmptyMessage>Pilih stasiun untuk melihat heatmap curah hujan.</EmptyMessage>
-      ) : isLoading ? (
-        <EmptyMessage>Memuat data curah hujan...</EmptyMessage>
-      ) : (
-        <>
-          <WeekdayRow>
-            {WEEKDAY_LABELS.map((label) => (
-              <WeekdayLabel key={label}>{label}</WeekdayLabel>
-            ))}
-          </WeekdayRow>
+      {/* Halaman hanya merender kartu ini tanpa stasiun saat daftar stasiun
+          masih dimuat, jadi `!stationId` = loading juga. */}
+      <WeekdayRow>
+        {WEEKDAY_LABELS.map((label) => (
+          <WeekdayLabel key={label}>{label}</WeekdayLabel>
+        ))}
+      </WeekdayRow>
 
-          <DateGrid>
-            {hariKalender.map((hari, i) =>
-              hari === null ? (
-                <EmptyCell key={i}>-</EmptyCell>
-              ) : (
-                <DateCell key={hari.tanggal} $level={hari.level}>
-                  <DateNumber>{hari.tanggalAngka}</DateNumber>
-                  <RainText>
-                    {hari.level === "tidak_ada_data" ? "-" : `${hari.curahHujan} mm`}
-                  </RainText>
-                </DateCell>
-              ),
-            )}
-          </DateGrid>
-        </>
+      {!stationId || isLoading ? (
+        <DateGrid>
+          {Array.from({ length: HEATMAP_SKELETON_CELLS }, (_, i) => (
+            <SkeletonCell key={i} />
+          ))}
+        </DateGrid>
+      ) : (
+        <DateGrid>
+          {hariKalender.map((hari, i) =>
+            hari === null ? (
+              <EmptyCell key={i}>-</EmptyCell>
+            ) : (
+              <DateCell key={hari.tanggal} $level={hari.level}>
+                <DateNumber>{hari.tanggalAngka}</DateNumber>
+                <RainText>
+                  {hari.level === "tidak_ada_data" ? "-" : `${hari.curahHujan} mm`}
+                </RainText>
+              </DateCell>
+            ),
+          )}
+        </DateGrid>
       )}
 
       <LegendSection>
@@ -185,13 +191,6 @@ const NavArrowButton = styled.button`
   }
 `;
 
-const EmptyMessage = styled.p`
-  padding: 8px 0;
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 13px;
-  color: #667a6c;
-`;
-
 const WeekdayRow = styled.div`
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -253,6 +252,16 @@ const DateCell = styled.div<{ $level: RainfallHeatmapLevel }>`
 
   ${media.desktop} {
     min-height: 70px;
+  }
+`;
+
+/* Ukuran sama dengan `DateCell` supaya grid tidak melompat saat data datang. */
+const SkeletonCell = styled(SkeletonBlock)`
+  height: 44px;
+  border-radius: 8px;
+
+  ${media.desktop} {
+    height: 70px;
   }
 `;
 

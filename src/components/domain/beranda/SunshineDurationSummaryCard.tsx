@@ -4,6 +4,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardSunshineDuration } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
 import { media } from "@/lib/breakpoints";
 
@@ -15,10 +16,9 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
   const pending = !stationId || isLoading;
 
   let durationText = "Data Belum Tersedia";
-  if (pending) durationText = "Memuat data...";
-  else if (data?.total_solar_sunshine_duration) durationText = data.total_solar_sunshine_duration;
+  if (data?.total_solar_sunshine_duration) durationText = data.total_solar_sunshine_duration;
 
-  const minThresholdText = pending ? "..." : (data?.min_threshold ?? "3 jam");
+  const minThresholdText = data?.min_threshold ?? "3 jam";
 
   let message = "";
   if (isError) message = getErrorMessage(error);
@@ -33,14 +33,22 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
 
       <Row>
         <Label>Batas Bawah</Label>
-        <Value $muted={false}>{minThresholdText}</Value>
+        {pending ? (
+          <SkeletonBlock $w="48px" $h="14px" />
+        ) : (
+          <Value $muted={false}>{minThresholdText}</Value>
+        )}
       </Row>
       <Row>
         <Label>Lama Penyinaran</Label>
-        <Value $muted={!data}>{durationText}</Value>
+        {pending ? (
+          <SkeletonBlock $w="64px" $h="14px" />
+        ) : (
+          <Value $muted={!data}>{durationText}</Value>
+        )}
       </Row>
 
-      {message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }

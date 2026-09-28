@@ -5,6 +5,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardWaterBalance } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
 
 /** Kartu "Keseimbangan Air" di sidebar kanan Beranda.
@@ -18,10 +19,12 @@ export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
   if (isError) message = getErrorMessage(error);
   else if (data?.insight) message = data.insight;
 
-  const rainfall = parseValueAndUnit(isLoading ? "..." : data?.total_rainfall);
-  const rainyDay = parseValueAndUnit(isLoading ? "..." : data?.total_rainy_day);
-  const deficit = parseValueAndUnit(isLoading ? "..." : data?.total_water_deficit);
-  const surplus = parseValueAndUnit(isLoading ? "..." : data?.total_water_surplus);
+  const pending = !stationId || isLoading;
+
+  const rainfall = parseValueAndUnit(data?.total_rainfall);
+  const rainyDay = parseValueAndUnit(data?.total_rainy_day);
+  const deficit = parseValueAndUnit(data?.total_water_deficit);
+  const surplus = parseValueAndUnit(data?.total_water_surplus);
 
   return (
     <Card>
@@ -43,15 +46,35 @@ export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
       </Header>
 
       <TileRow>
-        <MetricTile label="Curah Hujan" value={rainfall.val} unit={rainfall.unit} />
-        <MetricTile label="Hari Hujan" value={rainyDay.val} unit={rainyDay.unit} />
+        <MetricTile
+          label="Curah Hujan"
+          value={rainfall.val}
+          unit={rainfall.unit}
+          loading={pending}
+        />
+        <MetricTile
+          label="Hari Hujan"
+          value={rainyDay.val}
+          unit={rainyDay.unit}
+          loading={pending}
+        />
       </TileRow>
       <TileRow>
-        <MetricTile label="Defisit Air" value={deficit.val} unit={deficit.unit} />
-        <MetricTile label="Kelebihan Air" value={surplus.val} unit={surplus.unit} />
+        <MetricTile
+          label="Defisit Air"
+          value={deficit.val}
+          unit={deficit.unit}
+          loading={pending}
+        />
+        <MetricTile
+          label="Kelebihan Air"
+          value={surplus.val}
+          unit={surplus.unit}
+          loading={pending}
+        />
       </TileRow>
 
-      {message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }
@@ -69,18 +92,24 @@ function MetricTile({
   label,
   value,
   unit,
+  loading,
 }: {
   label: string;
   value: string;
   unit?: string;
+  loading: boolean;
 }) {
   return (
     <Tile>
       <TileLabel>{label}</TileLabel>
-      <TileValue>
-        {value}
-        {unit && value !== "—" && value !== "..." && <Unit> {unit}</Unit>}
-      </TileValue>
+      {loading ? (
+        <SkeletonBlock $w="64px" $h="28px" $radius="8px" />
+      ) : (
+        <TileValue>
+          {value}
+          {unit && value !== "—" && <Unit> {unit}</Unit>}
+        </TileValue>
+      )}
     </Tile>
   );
 }

@@ -8,7 +8,11 @@ import styled from "styled-components";
 import { useForecast } from "@/hooks/use-forecast";
 import { NavArrowRightIcon } from "@/components/shared/DashboardIcons";
 import { FORECAST_ICON_SRC, getForecastIconLevel } from "@/lib/forecast-icon-level";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { media } from "@/lib/breakpoints";
+
+/** Jumlah kolom skeleton saat memuat (horizon asli baru diketahui setelah data datang). */
+const FORECAST_SKELETON_DAYS = 7;
 
 export function ForecastCard({ stationId }: { stationId?: string }) {
   const { data, isLoading } = useForecast(stationId);
@@ -31,8 +35,19 @@ export function ForecastCard({ stationId }: { stationId?: string }) {
       <Subtitle>Ramalan curah hujan 7 Hari Ke Depan</Subtitle>
 
       <DayStrip>
-        {isLoading ? (
-          <EmptyMessage>Memuat ramalan...</EmptyMessage>
+        {isLoading || !stationId ? (
+          Array.from({ length: FORECAST_SKELETON_DAYS }, (_, i) => (
+            <DayColumn key={i}>
+              <DateBlock>
+                <SkeletonBlock $w="36px" $h="14px" />
+                <SkeletonBlock $w="44px" $h="12px" />
+              </DateBlock>
+              <StatusBlock>
+                <SkeletonBlock $w="40px" $h="40px" $radius="50%" />
+                <SkeletonBlock $w="36px" $h="14px" />
+              </StatusBlock>
+            </DayColumn>
+          ))
         ) : days.length === 0 ? (
           <EmptyMessage>Pilih stasiun untuk melihat ramalan cuaca.</EmptyMessage>
         ) : (

@@ -9,6 +9,7 @@ import {
   ChevronCircleDownIcon,
   WarningTriangleIcon,
 } from "@/components/shared/DashboardIcons";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import type { WeatherChartPoint, WeatherStatus } from "@/types/domain";
 
 export interface WeatherSummaryDayItem {
@@ -38,6 +39,9 @@ export interface WeatherSummaryCardProps {
    *  angka + unit. Komponen di `domain/` dilarang import `@/lib/utils`,
    *  jadi konversi seperti itu dikirim dari pemanggil. */
   formatDayValue?: (value: number | null) => string;
+  /** `true` = nilai, 3 kotak hari & banner status diganti skeleton (label tab
+   *  & ilustrasi statis tetap tampil). */
+  isLoading?: boolean;
 }
 
 const RECENT_DAYS = 3;
@@ -59,6 +63,7 @@ export function WeatherSummaryCard({
   showTrend = true,
   valueSuffix,
   formatDayValue,
+  isLoading = false,
 }: WeatherSummaryCardProps) {
   // Jika `days` dikirim eksplisit, pakai itu; jika tidak, ambil 3 hari sebelum hari ini dari `chart`
   const recentDays: WeatherSummaryDayItem[] =
@@ -95,31 +100,48 @@ export function WeatherSummaryCard({
           <LabelTab>{label}</LabelTab>
           <Content>
             <ValueRow>
-              <ValueGroup>
-                <Value>{renderedValue}</Value>
-                {valueSuffix && <ValueSuffix>{valueSuffix}</ValueSuffix>}
-              </ValueGroup>
-              {trend !== null && (
-                <TrendChip>
-                  <TrendArrow $up={trend > 0} size={16} />
-                  <TrendText>{Math.abs(trend)}%</TrendText>
-                </TrendChip>
+              {isLoading ? (
+                <SkeletonBlock $w="120px" $h="38px" $radius="8px" />
+              ) : (
+                <>
+                  <ValueGroup>
+                    <Value>{renderedValue}</Value>
+                    {valueSuffix && <ValueSuffix>{valueSuffix}</ValueSuffix>}
+                  </ValueGroup>
+                  {trend !== null && (
+                    <TrendChip>
+                      <TrendArrow $up={trend > 0} size={16} />
+                      <TrendText>{Math.abs(trend)}%</TrendText>
+                    </TrendChip>
+                  )}
+                </>
               )}
             </ValueRow>
             <RecentDays>
-              {recentDays.map((day) => (
-                <DayBox key={day.date}>
-                  <DayLabel>{day.date}</DayLabel>
-                  <DayValue>{day.valueText}</DayValue>
-                </DayBox>
-              ))}
+              {isLoading
+                ? Array.from({ length: RECENT_DAYS }, (_, i) => (
+                    <DayBox key={i}>
+                      <SkeletonBlock $w="70%" $h="12px" />
+                      <SkeletonBlock $w="50%" $h="14px" />
+                    </DayBox>
+                  ))
+                : recentDays.map((day) => (
+                    <DayBox key={day.date}>
+                      <DayLabel>{day.date}</DayLabel>
+                      <DayValue>{day.valueText}</DayValue>
+                    </DayBox>
+                  ))}
             </RecentDays>
           </Content>
         </Main>
         <Illustration src={illustrationSrc} alt="" width={130} height={130} />
       </Body>
 
-      {status.message && (
+      {isLoading ? (
+        <StatusRow>
+          <SkeletonBlock $h="28px" $radius="8px" />
+        </StatusRow>
+      ) : status.message ? (
         <StatusRow>
           <StatusBanner $tone={status.tone}>
             <IconCircle $tone={status.tone}>
@@ -149,7 +171,7 @@ export function WeatherSummaryCard({
             )}
           </StatusBanner>
         </StatusRow>
-      )}
+      ) : null}
     </Card>
   );
 }

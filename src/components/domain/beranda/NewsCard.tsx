@@ -8,9 +8,13 @@ import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 import { useNews } from "@/hooks/use-news";
 import { DataState } from "@/components/shared/DataState";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { JournalIcon } from "@/components/shared/DashboardIcons";
 import { media } from "@/lib/breakpoints";
 import type { NewsItem } from "@/types/domain";
+
+/** 1 kartu featured + sampai 3 kartu kecil (lihat `slice(0, 4)` di `NewsCard`). */
+const NEWS_SKELETON_SMALL_CARDS = 3;
 
 /** "Berita Pilihan" — card ringkas di Beranda, sampai 4 berita terbaru
  *  dari `GET /news/published` via `useNews()`. 1 kartu \"featured\" besar
@@ -45,20 +49,29 @@ export function NewsCard() {
           <SeeAllLink href="/news">Lihat Semua</SeeAllLink>
         </HeaderRow>
 
-        <DataState
-          isLoading={isLoading}
-          isError={isError}
-          error={error}
-          isEmpty={items.length === 0}
-          emptyMessage="Belum ada berita."
-        >
+        {isLoading ? (
           <CardsRow>
-            {featured && <FeaturedArticleCard item={featured} />}
-            {smallItems.map((item) => (
-              <SmallArticleCard key={item.id} item={item} />
+            <FeaturedSkeleton />
+            {Array.from({ length: NEWS_SKELETON_SMALL_CARDS }, (_, i) => (
+              <SmallSkeleton key={i} />
             ))}
           </CardsRow>
-        </DataState>
+        ) : (
+          <DataState
+            isLoading={false}
+            isError={isError}
+            error={error}
+            isEmpty={items.length === 0}
+            emptyMessage="Belum ada berita."
+          >
+            <CardsRow>
+              {featured && <FeaturedArticleCard item={featured} />}
+              {smallItems.map((item) => (
+                <SmallArticleCard key={item.id} item={item} />
+              ))}
+            </CardsRow>
+          </DataState>
+        )}
       </Section>
     </>
   );
@@ -178,6 +191,28 @@ const CardsRow = styled.div`
   flex-wrap: wrap;
   align-items: stretch;
   gap: 16px;
+`;
+
+/* Ukuran sama dengan `FeaturedArticle`/`SmallArticle` supaya section tidak
+ * melompat saat berita datang. */
+const FeaturedSkeleton = styled(SkeletonBlock)`
+  flex: 1 1 530px;
+  width: auto;
+  max-width: 530px;
+  height: 204px;
+  border-radius: 8px;
+`;
+
+const SmallSkeleton = styled(SkeletonBlock)`
+  flex: 1 1 180px;
+  width: auto;
+  max-width: 260px;
+  height: 241px;
+  border-radius: 8px;
+
+  ${media.desktop} {
+    height: 204px;
+  }
 `;
 
 const ImagePlaceholder = styled.div`

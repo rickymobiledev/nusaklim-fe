@@ -5,6 +5,7 @@ import styled, { keyframes } from "styled-components";
 import { useStations } from "@/hooks/use-stations";
 import { media } from "@/lib/breakpoints";
 import { RefreshDoubleIcon } from "@/components/shared/DashboardIcons";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import {
   Select,
   SelectContent,
@@ -55,7 +56,11 @@ export function StationSyncCard({
       <SyncBlock>
         <SyncTextBlock>
           <SyncLabel>Sinkronisasi terakhir</SyncLabel>
-          <SyncValue>{syncText}</SyncValue>
+          {isLoading ? (
+            <SkeletonBlock $tone="light" $w="140px" $h="16px" />
+          ) : (
+            <SyncValue>{syncText}</SyncValue>
+          )}
         </SyncTextBlock>
         <RefreshButton type="button" onClick={() => refetch()} disabled={isFetching}>
           <SpinningIcon $spinning={isFetching} size={24} />

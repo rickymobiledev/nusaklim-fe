@@ -14,10 +14,14 @@ import { WeatherSummaryCard } from "@/components/domain/beranda/WeatherSummaryCa
 import { useLatestWeather, computeDayTrend } from "@/hooks/use-latest-weather";
 import type { LatestWeatherItem } from "@/lib/api/latest-weather-client";
 import { useStations } from "@/hooks/use-stations";
-import { Skeleton } from "@/components/ui/skeleton";
 
-function toCardProps(item?: LatestWeatherItem, isWindDirection = false) {
+function toCardProps(
+  item: LatestWeatherItem | undefined,
+  isLoading: boolean,
+  isWindDirection = false,
+) {
   return {
+    isLoading,
     displayValue: item?.latest_10_min ?? "--",
     days:
       item?.last_3_days?.map((d) => ({
@@ -40,7 +44,7 @@ function toCardProps(item?: LatestWeatherItem, isWindDirection = false) {
 export default function BerandaPage() {
   const [stationId, setStationId] = useState<string>();
 
-  const { data: stationsResponse } = useStations();
+  const { data: stationsResponse, isLoading: loadingStations } = useStations();
   const selectedStationId = stationId ?? stationsResponse?.data[0]?.id;
 
   const {
@@ -49,14 +53,18 @@ export default function BerandaPage() {
     isLoading: loadingWeather,
   } = useLatestWeather(selectedStationId);
 
-  const rainfallProps = toCardProps(weatherMap["rainfall"]);
-  const humidityProps = toCardProps(weatherMap["humidity"]);
-  const tempProps = toCardProps(weatherMap["temperature"]);
-  const solarProps = toCardProps(weatherMap["solar_radiation"]);
-  const pressureProps = toCardProps(weatherMap["air_pressure"]);
-  const windSpeedProps = toCardProps(weatherMap["wind_speed"]);
+  // Daftar stasiun belum datang → belum ada stasiun terpilih, kartu-kartu
+  // tetap dirender (bentuk final) dalam keadaan skeleton, bukan teks kosong.
+  const cardsLoading = loadingStations || loadingWeather;
+
+  const rainfallProps = toCardProps(weatherMap["rainfall"], cardsLoading);
+  const humidityProps = toCardProps(weatherMap["humidity"], cardsLoading);
+  const tempProps = toCardProps(weatherMap["temperature"], cardsLoading);
+  const solarProps = toCardProps(weatherMap["solar_radiation"], cardsLoading);
+  const pressureProps = toCardProps(weatherMap["air_pressure"], cardsLoading);
+  const windSpeedProps = toCardProps(weatherMap["wind_speed"], cardsLoading);
   const windDirItem = weatherMap["wind_direction"];
-  const windDirProps = toCardProps(windDirItem, true);
+  const windDirProps = toCardProps(windDirItem, cardsLoading, true);
 
   return (
     <div className="flex flex-col gap-6" data-page="beranda">
@@ -78,16 +86,7 @@ export default function BerandaPage() {
       </div>
 
       <div className="relative z-10">
-        {loadingWeather ? (
-          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-28" />
-              ))}
-            </div>
-            <div />
-          </div>
-        ) : selectedStationId ? (
+        {selectedStationId || loadingStations ? (
           <div className="grid min-w-0 gap-4 lg:grid-cols-[1fr_300px]">
             <div className="flex min-w-0 flex-col gap-4">
               <div className="grid min-w-0 gap-4 sm:grid-cols-2">

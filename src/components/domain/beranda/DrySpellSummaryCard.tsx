@@ -4,6 +4,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardDrySpell } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
 
 /** Kartu "Deret Hari Terpanjang Tidak Hujan" di sidebar kanan Beranda.
@@ -11,13 +12,14 @@ import { getErrorMessage } from "@/lib/api/error-messages";
 export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
   const { data, isLoading, isError, error } = useDashboardDrySpell(stationId);
 
+  const pending = !stationId || isLoading;
+
   let dateText: string;
-  if (!stationId || isLoading) dateText = "Memuat data...";
-  else if (isError) dateText = "Data tidak dapat dimuat";
+  if (isError) dateText = "Data tidak dapat dimuat";
   else if (!data?.date) dateText = "Belum ada periode tercatat";
   else dateText = data.date;
 
-  const valueText = !stationId || isLoading ? "..." : (data?.total_dry_spell ?? "—");
+  const valueText = data?.total_dry_spell ?? "—";
   const message = isError ? getErrorMessage(error) : (data?.insight ?? "");
 
   return (
@@ -30,13 +32,21 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
         <Title>Deret Hari Terpanjang Tidak Hujan</Title>
         <ValueRow>
           <Image src="/brand/dry-spell.png" alt="" width={50} height={50} />
-          <Value>{valueText}</Value>
+          {pending ? (
+            <SkeletonBlock $w="80px" $h="28px" $radius="8px" />
+          ) : (
+            <Value>{valueText}</Value>
+          )}
         </ValueRow>
       </Content>
 
-      <DateText>{dateText}</DateText>
+      {pending ? (
+        <SkeletonBlock $w="140px" $h="14px" />
+      ) : (
+        <DateText>{dateText}</DateText>
+      )}
 
-      {message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }

@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useDashboardVpd } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
 import { media } from "@/lib/breakpoints";
 
@@ -14,8 +15,8 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
   const { data, isLoading, isError, error } = useDashboardVpd(stationId);
   const pending = !stationId || isLoading;
 
-  const maxThresholdText = pending ? "..." : (data?.max_threshold ?? "2.1 kPa");
-  const vpdText = pending ? "..." : (data?.vpd ?? "—");
+  const maxThresholdText = data?.max_threshold ?? "2.1 kPa";
+  const vpdText = data?.vpd ?? "—";
 
   let message = "";
   if (isError) message = getErrorMessage(error);
@@ -31,14 +32,22 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
 
       <Row>
         <Label>Batas Aman</Label>
-        <Value $muted={false}>{maxThresholdText}</Value>
+        {pending ? (
+          <SkeletonBlock $w="48px" $h="14px" />
+        ) : (
+          <Value $muted={false}>{maxThresholdText}</Value>
+        )}
       </Row>
       <Row>
         <Label>VPD</Label>
-        <Value $muted={!data}>{vpdText}</Value>
+        {pending ? (
+          <SkeletonBlock $w="64px" $h="14px" />
+        ) : (
+          <Value $muted={!data}>{vpdText}</Value>
+        )}
       </Row>
 
-      {message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
     </Card>
   );
 }
