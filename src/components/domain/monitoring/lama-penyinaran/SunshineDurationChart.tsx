@@ -104,7 +104,11 @@ export function SunshineDurationChart({
   );
 }
 
+/** Lebar batang: minimum 36px (Figma, dipakai saat banyak hari), membesar
+ *  mengikuti lebar slot saat hari sedikit, maksimum 96px. */
 const BAR_WIDTH = 36;
+const MAX_BAR_WIDTH = 96;
+const BAR_WIDTH_RATIO = 0.6;
 const BAR_FRAME = 2;
 
 interface PillBarProps {
@@ -118,22 +122,23 @@ interface PillBarProps {
  *  `#0039FF` (radius atas 24, bawah 4), lebar tetap 36px di tengah slot. */
 function PillBar({ x = 0, y = 0, width = 0, height = 0 }: PillBarProps) {
   if (height <= 0) return null;
-  const left = x + (width - BAR_WIDTH) / 2;
-  const radius = Math.min(BAR_WIDTH / 2, height);
+  const barWidth = Math.min(MAX_BAR_WIDTH, Math.max(BAR_WIDTH, width * BAR_WIDTH_RATIO));
+  const left = x + (width - barWidth) / 2;
+  const radius = Math.min(barWidth / 2, height);
   return (
     <g>
       <path
         d={roundedTopPath(
           left - BAR_FRAME,
           y - BAR_FRAME,
-          BAR_WIDTH + BAR_FRAME * 2,
+          barWidth + BAR_FRAME * 2,
           height + BAR_FRAME,
           radius + BAR_FRAME,
           6,
         )}
         fill="#F6F8F7"
       />
-      <path d={roundedTopPath(left, y, BAR_WIDTH, height, radius, 4)} fill="#0039FF" />
+      <path d={roundedTopPath(left, y, barWidth, height, radius, 4)} fill="#0039FF" />
     </g>
   );
 }
