@@ -72,7 +72,7 @@ export default function LoginPage() {
     <div className="flex w-full flex-col gap-10">
       <div className="flex flex-col gap-2.5">
         <AuthHeading>Selamat Datang Kembali</AuthHeading>
-        <AuthSubtext>Masukkan kredensial untuk masuk ke akun kami</AuthSubtext>
+        <AuthSubtext>Masukkan kredensial untuk masuk ke akun kamu</AuthSubtext>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
