@@ -10,6 +10,7 @@ export function DataState({
   error,
   isEmpty = false,
   emptyMessage = "Data Tidak Tersedia",
+  skeleton,
   children,
 }: {
   isLoading: boolean;
@@ -17,14 +18,18 @@ export function DataState({
   error?: unknown;
   isEmpty?: boolean;
   emptyMessage?: string;
+  /** Skeleton khusus yang bentuknya meniru konten; default = skeleton generik. */
+  skeleton?: ReactNode;
   children: ReactNode;
 }) {
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-20 w-full" />
-      </div>
+      skeleton ?? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      )
     );
   }
 

@@ -58,7 +58,7 @@ export function DrySpellSection() {
 
       <DrySpellList
         data={selectedStationId ? rows : []}
-        isLoading={isLoading}
+        isLoading={isLoading || isLoadingStations}
         isError={isError}
         error={error}
       />

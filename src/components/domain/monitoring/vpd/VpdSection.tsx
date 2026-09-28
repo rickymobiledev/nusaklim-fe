@@ -68,7 +68,7 @@ export function VpdSection() {
 
       <VpdChart
         data={visibleRows}
-        isLoading={isLoading}
+        isLoading={isLoading || isLoadingStations}
         isError={isError}
         error={error}
       />

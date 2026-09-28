@@ -14,6 +14,7 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
+import { ChartSkeleton } from "@/components/shared/ChartSkeleton";
 import { DataState } from "@/components/shared/DataState";
 import { getBatasBawahJam } from "@/lib/sunshine-duration-summary";
 import type { SunshineDuration } from "@/types/domain";
@@ -62,6 +63,7 @@ export function SunshineDurationChart({
         error={error}
         isEmpty={data.length === 0}
         emptyMessage="Pilih stasiun & rentang tanggal untuk melihat lama penyinaran."
+        skeleton={<ChartSkeleton />}
       >
         <ChartScroll>
           <ChartInner $minWidth={rows.length * CHART_MIN_WIDTH_PER_POINT}>

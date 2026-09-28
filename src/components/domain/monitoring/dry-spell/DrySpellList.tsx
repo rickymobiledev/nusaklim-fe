@@ -5,12 +5,15 @@ import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 import { CalendarIcon, Info } from "lucide-react";
 import { DataState } from "@/components/shared/DataState";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import {
   getDrySpellLevel,
   DRY_SPELL_COLOR,
   DRY_SPELL_LABEL,
 } from "@/lib/dry-spell-level";
 import type { DrySpellReport } from "@/types/domain";
+
+const SKELETON_CARDS = 3;
 
 export function DrySpellList({
   data,
@@ -42,6 +45,19 @@ export function DrySpellList({
         error={error}
         isEmpty={rows.length === 0}
         emptyMessage="Tidak ada periode hari tanpa hujan pada rentang & stasiun ini."
+        skeleton={
+          <List>
+            {Array.from({ length: SKELETON_CARDS }, (_, i) => (
+              <PeriodCard key={i}>
+                <PeriodInfo>
+                  <SkeletonBlock $w="90px" $h="34px" $radius="8px" />
+                  <SkeletonBlock $w="220px" $h="16px" />
+                </PeriodInfo>
+                <SkeletonBlock $w="280px" $h="32px" $radius="24px" />
+              </PeriodCard>
+            ))}
+          </List>
+        }
       >
         <List>
           {rows.map((row, index) => {

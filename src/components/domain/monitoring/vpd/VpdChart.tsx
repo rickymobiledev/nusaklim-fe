@@ -14,6 +14,7 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
+import { ChartSkeleton } from "@/components/shared/ChartSkeleton";
 import { DataState } from "@/components/shared/DataState";
 import { getBatasAmanKpa, isMeaningfulVpdRow, formatKpa } from "@/lib/vpd-summary";
 import type { VPDReport } from "@/types/domain";
@@ -59,6 +60,7 @@ export function VpdChart({
       </HeadingRow>
 
       <DataState
+        skeleton={<ChartSkeleton />}
         isLoading={isLoading}
         isError={isError}
         error={error}

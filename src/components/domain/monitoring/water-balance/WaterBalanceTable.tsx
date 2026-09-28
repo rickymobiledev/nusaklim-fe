@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Info } from "lucide-react";
 import { media } from "@/lib/breakpoints";
 import { DataState } from "@/components/shared/DataState";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import {
   MONTH_LABEL_SHORT,
   WATER_BALANCE_ROWS,
@@ -38,6 +39,7 @@ export function WaterBalanceTable({
           error={error}
           isEmpty={!data}
           emptyMessage="Pilih stasiun untuk melihat keseimbangan air."
+          skeleton={<TableSkeleton />}
         >
           {data && (
             <Scroll>
@@ -88,6 +90,48 @@ export function WaterBalanceTable({
     </>
   );
 }
+
+/** Skeleton tabel: kolom & tinggi baris sama dengan tabel asli (2 kolom kiri +
+ *  12 bulan + Total; header 60px, baris 49px) supaya tidak melompat. */
+function TableSkeleton() {
+  return (
+    <Scroll>
+      <Table>
+        <thead>
+          <tr>
+            {Array.from({ length: SKELETON_COLUMNS }, (_, col) => (
+              <HeadCell
+                key={col}
+                $left={col < 2}
+                $width={col === 0 ? 130 : col === 1 ? 100 : undefined}
+              >
+                <SkeletonBlock $w="60%" $h="16px" style={{ margin: "0 auto" }} />
+              </HeadCell>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: SKELETON_ROWS }, (_, row) => (
+            <Row key={row} $zebra={row % 2 === 0}>
+              {Array.from({ length: SKELETON_COLUMNS }, (_, col) => (
+                <BodyCell key={col} $left={col < 2}>
+                  <SkeletonBlock
+                    $w={col < 2 ? "70%" : "50%"}
+                    $h="16px"
+                    style={col < 2 ? undefined : { margin: "0 auto" }}
+                  />
+                </BodyCell>
+              ))}
+            </Row>
+          ))}
+        </tbody>
+      </Table>
+    </Scroll>
+  );
+}
+
+const SKELETON_COLUMNS = 15;
+const SKELETON_ROWS = 4;
 
 const Card = styled.div`
   box-sizing: border-box;

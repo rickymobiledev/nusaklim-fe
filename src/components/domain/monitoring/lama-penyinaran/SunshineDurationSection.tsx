@@ -75,7 +75,7 @@ export function SunshineDurationSection() {
 
       <SunshineDurationChart
         data={visibleRows}
-        isLoading={isLoading}
+        isLoading={isLoading || isLoadingStations}
         isError={isError}
         error={error}
       />

@@ -62,7 +62,7 @@ export function WaterBalanceSection() {
       <WaterBalanceTable
         data={selectedStationId ? series : undefined}
         stationCode={stationCode}
-        isLoading={isLoading}
+        isLoading={isLoading || isLoadingStations}
         isError={isError}
         error={error}
       />
