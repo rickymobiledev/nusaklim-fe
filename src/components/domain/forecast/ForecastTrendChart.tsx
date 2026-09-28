@@ -7,6 +7,8 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -35,6 +37,16 @@ const CHART_MIN_WIDTH_PER_POINT = 80;
  *  berkisar sempit di sekitar nilai tertentu, jadi sumbu Y diberi padding. */
 const ZERO_BASED: ForecastParameter[] = ["rainfall", "radiation", "windSpeed"];
 
+/** Parameter yang digambar sebagai batang — sama dengan halaman detail cuaca
+ *  (`/rainfall`, `/solar-radiation`, `/wind-speed`, `/wind-direction`);
+ *  sisanya (temperatur, kelembapan, tekanan) garis. */
+const BAR_PARAMETERS: ForecastParameter[] = [
+  "rainfall",
+  "radiation",
+  "windSpeed",
+  "windDirectionDeg",
+];
+
 interface TooltipEntry {
   value?: number | string | null;
   payload?: { label?: string };
@@ -59,6 +71,43 @@ export function ForecastTrendChart({
     label: format(new Date(day.date), "dd MMM yyyy", { locale: id }),
     value: day[parameter],
   }));
+
+  const isBar = BAR_PARAMETERS.includes(parameter);
+  // Batang harus mulai dari 0; arah angin = derajat 0-360.
+  const yDomain: [number | string, number | string] =
+    parameter === "windDirectionDeg"
+      ? [0, 360]
+      : ZERO_BASED.includes(parameter)
+        ? [0, "auto"]
+        : ["dataMin - 2", "dataMax + 2"];
+
+  // Elemen bersama dibuat sekali & dipakai kedua jenis chart (Recharts
+  // membutuhkan elemen langsung sebagai child, bukan komponen pembungkus).
+  const grid = <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" />;
+  const xAxis = (
+    <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#6D717F" }} tickLine={false} />
+  );
+  const yAxis = (
+    <YAxis
+      tick={{ fontSize: 12, fill: "#6D717F" }}
+      tickLine={false}
+      domain={yDomain}
+      tickFormatter={(value: number) => value.toLocaleString("id-ID")}
+      label={{
+        value: `${meta.axisLabel} (${unit})`,
+        angle: -90,
+        position: "insideLeft",
+        offset: 8,
+        style: { fontSize: 12, fill: "#667A6C", textAnchor: "middle" },
+      }}
+    />
+  );
+  const tooltip = (
+    <Tooltip
+      cursor={isBar ? { fill: "#F6F8F7" } : undefined}
+      content={<ChartTooltip stationName={stationName} label={meta.label} unit={unit} />}
+    />
+  );
 
   return (
     <Card>
@@ -91,48 +140,36 @@ export function ForecastTrendChart({
       <ChartScroll>
         <ChartInner $minWidth={rows.length * CHART_MIN_WIDTH_PER_POINT}>
           <ResponsiveContainer width="100%" height={352}>
-            <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 12, fill: "#6D717F" }}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: "#6D717F" }}
-                tickLine={false}
-                domain={
-                  ZERO_BASED.includes(parameter)
-                    ? [0, "auto"]
-                    : ["dataMin - 2", "dataMax + 2"]
-                }
-                tickFormatter={(value: number) => value.toLocaleString("id-ID")}
-                label={{
-                  value: `${meta.axisLabel} (${unit})`,
-                  angle: -90,
-                  position: "insideLeft",
-                  offset: 8,
-                  style: { fontSize: 12, fill: "#667A6C", textAnchor: "middle" },
-                }}
-              />
-              <Tooltip
-                content={
-                  <ChartTooltip
-                    stationName={stationName}
-                    label={meta.label}
-                    unit={unit}
-                  />
-                }
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#0039FF"
-                strokeWidth={1}
-                dot={false}
-                activeDot={{ r: 4, fill: "#ffffff", stroke: "#0039FF" }}
-              />
-            </LineChart>
+            {isBar ? (
+              <BarChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                {grid}
+                {xAxis}
+                {yAxis}
+                {tooltip}
+                <Bar
+                  dataKey="value"
+                  fill="#0039FF"
+                  radius={[4, 4, 0, 0]}
+                  barSize={24}
+                  isAnimationActive={false}
+                />
+              </BarChart>
+            ) : (
+              <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
+                {grid}
+                {xAxis}
+                {yAxis}
+                {tooltip}
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#0039FF"
+                  strokeWidth={1}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "#ffffff", stroke: "#0039FF" }}
+                />
+              </LineChart>
+            )}
           </ResponsiveContainer>
         </ChartInner>
       </ChartScroll>
