@@ -186,16 +186,25 @@ const SeeAllLink = styled(Link)`
   color: #175fe2;
 `;
 
+/* Mobile = grid auto-fill (2 kolom di lebar HP): semua kartu kecil sama lebar,
+ * kartu ganjil menempati SATU kolom (tidak melebar penuh). Desktop kembali ke
+ * flex-wrap dengan lebar kartu kecil dibatasi 260px. */
 const CardsRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   align-items: stretch;
   gap: 16px;
+
+  ${media.desktop} {
+    display: flex;
+    flex-wrap: wrap;
+  }
 `;
 
 /* Ukuran sama dengan `FeaturedArticle`/`SmallArticle` supaya section tidak
  * melompat saat berita datang. */
 const FeaturedSkeleton = styled(SkeletonBlock)`
+  grid-column: 1 / -1;
   flex: 1 1 530px;
   width: auto;
   max-width: 530px;
@@ -206,11 +215,12 @@ const FeaturedSkeleton = styled(SkeletonBlock)`
 const SmallSkeleton = styled(SkeletonBlock)`
   flex: 1 1 180px;
   width: auto;
-  max-width: 260px;
+  max-width: none;
   height: 241px;
   border-radius: 8px;
 
   ${media.desktop} {
+    max-width: 260px;
     height: 204px;
   }
 `;
@@ -223,6 +233,7 @@ const ImagePlaceholder = styled.div`
 
 const FeaturedArticle = styled(Link)`
   position: relative;
+  grid-column: 1 / -1;
   flex: 1 1 530px;
   max-width: 530px;
   height: 204px;
@@ -287,7 +298,6 @@ const FeaturedExcerpt = styled.p`
  * BUKAN cuma versi diperkecil dari desktop. */
 const SmallArticle = styled(Link)`
   flex: 1 1 180px;
-  max-width: 260px;
   height: 241px;
   display: flex;
   flex-direction: column;
@@ -296,6 +306,7 @@ const SmallArticle = styled(Link)`
   overflow: hidden;
 
   ${media.desktop} {
+    max-width: 260px;
     height: 204px;
   }
 `;
