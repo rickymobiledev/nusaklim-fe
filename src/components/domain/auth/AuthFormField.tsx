@@ -71,7 +71,7 @@ const StyledInput = styled(Input)<{ $hasTrailing: boolean }>`
   padding-right: ${(p) => (p.$hasTrailing ? "48px" : "12px")};
   border-radius: 12px;
   border: 1.5px solid #d6dcd8;
-  background: #f6f8f7;
+  background: #ffffff;
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 16px;
   line-height: 24px;
@@ -95,6 +95,7 @@ const TrailingSlot = styled.span`
   position: absolute;
   right: 12px;
   top: 50%;
+  display: flex;
   transform: translateY(-50%);
 `;
 
