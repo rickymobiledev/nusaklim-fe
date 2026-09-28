@@ -7,6 +7,7 @@ import { useDashboardWaterBalance } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
+import { media } from "@/lib/breakpoints";
 
 /** Kartu "Keseimbangan Air" di sidebar kanan Beranda.
  *  Hit `/api/v2/dashboards/water_balance?weather_station_id=...` */
@@ -131,7 +132,11 @@ const Card = styled.div`
 `;
 
 /* Frame "Background" Figma (265×209) — gambar hujan di-mask radial putih
- * (Rectangle 1 Figma, tipe Mask) supaya cuma tampak di pojok kanan atas. */
+ * (Rectangle 1 Figma, tipe Mask) supaya cuma tampak di pojok kanan atas.
+ * Mask dalam PIKSEL berjangkar ke kanan (setara persen Figma di lebar 265px:
+ * 48.9%→130px, 46.43%→97px, 80.52%→52px dari kanan, -2.62%→-5px) — bukan
+ * persen, karena gambar lebar tetap 159px sedangkan kartu melebar di
+ * mobile; kalau persen, fade ikut melebar & tepi gambar jadi keras. */
 const BackgroundFrame = styled.div`
   position: absolute;
   top: 1px;
@@ -142,20 +147,30 @@ const BackgroundFrame = styled.div`
   pointer-events: none;
   z-index: 0;
   -webkit-mask-image: radial-gradient(
-    48.9% 46.43% at 80.52% -2.62%,
+    130px 97px at calc(100% - 52px) -5px,
     #000 0%,
     transparent 100%
   );
-  mask-image: radial-gradient(48.9% 46.43% at 80.52% -2.62%, #000 0%, transparent 100%);
+  mask-image: radial-gradient(
+    130px 97px at calc(100% - 52px) -5px,
+    #000 0%,
+    transparent 100%
+  );
 `;
 
 const Rain = styled(Image)`
   position: absolute;
   top: 0;
-  left: 109px;
+  right: 0;
   width: 159px;
   height: 119px;
   max-width: none;
+
+  /* Desktop: kartu ±265px (spec Figma) — left 109px = rapat kanan juga. */
+  ${media.desktop} {
+    left: 109px;
+    right: auto;
+  }
 `;
 
 const Header = styled.div`
