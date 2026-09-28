@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import Image from "next/image";
 import styled from "styled-components";
 import {
@@ -128,7 +128,7 @@ export function WeatherSummaryCard({
                 : recentDays.map((day) => (
                     <DayBox key={day.date}>
                       <DayLabel>{day.date}</DayLabel>
-                      <DayValue>{day.valueText}</DayValue>
+                      <FitDayValue text={day.valueText} />
                     </DayBox>
                   ))}
             </RecentDays>
@@ -195,6 +195,38 @@ function useIsTruncated(ref: RefObject<HTMLElement | null>, text: string): boole
   }, [ref, text]);
 
   return truncated;
+}
+
+const DAY_VALUE_MAX_FONT_PX = 16;
+const DAY_VALUE_MIN_FONT_PX = 9;
+
+/** Nilai di kotak hari: font turun dari 16px sampai teks muat selebar
+ *  kotaknya (kotak fluid, ikut lebar kartu/viewport). Ukuran diatur langsung
+ *  lewat style DOM di layout effect — bukan state — supaya tanpa re-render &
+ *  tanpa kedip; ResizeObserver mengukur ulang saat lebar berubah. `ellipsis`
+ *  di `DayValue` cuma pengaman di ukuran minimum. */
+function FitDayValue({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const fit = () => {
+      element.style.fontSize = `${DAY_VALUE_MAX_FONT_PX}px`;
+      const { scrollWidth, clientWidth } = element;
+      if (scrollWidth <= clientWidth) return;
+      const fitted = Math.floor((DAY_VALUE_MAX_FONT_PX * clientWidth) / scrollWidth);
+      element.style.fontSize = `${Math.max(DAY_VALUE_MIN_FONT_PX, fitted)}px`;
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [text]);
+
+  return <DayValue ref={ref}>{text}</DayValue>;
 }
 
 /** Pembulatan 1 desimal; unit `%` ditulis rapat ("90%", sesuai Figma), unit
@@ -384,7 +416,13 @@ const DayLabel = styled.span`
   white-space: nowrap;
 `;
 
+/* Font-size final diatur `FitDayValue` lewat style inline (16px = ukuran
+ * awal sebelum diukur); `ellipsis` = pengaman di ukuran minimum.
+ * `display:block` wajib agar `overflow` berlaku. */
 const DayValue = styled.span`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 16px;
   font-weight: 600;
