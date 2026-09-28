@@ -12,12 +12,11 @@ export function DashboardFooter() {
   );
 }
 
+/* Bukan sticky/fixed: dirender di akhir `<main>` (lihat (dashboard)/layout.tsx)
+ * — ikut scroll bersama konten, dan menempel di dasar layar kalau konten pendek
+ * (wrapper konten `flex-1`). */
 const Wrapper = styled.footer`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 16px;
