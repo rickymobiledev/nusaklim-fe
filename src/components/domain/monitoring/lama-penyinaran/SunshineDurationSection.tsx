@@ -17,7 +17,7 @@ import {
 import { SunshineDurationChart } from "./SunshineDurationChart";
 import { SunshineDurationSummary } from "./SunshineDurationSummary";
 
-const DEFAULT_RANGE_DAYS = 10;
+const DEFAULT_RANGE_DAYS = 7;
 
 export function SunshineDurationSection() {
   const [stationId, setStationId] = useState<string>();
