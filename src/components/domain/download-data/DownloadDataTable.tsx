@@ -249,8 +249,12 @@ const FooterLabel = styled.span`
   color: #6d717f;
 `;
 
+/* Lebar mengikuti isi (min 51px sesuai Figma): 51px tetap cuma menyisakan
+ * 32px untuk angka + gap + chevron 16px (34px) sehingga angka terpotong. */
 const PageSizeTrigger = styled(SelectTrigger)`
-  width: 51px;
+  width: auto;
+  min-width: 51px;
+  flex-shrink: 0;
   height: 24px;
   padding: 4px 8px;
   gap: 4px;
