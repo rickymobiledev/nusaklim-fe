@@ -79,10 +79,14 @@ export function Sidebar() {
   );
 }
 
+/* z-index drawer HARUS di atas z-index Leaflet & overlay peta (maks 1000:
+ * toolbar/zoom/legenda di components/domain/map) — kalau tidak, peta
+ * menembus di atas menu saat drawer dibuka. Nilai 1100+ = di atas semua
+ * konten halaman. */
 const Backdrop = styled.div<{ $open: boolean }>`
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 1100;
   background: rgba(0, 0, 0, 0.4);
   opacity: ${(p) => (p.$open ? 1 : 0)};
   pointer-events: ${(p) => (p.$open ? "auto" : "none")};
@@ -98,7 +102,7 @@ const Aside = styled.aside<{ $open: boolean }>`
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 50;
+  z-index: 1110;
   display: flex;
   flex-direction: column;
   width: 350px;
