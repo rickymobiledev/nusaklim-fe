@@ -400,7 +400,7 @@ const DayBox = styled.div`
   justify-content: center;
   flex: 1 1 0;
   min-width: 0;
-  min-height: 50px;
+  min-height: 60px;
   padding: 4px 8px 8px;
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
@@ -426,7 +426,7 @@ const DayValue = styled.span`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 16px;
   font-weight: 600;
-  line-height: 16px;
+  line-height: 20px;
   color: #1d2520;
   white-space: nowrap;
 `;

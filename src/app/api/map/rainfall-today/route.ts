@@ -7,7 +7,12 @@ export async function GET(request: Request) {
   if (!user) return unauthorized;
 
   const { searchParams } = new URL(request.url);
-  const companyId = resolveCompanyId(user, searchParams.get("companyId") ?? undefined);
+  // `/devices/rainfall_today` WAJIB `company_code`: role lintas-company
+  // (ADMINISTRATOR/RESEARCHER) yang tidak memilih company jatuh ke company
+  // dari respons login (sesi server), bukan tanpa filter.
+  const companyId =
+    resolveCompanyId(user, searchParams.get("companyId") ?? undefined) ??
+    user.companyCode;
 
   try {
     const result = await rainfallTodayApi.getStationRainfallToday({ companyId });
