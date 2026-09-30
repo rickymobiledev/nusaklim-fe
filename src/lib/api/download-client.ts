@@ -51,17 +51,19 @@ function mapFilterRow(row: RawWeatherFilter): DownloadDataRow {
   };
 }
 
-/** Jendela jam "Pagi (00:01–12:00)"/"Siang (12:01–18:00)"/"Malam
- *  (18:01–00:00)" dari `DATA_GRANULARITY` (`constants/index.ts`) — dipakai
- *  buat filter baris `/weathers/filter` (data mentah per ~10 menit,
- *  BUKAN diagregasi ulang jadi 1 baris/hari, cuma disubset jamnya). `00:00`
- *  sendiri masuk "Malam" (ujung akhir jendela 18:01–00:00), bukan "Pagi". */
+/** Jendela 6 jam "00:01–06:00"/"06:01–12:00"/"12:01–18:00"/"18:01–00:00"
+ *  dari `DATA_GRANULARITY` (`constants/index.ts`) — dipakai buat filter
+ *  baris `/weathers/filter` (data mentah per ~10 menit, BUKAN diagregasi
+ *  ulang jadi 1 baris/hari, cuma disubset jamnya). `00:00` sendiri masuk
+ *  jendela terakhir "18:01–00:00" (ujung akhir), bukan "00:01–06:00". */
 function matchesTimeWindow(granularity: DataGranularity, minutesSinceMidnight: number) {
-  if (granularity === "pagi")
-    return minutesSinceMidnight > 0 && minutesSinceMidnight <= 720;
-  if (granularity === "siang")
+  if (granularity === "00-06")
+    return minutesSinceMidnight > 0 && minutesSinceMidnight <= 360;
+  if (granularity === "06-12")
+    return minutesSinceMidnight > 360 && minutesSinceMidnight <= 720;
+  if (granularity === "12-18")
     return minutesSinceMidnight > 720 && minutesSinceMidnight <= 1080;
-  if (granularity === "malam")
+  if (granularity === "18-24")
     return minutesSinceMidnight > 1080 || minutesSinceMidnight === 0;
   return true; // "10menit": semua baris dipakai apa adanya.
 }
@@ -105,10 +107,10 @@ async function fetchRows(
  *  tes langsung ke backend asli):
  *  - `"harian"` → `/weathers/daily` (`fetchRawDaily`, 1 baris/hari, sudah
  *    dipakai halaman lain juga).
- *  - `"10menit"/"pagi"/"siang"/"malam"` → `/weathers/filter` (`fetchRawFilter`,
- *    pembacaan mentah ~tiap 10 menit, BARU khusus dipakai halaman ini) —
- *    pagi/siang/malam cuma SUBSET jam dari data mentah yang sama, bukan
- *    agregasi ulang.
+ *  - `"10menit"/"00-06"/"06-12"/"12-18"/"18-24"` → `/weathers/filter`
+ *    (`fetchRawFilter`, pembacaan mentah ~tiap 10 menit, BARU khusus dipakai
+ *    halaman ini) — jendela 6 jam cuma SUBSET jam dari data mentah yang
+ *    sama, bukan agregasi ulang.
  *  Kedua endpoint balikin SELURUH rentang tanggal sekaligus (tidak native
  *  paginated). Kalau caller (`use-download-data.ts`) TIDAK eksplisit minta
  *  `page`/`pageSize`, balikin SEMUA baris apa adanya — pola PERSIS

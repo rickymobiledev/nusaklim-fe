@@ -493,7 +493,13 @@ export interface DownloadDataRow {
   arahMataAngin: string | null;
 }
 
-export type DataGranularity = "harian" | "10menit" | "pagi" | "siang" | "malam";
+export type DataGranularity =
+  | "harian"
+  | "10menit"
+  | "00-06"
+  | "06-12"
+  | "12-18"
+  | "18-24";
 
 /** Kartu "Berita Pilihan" di Beranda — `GET /news` asli, dikonfirmasi user.
  *  PENGECUALIAN sengaja dari konvensi "kontrak Indonesia" di docblock atas
