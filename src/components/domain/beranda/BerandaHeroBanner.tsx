@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import styled from "styled-components";
+import { media } from "@/lib/breakpoints";
 
 export function BerandaHeroBanner() {
   return (
@@ -31,7 +32,14 @@ const Banner = styled.div`
   z-index: 0;
 `;
 
+/* Mobile: polos (biru solid dari `Banner`) supaya teks mudah dibaca —
+ * gambar pola cuma tampil di desktop. */
 const PatternLayer = styled.div`
   position: absolute;
   inset: 0;
+  display: none;
+
+  ${media.desktop} {
+    display: block;
+  }
 `;
