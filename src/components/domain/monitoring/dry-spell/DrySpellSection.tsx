@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styled from "styled-components";
-import { format, subDays } from "date-fns";
+import { format, startOfYear } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useDrySpell } from "@/hooks/use-dry-spell";
@@ -10,16 +10,13 @@ import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDo
 import { DrySpellFilters } from "./DrySpellFilters";
 import { DrySpellList } from "./DrySpellList";
 
-/** Beda dari Lama Penyinaran/VPD (10 hari) — periode dry-spell butuh
- *  jendela lebar biar ada isinya, cocok juga sama contoh Figma yang
- *  rentangnya ~1 tahun. */
-const DEFAULT_RANGE_DAYS = 365;
-
 export function DrySpellSection() {
   const [stationId, setStationId] = useState<string>();
+  // Default 1 Januari tahun berjalan s/d hari ini — periode dry-spell butuh
+  // jendela lebar, dan rentangnya sama dengan kartu dry-spell di Beranda.
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     const to = new Date();
-    return { from: subDays(to, DEFAULT_RANGE_DAYS - 1), to };
+    return { from: startOfYear(to), to };
   });
 
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
