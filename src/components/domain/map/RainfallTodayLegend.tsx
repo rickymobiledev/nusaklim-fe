@@ -1,24 +1,22 @@
 "use client";
 
 import styled from "styled-components";
-import { RainIcon, SunIcon } from "@/components/shared/RainfallIcons";
 import { RAINFALL_TODAY_COLOR, RAINFALL_TODAY_LABEL } from "@/lib/rainfall-today-level";
 
-/** Legend mengambang bawah-tengah peta tab Curah Hujan Hari Ini — posisi
- *  identik `DrySpellLegend`/`WaterDeficitLegend`, TAPI gaya beda: Figma
- *  eksplisit gambar icon hujan/matahari di sini (bukan "glow dot" 3
- *  lingkaran nested yang dipakai legend lain), jadi diikuti apa adanya.
- *  Icon `RainIcon`/`SunIcon` dari `RainfallIcons.tsx` — SVG custom
- *  langsung dari Figma, bukan `CloudRain`/`Sun` bawaan lucide-react. */
+/** Legend mengambang bawah-tengah peta tab Curah Hujan Hari Ini — identik
+ *  `DrySpellLegend`/`WaterDeficitLegend`: titik solid + cincin putih yang
+ *  sama dengan marker peta (`getStationDotIcon`). Dulu pakai icon
+ *  `RainIcon`/`SunIcon` (Figma), diganti titik supaya konsisten dengan
+ *  marker; icon itu tetap dipakai di popup marker. */
 export function RainfallTodayLegend() {
   return (
     <Wrapper>
       <Item>
-        <RainIcon size={16} color={RAINFALL_TODAY_COLOR.hujan} />
+        <LegendDot $color={RAINFALL_TODAY_COLOR.hujan} />
         <Label $color={RAINFALL_TODAY_COLOR.hujan}>{RAINFALL_TODAY_LABEL.hujan}</Label>
       </Item>
       <Item>
-        <SunIcon size={16} color={RAINFALL_TODAY_COLOR.tidak_hujan} />
+        <LegendDot $color={RAINFALL_TODAY_COLOR.tidak_hujan} />
         <Label $color={RAINFALL_TODAY_COLOR.tidak_hujan}>
           {RAINFALL_TODAY_LABEL.tidak_hujan}
         </Label>
@@ -47,10 +45,19 @@ const Item = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
+`;
 
-  svg {
-    flex: none;
-  }
+const LegendDot = styled.span<{ $color: string }>`
+  box-sizing: border-box;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: ${(p) => p.$color};
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 1px 4px rgba(0, 0, 0, 0.4);
 `;
 
 const Label = styled.span<{ $color: string }>`
