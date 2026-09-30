@@ -20,6 +20,7 @@ import {
   INDONESIA_PROVINCE_LABELS,
 } from "@/lib/indonesia-provinces";
 import { buildStationsCsv } from "@/lib/map-utils";
+import { getStationDotIcon } from "@/lib/map-marker-icon";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
@@ -38,7 +39,6 @@ import { MapLegend } from "./MapLegend";
  * `attribution` di bawah), jangan dihapus.
  */
 
-const DIV_ICON_CACHE = new Map<string, L.DivIcon>();
 const PROVINCE_LABEL_ICON_CACHE = new Map<string, L.DivIcon>();
 
 /** `smoothFactor` cuma dideklarasikan di `PolylineOptions` (bukan `PathOptions`
@@ -58,32 +58,10 @@ const PROVINCE_BOUNDARY_STYLE: PolylineOptions = {
   smoothFactor: 0,
 };
 
-/** Marker "glow dot" 3 lingkaran nested meniru Figma (12px/20% opacity,
- *  8px/50% opacity, 4px solid) — Leaflet `divIcon` cuma terima HTML string,
- *  bukan JSX, jadi tidak bisa dibuat styled-components biasa. */
-function getStationDivIcon(color: string): L.DivIcon {
-  const cached = DIV_ICON_CACHE.get(color);
-  if (cached) return cached;
-
-  const icon = L.divIcon({
-    className: "station-div-icon",
-    html: `
-      <span style="position:absolute;inset:0;border-radius:50%;background:${color};opacity:0.2"></span>
-      <span style="position:absolute;left:2px;top:2px;right:2px;bottom:2px;border-radius:50%;background:${color};opacity:0.5"></span>
-      <span style="position:absolute;left:4px;top:4px;right:4px;bottom:4px;border-radius:50%;background:${color}"></span>
-    `,
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
-    popupAnchor: [0, -6],
-  });
-  DIV_ICON_CACHE.set(color, icon);
-  return icon;
-}
-
 /** Label teks nama provinsi (bukan marker stasiun) — non-interactive, cuma
  *  teks dengan outline putih tipis biar kebaca di atas fill hijau pulau.
  *  Style-nya di `station-map.css` (class `.province-label-icon`) karena sama
- *  seperti `getStationDivIcon`, ini HTML string mentah Leaflet, bukan JSX. */
+ *  seperti `getStationDotIcon`, ini HTML string mentah Leaflet, bukan JSX. */
 function getProvinceLabelIcon(name: string): L.DivIcon {
   const cached = PROVINCE_LABEL_ICON_CACHE.get(name);
   if (cached) return cached;
@@ -219,7 +197,7 @@ export function StationMap({
             <Marker
               key={station.id}
               position={[station.lat, station.long]}
-              icon={getStationDivIcon(statusInfo.color)}
+              icon={getStationDotIcon(statusInfo.color)}
               ref={(marker) => {
                 markersRef.current[station.id] = marker;
               }}

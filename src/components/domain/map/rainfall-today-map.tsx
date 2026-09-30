@@ -17,6 +17,7 @@ import {
   INDONESIA_PROVINCE_LABELS,
 } from "@/lib/indonesia-provinces";
 import { buildRainfallTodayCsv } from "@/lib/map-utils";
+import { getStationDotIcon } from "@/lib/map-marker-icon";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
@@ -33,7 +34,6 @@ import { RainfallTodayLegend } from "./RainfallTodayLegend";
  * mm) — ikut Figma persis.
  */
 
-const DIV_ICON_CACHE = new Map<string, L.DivIcon>();
 const PROVINCE_LABEL_ICON_CACHE = new Map<string, L.DivIcon>();
 
 const PROVINCE_BOUNDARY_STYLE: PolylineOptions = {
@@ -43,29 +43,6 @@ const PROVINCE_BOUNDARY_STYLE: PolylineOptions = {
   fillOpacity: 1,
   smoothFactor: 0,
 };
-
-/** Marker "glow dot" 3 lingkaran nested — identik pola `getStationDivIcon`
- *  di `station-map.tsx`, cuma warnanya dari level status hujan hari ini.
- *  JANGAN tambahkan CSS `position` ke class `station-div-icon` manapun
- *  (lihat ADR di docs/ARCHITECTURE.md bagian 13). */
-function getRainfallTodayDivIcon(color: string): L.DivIcon {
-  const cached = DIV_ICON_CACHE.get(color);
-  if (cached) return cached;
-
-  const icon = L.divIcon({
-    className: "station-div-icon",
-    html: `
-      <span style="position:absolute;inset:0;border-radius:50%;background:${color};opacity:0.2"></span>
-      <span style="position:absolute;left:2px;top:2px;right:2px;bottom:2px;border-radius:50%;background:${color};opacity:0.5"></span>
-      <span style="position:absolute;left:4px;top:4px;right:4px;bottom:4px;border-radius:50%;background:${color}"></span>
-    `,
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
-    popupAnchor: [0, -6],
-  });
-  DIV_ICON_CACHE.set(color, icon);
-  return icon;
-}
 
 function getProvinceLabelIcon(name: string): L.DivIcon {
   const cached = PROVINCE_LABEL_ICON_CACHE.get(name);
@@ -154,7 +131,7 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
             <Marker
               key={row.stationId}
               position={[row.lat, row.long]}
-              icon={getRainfallTodayDivIcon(color)}
+              icon={getStationDotIcon(color)}
             >
               <Popup className="map-popup" closeButton={false}>
                 <PopupContent>
