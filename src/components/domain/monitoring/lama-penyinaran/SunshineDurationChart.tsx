@@ -19,10 +19,12 @@ import { DataState } from "@/components/shared/DataState";
 import { getBatasBawahJam } from "@/lib/sunshine-duration-summary";
 import type { SunshineDuration } from "@/types/domain";
 
-/** Estimasi lebar per titik tanggal supaya label "01 Agt 2026" tidak
- *  bertumpuk di mobile — chart di-scroll horizontal (pola sama
- *  `air-temperature`), BELUM spec Figma. */
-const CHART_MIN_WIDTH_PER_POINT = 90;
+/** Lebar minimum per titik tanggal — chart di-scroll horizontal kalau
+ *  titiknya lebih banyak dari lebar card (pola sama `air-temperature`).
+ *  Sengaja kecil (40px): dulu 90px + scrollbar disembunyikan, sehingga
+ *  rentang > ±14 hari terpotong diam-diam di desktop. Label sumbu X yang
+ *  bertumpuk dilewati Recharts (`minTickGap`). BELUM spec Figma. */
+const CHART_MIN_WIDTH_PER_POINT = 40;
 const Y_TICKS = [0, 2, 4, 6, 8, 10, 12, 14];
 
 interface ChartRow {
@@ -72,6 +74,7 @@ export function SunshineDurationChart({
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EA" />
                 <XAxis
                   dataKey="tanggal"
+                  minTickGap={8}
                   tick={{ fontSize: 12, fill: "#6D717F" }}
                   tickLine={false}
                   axisLine={{ stroke: "#D2D5DB" }}
@@ -109,6 +112,7 @@ export function SunshineDurationChart({
 const BAR_WIDTH = 36;
 const MAX_BAR_WIDTH = 96;
 const BAR_WIDTH_RATIO = 0.6;
+const MIN_SLOT_FILL = 0.7;
 const BAR_FRAME = 2;
 
 interface PillBarProps {
@@ -122,7 +126,12 @@ interface PillBarProps {
  *  `#0039FF` (radius atas 24, bawah 4), lebar tetap 36px di tengah slot. */
 function PillBar({ x = 0, y = 0, width = 0, height = 0 }: PillBarProps) {
   if (height <= 0) return null;
-  const barWidth = Math.min(MAX_BAR_WIDTH, Math.max(BAR_WIDTH, width * BAR_WIDTH_RATIO));
+  // Slot lebar: 36–96px seperti Figma; slot sempit (rentang panjang) menyusut
+  // proporsional supaya batang tidak saling menempel.
+  const barWidth = Math.min(
+    MAX_BAR_WIDTH,
+    Math.max(Math.min(BAR_WIDTH, width * MIN_SLOT_FILL), width * BAR_WIDTH_RATIO),
+  );
   const left = x + (width - barWidth) / 2;
   const radius = Math.min(barWidth / 2, height);
   return (
@@ -222,12 +231,7 @@ const Heading = styled.h3`
 
 const ChartScroll = styled.div`
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  -webkit-overflow-scrolling: touch;
 `;
 
 const ChartInner = styled.div<{ $minWidth: number }>`
