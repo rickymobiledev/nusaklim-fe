@@ -1,26 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import styled from "styled-components";
+import { useState, type ReactNode } from "react";
+import styled, { css } from "styled-components";
 import { Check, ChevronDown, Search } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
 
 /** Pilih satu stasiun dengan kolom cari (filter `nama` stasiun, case-insensitive).
- *  Versi single-select dari `MultiStationSelect`. */
+ *  Versi single-select dari `MultiStationSelect`.
+ *  `variant`: "glass" (default, hero Beranda) atau "outlined" (putih + border,
+ *  Ramalan Cuaca); `icon` = ikon opsional di kiri teks trigger. */
 export function StationSearchSelect({
   stations,
   value,
   onChange,
   isLoading = false,
   id,
+  variant = "glass",
+  icon,
 }: {
   stations: Station[];
   value?: string;
   onChange: (stationId: string) => void;
   isLoading?: boolean;
   id?: string;
+  variant?: "glass" | "outlined";
+  icon?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,7 +34,11 @@ export function StationSearchSelect({
 
   const term = searchTerm.trim().toLowerCase();
   const filteredStations = term
-    ? stations.filter((s) => s.nama.toLowerCase().includes(term))
+    ? stations.filter(
+        (s) =>
+          s.nama.toLowerCase().includes(term) ||
+          (s.companyName ?? "").toLowerCase().includes(term),
+      )
     : stations;
 
   function handleOpenChange(nextOpen: boolean) {
@@ -44,11 +54,14 @@ export function StationSearchSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Trigger id={id} type="button" disabled={isLoading}>
-          <TriggerText $placeholder={!selected}>
-            {selected?.nama ?? (isLoading ? "Memuat stasiun..." : "Pilih Stasiun")}
-          </TriggerText>
-          <ChevronDown size={20} color="#667a6c" />
+        <Trigger id={id} type="button" disabled={isLoading} $variant={variant}>
+          <TriggerContent>
+            {icon}
+            <TriggerText $placeholder={!selected}>
+              {selected?.nama ?? (isLoading ? "Memuat stasiun..." : "Pilih Stasiun")}
+            </TriggerText>
+          </TriggerContent>
+          <ChevronDown size={20} color={variant === "outlined" ? "#8b9c90" : "#667a6c"} />
         </Trigger>
       </PopoverTrigger>
       <MenuContent align="start">
@@ -57,7 +70,7 @@ export function StationSearchSelect({
             <Search size={20} color="#8B9C90" />
             <SearchInput
               type="text"
-              placeholder="Cari Stasiun"
+              placeholder="Cari Stasiun atau Kebun"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
@@ -84,7 +97,10 @@ export function StationSearchSelect({
                 $selected={s.id === value}
                 onClick={() => select(s.id)}
               >
-                <ItemLabel>{s.nama}</ItemLabel>
+                <ItemText>
+                  <ItemLabel>{s.nama}</ItemLabel>
+                  {s.companyName && <ItemSubLabel>{s.companyName}</ItemSubLabel>}
+                </ItemText>
                 {s.id === value && <Check size={16} color="#175fe2" />}
               </Item>
             ))
@@ -95,30 +111,51 @@ export function StationSearchSelect({
   );
 }
 
-const Trigger = styled.button`
+const Trigger = styled.button<{ $variant: "glass" | "outlined" }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   box-sizing: border-box;
-  width: 300px;
-  max-width: 100%;
   height: 48px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: none;
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
+
+  ${(p) =>
+    p.$variant === "outlined"
+      ? css`
+          width: 100%;
+          background: #ffffff;
+          border: 1.5px solid #d6dcd8;
+
+          ${media.desktop} {
+            width: 291px;
+          }
+        `
+      : css`
+          width: 300px;
+          max-width: 100%;
+          background: rgba(255, 255, 255, 0.6);
+          border: none;
+
+          ${media.desktop} {
+            width: 410px;
+          }
+        `}
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
   }
+`;
 
-  ${media.desktop} {
-    width: 410px;
-  }
+const TriggerContent = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 `;
 
 const TriggerText = styled.span<{ $placeholder: boolean }>`
@@ -205,11 +242,26 @@ const Item = styled.button<{ $selected: boolean }>`
   }
 `;
 
+const ItemText = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+`;
+
 const ItemLabel = styled.span`
   font-family: var(--font-body), sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: #1d2520;
+`;
+
+/* Nama kebun (= `companyName`, diambil BE lewat company code). */
+const ItemSubLabel = styled.span`
+  font-family: var(--font-body), sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #8b9c90;
 `;
 
 const EmptyText = styled.p`

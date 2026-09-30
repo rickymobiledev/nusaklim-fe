@@ -2,13 +2,7 @@
 
 import styled from "styled-components";
 import { MapPin } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
 
@@ -32,27 +26,15 @@ export function ForecastHeader({
 
       <Field>
         <FieldLabel htmlFor="forecast-station">Pilih Stasiun</FieldLabel>
-        <Select
+        <StationSearchSelect
+          id="forecast-station"
+          variant="outlined"
+          icon={<MapPin size={24} strokeWidth={1.5} color="#175FE2" />}
+          stations={stations}
           value={stationId}
-          onValueChange={onStationIdChange}
-          disabled={isLoadingStations}
-        >
-          <StationTrigger id="forecast-station" aria-label="Pilih Stasiun">
-            <TriggerContent>
-              <MapPin size={24} strokeWidth={1.5} color="#175FE2" />
-              <SelectValue
-                placeholder={isLoadingStations ? "Memuat stasiun..." : "Pilih Stasiun"}
-              />
-            </TriggerContent>
-          </StationTrigger>
-          <SelectContent>
-            {stations.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.nama}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={onStationIdChange}
+          isLoading={isLoadingStations}
+        />
       </Field>
     </Row>
   );
@@ -111,32 +93,4 @@ const FieldLabel = styled.label`
   font-weight: 600;
   line-height: 16px;
   color: #1d2520;
-`;
-
-const StationTrigger = styled(SelectTrigger)`
-  width: 100%;
-  height: 48px;
-  padding: 12px;
-  background: #ffffff;
-  border: 1.5px solid #d6dcd8;
-  border-radius: 12px;
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1d2520;
-
-  ${media.desktop} {
-    width: 291px;
-  }
-
-  & svg:last-child {
-    color: #8b9c90;
-  }
-`;
-
-const TriggerContent = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
 `;
