@@ -6,6 +6,7 @@ import { useDashboardDrySpell } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
+import { getDrySpellLevel } from "@/lib/dry-spell-level";
 
 /** Kartu "Deret Hari Terpanjang Tidak Hujan" di sidebar kanan Beranda.
  *  Hit `/api/v2/dashboards/dry_spell?weather_station_id=...` */
@@ -22,20 +23,25 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
   const valueText = data?.total_dry_spell ?? "—";
   const message = isError ? getErrorMessage(error) : (data?.insight ?? "");
 
+  // TODO: SEMENTARA — menunggu rules warna baru dari peneliti. Threshold
+  // > 20 hari (getDrySpellLevel "tinggi") & warna merah belum final.
+  const days = parseInt(data?.total_dry_spell ?? "", 10);
+  const isHigh = getDrySpellLevel(Number.isNaN(days) ? null : days) === "tinggi";
+
   return (
-    <Card>
+    <Card $high={isHigh}>
       <GlowFrame aria-hidden>
         <Glow src="/brand/dry-spell-glow.webp" alt="" width={520} height={520} />
       </GlowFrame>
 
       <Content>
-        <Title>Deret Hari Terpanjang Tidak Hujan</Title>
+        <Title $high={isHigh}>Deret Hari Terpanjang Tidak Hujan</Title>
         <ValueRow>
           <Image src="/brand/dry-spell.png" alt="" width={50} height={50} />
           {pending ? (
             <SkeletonBlock $w="80px" $h="28px" $radius="8px" />
           ) : (
-            <Value>{valueText}</Value>
+            <Value $high={isHigh}>{valueText}</Value>
           )}
         </ValueRow>
       </Content>
@@ -51,7 +57,7 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
   );
 }
 
-const Card = styled.div`
+const Card = styled.div<{ $high: boolean }>`
   position: relative;
   isolation: isolate;
   box-sizing: border-box;
@@ -62,8 +68,11 @@ const Card = styled.div`
   gap: 8px;
   padding: 16px;
   overflow: hidden;
-  background: linear-gradient(277.11deg, #ffeeb7 2.38%, #ffe100 73.49%);
-  border: 1px solid #e89b00;
+  background: ${(p) =>
+    p.$high
+      ? "linear-gradient(277.11deg, #ffdad9 2.38%, #ff9c99 73.49%)"
+      : "linear-gradient(277.11deg, #ffeeb7 2.38%, #ffe100 73.49%)"};
+  border: 1px solid ${(p) => (p.$high ? "#ee443f" : "#e89b00")};
   border-radius: 16px;
 `;
 
@@ -105,12 +114,12 @@ const Content = styled.div`
   gap: 4px;
 `;
 
-const Title = styled.span`
+const Title = styled.span<{ $high: boolean }>`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
-  color: #b57900;
+  color: ${(p) => (p.$high ? "#b3261e" : "#b57900")};
 `;
 
 const ValueRow = styled.div`
@@ -119,12 +128,12 @@ const ValueRow = styled.div`
   gap: 4px;
 `;
 
-const Value = styled.span`
+const Value = styled.span<{ $high: boolean }>`
   font-family: var(--font-manrope), sans-serif;
   font-size: 24px;
   font-weight: 700;
   line-height: 28px;
-  color: #8c5e00;
+  color: ${(p) => (p.$high ? "#8a1c17" : "#8c5e00")};
 `;
 
 const DateText = styled.span`
