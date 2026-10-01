@@ -19,6 +19,7 @@ export function StationSearchSelect({
   id,
   variant = "glass",
   icon,
+  desktopWidth,
 }: {
   stations: Station[];
   value?: string;
@@ -27,6 +28,8 @@ export function StationSearchSelect({
   id?: string;
   variant?: "glass" | "outlined";
   icon?: ReactNode;
+  /** Lebar trigger (px) di desktop untuk varian "outlined"; default 291. */
+  desktopWidth?: number;
 }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,7 +57,13 @@ export function StationSearchSelect({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <Trigger id={id} type="button" disabled={isLoading} $variant={variant}>
+        <Trigger
+          id={id}
+          type="button"
+          disabled={isLoading}
+          $variant={variant}
+          $desktopWidth={desktopWidth}
+        >
           <TriggerContent>
             {icon}
             <TriggerText $placeholder={!selected}>
@@ -111,7 +120,10 @@ export function StationSearchSelect({
   );
 }
 
-const Trigger = styled.button<{ $variant: "glass" | "outlined" }>`
+const Trigger = styled.button<{
+  $variant: "glass" | "outlined";
+  $desktopWidth?: number;
+}>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -131,7 +143,7 @@ const Trigger = styled.button<{ $variant: "glass" | "outlined" }>`
           border: 1.5px solid #d6dcd8;
 
           ${media.desktop} {
-            width: 291px;
+            width: ${p.$desktopWidth ?? 291}px;
           }
         `
       : css`

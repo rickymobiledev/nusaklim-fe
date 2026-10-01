@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
 
@@ -39,24 +40,14 @@ export function WaterBalanceFilters({
   return (
     <Row>
       <Filters>
-        <Select
+        <StationSearchSelect
+          variant="outlined"
+          desktopWidth={300}
+          stations={stations}
           value={stationId}
-          onValueChange={onStationIdChange}
-          disabled={isLoadingStations}
-        >
-          <StationTrigger aria-label="Pilih Stasiun">
-            <SelectValue
-              placeholder={isLoadingStations ? "Memuat stasiun..." : "Pilih Stasiun"}
-            />
-          </StationTrigger>
-          <SelectContent>
-            {stations.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.nama}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={onStationIdChange}
+          isLoading={isLoadingStations}
+        />
 
         <Select
           value={String(year)}
@@ -106,27 +97,6 @@ const Filters = styled.div`
   ${media.desktop} {
     flex-direction: row;
     align-items: center;
-  }
-`;
-
-const StationTrigger = styled(SelectTrigger)`
-  width: 100%;
-  height: 48px;
-  padding: 12px;
-  background: #ffffff;
-  border: 1.5px solid #d6dcd8;
-  border-radius: 12px;
-  font-family: var(--font-body), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1d2520;
-
-  ${media.desktop} {
-    width: 300px;
-  }
-
-  & svg {
-    color: #8b9c90;
   }
 `;
 
