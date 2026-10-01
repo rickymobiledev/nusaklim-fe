@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from "recharts";
 import { DataState } from "@/components/shared/DataState";
+import { PillBar } from "@/components/shared/PillBar";
 import { mergeSeriesByDate } from "@/lib/wind-speed-chart-utils";
 
 interface ColoredSeries {
@@ -24,7 +25,7 @@ interface ColoredSeries {
  *  supaya label tanggal & bar tidak bertumpuk di layar sempit — chart
  *  jadi lebih lebar dari viewport & bisa di-scroll horizontal
  *  (`ChartScroll`) alih-alih diperas `ResponsiveContainer` ke 100%. */
-const CHART_MIN_WIDTH_PER_POINT = 50;
+const CHART_MIN_WIDTH_PER_POINT = 40;
 
 export function WindSpeedChart({
   series,
@@ -56,11 +57,11 @@ export function WindSpeedChart({
                 data={rows}
                 margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
                 barGap={4}
-                barCategoryGap="30%"
               >
                 <CartesianGrid strokeDasharray="4 4" stroke="#E5E7EA" vertical={false} />
                 <XAxis
                   dataKey="date"
+                  minTickGap={8}
                   tick={{ fontSize: 12, fill: "#6D717F" }}
                   tickLine={false}
                 />
@@ -82,8 +83,8 @@ export function WindSpeedChart({
                     dataKey={s.stationId}
                     name={s.stationName}
                     fill={s.color}
-                    barSize={11}
-                    radius={[4, 4, 0, 0]}
+                    shape={<PillBar color={s.color} />}
+                    isAnimationActive={false}
                     onMouseEnter={() => setHoveredStationId(s.stationId)}
                     onMouseLeave={() => setHoveredStationId(null)}
                   />
