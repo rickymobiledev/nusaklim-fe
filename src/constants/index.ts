@@ -49,18 +49,24 @@ export type NavItem = {
 };
 
 /** Sidebar nav — mirrors the existing app's menu (Beranda, Sebaran Spasial, Monitoring, Unduh Data).
- *  "Lainnya" (admin-only) dropdown-nya redesign: "Ramalan Cuaca" DIPINDAH
- *  ke sini dari pill top-level (menghindari dobel di drawer mobile yang
- *  flatten `children`), + "Missing Data" (`/missing-data`, admin-only) +
- *  "Manajemen" (sudah ada). `/forecast` masih bisa
- *  diakses langsung via URL / kartu Ramalan Cuaca di Beranda — lihat
- *  `EXTRA_TITLES["/forecast"]` di bawah supaya title/breadcrumb tetap benar
- *  walau bukan lagi top-level NAV_ITEMS. */
+ *  "Lainnya" (admin-only) dropdown-nya redesign: untuk ADMIN "Ramalan Cuaca"
+ *  ada di dalam dropdown ini (menghindari dobel di drawer mobile yang
+ *  flatten `children`), sedangkan role selain admin dapat pill top-level
+ *  "Ramalan Cuaca" sendiri (item `roles` non-admin di bawah), + "Missing Data"
+ *  (`/missing-data`, admin-only) + "Manajemen" (sudah ada). `/forecast` juga
+ *  bisa diakses langsung via URL / kartu Ramalan Cuaca di Beranda —
+ *  `EXTRA_TITLES["/forecast"]` di bawah menjaga title/breadcrumb. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: DashboardIcon },
   { label: "Sebaran Spasial", href: "/map", icon: MapIcon },
   { label: "Monitoring", href: "/monitoring", icon: MonitoringIcon },
   { label: "Unduh Data", href: "/download-data", icon: DownloadIcon },
+  {
+    label: "Ramalan Cuaca",
+    href: "/forecast",
+    icon: ForecastIcon,
+    roles: ["RESEARCHER", "VIEWER_ANPER", "VIEWER_HOLDING"],
+  },
   {
     label: "Lainnya",
     href: "/user-management",

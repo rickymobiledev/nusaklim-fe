@@ -19,7 +19,12 @@ export function HeaderNav() {
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user?.role && item.roles.includes(user.role)),
   );
-  const activeHref = getActiveNavHref(pathname);
+  // Item top-level yang disembunyikan untuk role ini (mis. "Ramalan Cuaca"
+  // untuk admin) tidak boleh jadi active — fallback ke Dashboard.
+  const resolvedHref = getActiveNavHref(pathname);
+  const activeHref = visibleItems.some((item) => item.href === resolvedHref)
+    ? resolvedHref
+    : "/";
 
   return (
     <Nav aria-label="Navigasi utama">
