@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { ApiError, type ApiListResponse } from "@/types/api";
 import type { DrySpellReport } from "@/types/domain";
 import { createApiClient } from "./fetcher";
@@ -57,6 +58,17 @@ export const drySpellReportClient = {
       return { data, meta: { page: 1, pageSize: data.length, total: data.length } };
     } catch (err) {
       if (err instanceof ApiError) throw err;
+
+      // Rentang tanpa periode dibalas BE dengan HTTP 404 "No such … found."
+      // (pola sama `sunshine-duration-client.ts`/`vpd-client.ts`), bukan 200
+      // `data: []` — itu "kosong", bukan error. Teks pesannya untuk endpoint
+      // ini BELUM terkonfirmasi persis, jadi cukup cek status 404. Aman
+      // dibedakan dari device_id salah/bukan milik company karena
+      // `getStationDetail()` di atas sudah melempar sendiri untuk kasus itu.
+      if (isAxiosError(err) && err.response?.status === 404) {
+        return { data: [], meta: { page: 1, pageSize: 0, total: 0 } };
+      }
+
       throw new ApiError(
         "DRY_SPELL_REPORT_FETCH_FAILED",
         extractBackendErrorMessage(err) ??

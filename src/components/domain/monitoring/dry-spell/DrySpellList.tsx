@@ -48,7 +48,7 @@ export function DrySpellList({
         isError={isError}
         error={error}
         isEmpty={rows.length === 0}
-        emptyMessage="Tidak ada periode hari tanpa hujan pada rentang & stasiun ini."
+        emptyMessage="Tidak Terdapat Deret Terpanjang Hari Tidak Hujan"
         skeleton={
           <List>
             {Array.from({ length: SKELETON_CARDS }, (_, i) => (
