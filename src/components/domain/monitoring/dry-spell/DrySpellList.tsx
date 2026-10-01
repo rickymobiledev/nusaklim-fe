@@ -26,7 +26,11 @@ export function DrySpellList({
   isError: boolean;
   error?: unknown;
 }) {
-  const rows = [...data].sort((a, b) => b.totalHariKering - a.totalHariKering);
+  const rows = [...data].sort(
+    (a, b) =>
+      parseISO(b.tanggalSelesai).getTime() - parseISO(a.tanggalSelesai).getTime() ||
+      parseISO(b.tanggalMulai).getTime() - parseISO(a.tanggalMulai).getTime(),
+  );
 
   return (
     <Wrapper>
