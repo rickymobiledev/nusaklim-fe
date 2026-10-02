@@ -9,7 +9,6 @@ Copy the example environment file and adjust the values as needed:
 ```bash
 cp .env.example .env.local
 ```
-
 Then, run the development server:
 
 ```bash
