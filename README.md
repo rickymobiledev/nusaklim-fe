@@ -5,7 +5,6 @@ Install dependencies:
 pnpm install
 ```
 Copy the example environment file and adjust the values as needed:
-
 ```bash
 cp .env.example .env.local
 ```
