@@ -11,6 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { ChartSkeleton } from "@/components/shared/ChartSkeleton";
 import { DataState } from "@/components/shared/DataState";
 import { PillBar } from "@/components/shared/PillBar";
 import { mergeSeriesByDate } from "@/lib/wind-direction-chart-utils";
@@ -49,6 +50,7 @@ export function WindDirectionChart({
         error={error}
         isEmpty={series.length === 0}
         emptyMessage="Pilih minimal satu stasiun untuk melihat grafik."
+        skeleton={<ChartSkeleton height={352} />}
       >
         <ChartScroll>
           <ChartInner $minWidth={rows.length * CHART_MIN_WIDTH_PER_POINT}>

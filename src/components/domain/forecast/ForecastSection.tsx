@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
 import { useForecast } from "@/hooks/use-forecast";
 import { DataState } from "@/components/shared/DataState";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import {
   findHeavyRainDay,
   getParameterUnit,
@@ -59,6 +60,7 @@ export function ForecastSection() {
         error={error}
         isEmpty={!data || !activeDay}
         emptyMessage="Pilih stasiun untuk melihat ramalan cuaca."
+        skeleton={<ForecastSkeleton />}
       >
         {data && activeDay && (
           <>
@@ -93,6 +95,25 @@ export function ForecastSection() {
   );
 }
 
+/** Skeleton yang meniru layout halaman (peta + strip hari + panel Hari Ini +
+ *  chart tren) dengan tinggi yang sama, supaya tidak melompat saat data datang. */
+function ForecastSkeleton() {
+  return (
+    <>
+      <TopRow>
+        <MapSlot>
+          <MapSkeleton $radius="20px" />
+        </MapSlot>
+        <Left>
+          <SkeletonBlock $h="190px" $radius="20px" />
+          <TodayPanelSkeleton $radius="20px" />
+        </Left>
+      </TopRow>
+      <SkeletonBlock $h="440px" $radius="20px" />
+    </>
+  );
+}
+
 const Page = styled.div`
   display: flex;
   flex-direction: column;
@@ -119,6 +140,25 @@ const MapSlot = styled.div`
   ${media.desktop} {
     grid-column: 2;
     grid-row: 1;
+  }
+`;
+
+/* Tinggi ikut `forecast-map.tsx` (262px mobile, min 484px & mengisi baris grid
+ * di desktop) dan `ForecastTodayPanel.tsx` (min-height 184px / 244px). */
+const MapSkeleton = styled(SkeletonBlock)`
+  height: 262px;
+
+  ${media.desktop} {
+    height: 100%;
+    min-height: 484px;
+  }
+`;
+
+const TodayPanelSkeleton = styled(SkeletonBlock)`
+  height: 184px;
+
+  ${media.desktop} {
+    height: 244px;
   }
 `;
 

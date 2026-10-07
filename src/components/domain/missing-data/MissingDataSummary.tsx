@@ -2,6 +2,7 @@
 
 import styled from "styled-components";
 import { AlertTriangleIcon, StationIcon } from "@/components/shared/DashboardIcons";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { media } from "@/lib/breakpoints";
 import { MissingDataImportCard } from "./MissingDataImportCard";
 
@@ -10,9 +11,12 @@ import { MissingDataImportCard } from "./MissingDataImportCard";
 export function MissingDataSummary({
   missingCount,
   affectedStationCount,
+  isLoading = false,
 }: {
   missingCount: number;
   affectedStationCount: number;
+  /** Selama data dimuat, angka diganti skeleton (bukan "0" yang menyesatkan). */
+  isLoading?: boolean;
 }) {
   return (
     <Row>
@@ -21,7 +25,11 @@ export function MissingDataSummary({
           <AlertTriangleIcon size={32} color="#EE443F" />
         </IconCircle>
         <StatText>
-          <StatValue>{missingCount.toLocaleString("id-ID")}</StatValue>
+          {isLoading ? (
+            <SkeletonBlock $w="64px" $h="34px" />
+          ) : (
+            <StatValue>{missingCount.toLocaleString("id-ID")}</StatValue>
+          )}
           <StatLabel>Data Missing</StatLabel>
         </StatText>
       </StatCard>
@@ -31,7 +39,11 @@ export function MissingDataSummary({
           <StationIcon size={32} color="#175FE2" />
         </IconCircle>
         <StatText>
-          <StatValue>{affectedStationCount.toLocaleString("id-ID")}</StatValue>
+          {isLoading ? (
+            <SkeletonBlock $w="64px" $h="34px" />
+          ) : (
+            <StatValue>{affectedStationCount.toLocaleString("id-ID")}</StatValue>
+          )}
           <StatLabel>Stasiun Terdampak</StatLabel>
         </StatText>
       </StatCard>

@@ -11,6 +11,7 @@ import { DataState } from "@/components/shared/DataState";
 import { AlertTriangleIcon } from "@/components/shared/DashboardIcons";
 import {
   DownloadDataTable,
+  DownloadDataTableSkeleton,
   DownloadDataPagination,
 } from "@/components/domain/download-data/DownloadDataTable";
 import type { MissingDataRow } from "@/types/domain";
@@ -188,6 +189,7 @@ export function MissingDataSection() {
       <MissingDataSummary
         missingCount={missingCount}
         affectedStationCount={affectedStationCount}
+        isLoading={isLoading}
       />
 
       <FilterAndTableGroup>
@@ -207,6 +209,13 @@ export function MissingDataSection() {
             error={error}
             isEmpty={rows.length === 0}
             emptyMessage="Data Tidak Tersedia"
+            skeleton={
+              <DownloadDataTableSkeleton
+                columns={columns}
+                rows={Math.min(pageSize, 10)}
+                headerHeight={64}
+              />
+            }
           >
             <DownloadDataTable columns={columns} data={rows} headerHeight={64} />
           </DataState>
@@ -215,6 +224,7 @@ export function MissingDataSection() {
 
       <DownloadDataPagination
         meta={{ page: effectivePage, pageSize, total }}
+        isLoading={isLoading}
         onPageChange={setPage}
         onPageSizeChange={handlePageSizeChange}
       />
