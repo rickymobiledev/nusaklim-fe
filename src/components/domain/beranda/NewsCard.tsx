@@ -6,6 +6,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
+import { ArrowRightIcon } from "lucide-react";
 import { useNews } from "@/hooks/use-news";
 import { DataState } from "@/components/shared/DataState";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
@@ -24,7 +25,11 @@ const NEWS_SKELETON_SMALL_CARDS = 3;
  *
  *  Struktur mengikuti CSS Figma persis (bukan approksimasi lagi): 1
  *  kartu \"featured\" besar (gambar + overlay gradasi, teks putih) + kartu
- *  kecil (bg putih polos, thumbnail tanpa overlay, teks tanpa ringkasan).
+ *  kecil (bg putih polos, thumbnail tanpa overlay, tanggal + judul +
+ *  ringkasan). Di desktop (Figma 1392px, kartu tinggi 269px) keduanya
+ *  punya tombol \"Baca Selengkapnya\" dan kartu kecil juga ringkasan —
+ *  ringkasan kartu kecil & tombol DESKTOP-ONLY (Figma mobile belum ada,
+ *  preseden sama `NewsArticleCards.tsx`).
  *  BEDA dari kebanyakan card Beranda lain: `Section` (wrapper terluar)
  *  SENGAJA tanpa background/border/padding — Figma (\"Frame 3\") menaruh
  *  section ini polos di atas background halaman, radius cuma ada di tiap
@@ -102,6 +107,10 @@ function FeaturedArticleCard({ item }: { item: NewsItem }) {
         </FeaturedDate>
         <FeaturedTitle>{item.title}</FeaturedTitle>
         <FeaturedExcerpt>{item.excerpt}</FeaturedExcerpt>
+        <FeaturedReadMore>
+          Baca Selengkapnya
+          <ArrowRightIcon size={20} />
+        </FeaturedReadMore>
       </FeaturedTextStack>
     </FeaturedArticle>
   );
@@ -132,6 +141,11 @@ function SmallArticleCard({ item }: { item: NewsItem }) {
           {format(parseISO(item.createdAt), "d MMMM yyyy", { locale: id })}
         </SmallDate>
         <SmallTitle>{item.title}</SmallTitle>
+        <SmallExcerpt>{item.excerpt}</SmallExcerpt>
+        <SmallReadMore>
+          Baca Selengkapnya
+          <ArrowRightIcon size={20} />
+        </SmallReadMore>
       </SmallTextBlock>
     </SmallArticle>
   );
@@ -160,8 +174,8 @@ const Section = styled.div`
 
 const HeaderRow = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 16px;
 `;
 
 const HeaderLeft = styled.div`
@@ -181,7 +195,7 @@ const Title = styled.h2`
 const SeeAllLink = styled(Link)`
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 16px;
   color: #175fe2;
 `;
@@ -210,6 +224,11 @@ const FeaturedSkeleton = styled(SkeletonBlock)`
   max-width: 530px;
   height: 204px;
   border-radius: 8px;
+
+  ${media.desktop} {
+    flex: 0 0 530px;
+    height: 269px;
+  }
 `;
 
 const SmallSkeleton = styled(SkeletonBlock)`
@@ -220,8 +239,9 @@ const SmallSkeleton = styled(SkeletonBlock)`
   border-radius: 8px;
 
   ${media.desktop} {
-    max-width: 260px;
-    height: 204px;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 269px;
   }
 `;
 
@@ -245,6 +265,11 @@ const FeaturedArticle = styled(Link)`
   border-radius: 8px;
   overflow: hidden;
   background: #d4d4d4;
+
+  ${media.desktop} {
+    flex: 0 0 530px;
+    height: 269px;
+  }
 `;
 
 const FeaturedOverlay = styled.div`
@@ -292,6 +317,29 @@ const FeaturedExcerpt = styled.p`
   color: rgba(255, 255, 255, 0.6);
 `;
 
+const ReadMore = styled.span`
+  display: none;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+
+  ${media.desktop} {
+    display: inline-flex;
+  }
+`;
+
+const FeaturedReadMore = styled(ReadMore)`
+  color: #ffffff;
+`;
+
+const SmallReadMore = styled(ReadMore)`
+  margin-top: auto;
+  color: #175fe2;
+`;
+
 /* Ukuran mobile (height241/gambar137/judul16-24) BEDA dari desktop
  * (height204/gambar100/judul14-20) — dikonfirmasi CSS Figma mobile
  * persis, kartu kecil mobile lebih tinggi & teksnya lebih besar,
@@ -306,8 +354,9 @@ const SmallArticle = styled(Link)`
   overflow: hidden;
 
   ${media.desktop} {
-    max-width: 260px;
-    height: 204px;
+    min-width: 0;
+    flex: 1 1 0;
+    height: 269px;
   }
 `;
 
@@ -353,5 +402,21 @@ const SmallTitle = styled.h3`
   ${media.desktop} {
     font-size: 14px;
     line-height: 20px;
+  }
+`;
+
+const SmallExcerpt = styled.p`
+  display: none;
+  overflow: hidden;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #667a6c;
+
+  ${media.desktop} {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 `;
