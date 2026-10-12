@@ -114,7 +114,7 @@ export function ForecastTrendChart({
       <Head>
         <HeadText>
           <Title>Tren Prediksi</Title>
-          <Subtitle>Grafik prediksi paramter cuaca harian untuk 7 hari ke depan</Subtitle>
+          <Subtitle>Grafik prediksi parameter cuaca harian untuk 7 hari ke depan</Subtitle>
         </HeadText>
 
         <Field>

@@ -1,21 +1,24 @@
 "use client";
 
 import styled from "styled-components";
-import { Printer, Maximize, Minimize, Download } from "lucide-react";
+import { Printer, Maximize, Minimize, Download, ImageDown } from "lucide-react";
+import { MAP_EXPORT_IGNORE_ATTR } from "@/lib/map-image";
 
 export function MapToolbar({
   isFullscreen,
   onPrint,
   onToggleFullscreen,
   onDownload,
+  onDownloadImage,
 }: {
   isFullscreen: boolean;
   onPrint: () => void;
   onToggleFullscreen: () => void;
   onDownload: () => void;
+  onDownloadImage: () => void;
 }) {
   return (
-    <Row>
+    <Row {...{ [MAP_EXPORT_IGNORE_ATTR]: "" }}>
       <IconButton type="button" title="Cetak" onClick={onPrint}>
         <Printer size={18} strokeWidth={1.5} color="#6d717f" />
       </IconButton>
@@ -33,6 +36,10 @@ export function MapToolbar({
       <DownloadButton type="button" onClick={onDownload}>
         <Download size={18} strokeWidth={1.5} />
         Unduh
+      </DownloadButton>
+      <DownloadButton type="button" onClick={onDownloadImage}>
+        <ImageDown size={18} strokeWidth={1.5} />
+        Gambar
       </DownloadButton>
     </Row>
   );

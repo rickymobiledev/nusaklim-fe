@@ -3,12 +3,14 @@ import type { ApiItemResponse, ApiListResponse } from "@/types/api";
 import type { Station } from "@/types/domain";
 import type { CreateStationInput, UpdateStationInput } from "@/types/user-management";
 import { companiesClient } from "./companies-client";
-import { stationApi } from "./station-client";
+import { mapAdminDeviceToStation, type RawAdminDevice } from "./adapters/station-adapter";
+import { extractBackendErrorMessage } from "./backend-error";
+import { createApiClient } from "./fetcher";
 import type { StationsAdminApi } from "./stations-admin-api";
 
 /** SEMENTARA: kontrak BE untuk tambah/ubah/hapus stasiun belum ada, jadi
  *  mutasi dimock in-memory sebagai OVERLAY di atas hasil
- *  `GET /devices/status` yang tetap real (pola sama `TEMP_USE_MOCK_COMPANIES`).
+ *  `GET /devices` (via fetcher admin) yang tetap real (pola sama `TEMP_USE_MOCK_COMPANIES`).
  *  Set `false` HANYA setelah cabang real diimplementasi. Overlay hilang saat
  *  server restart. */
 const TEMP_USE_MOCK_STATIONS = true;
@@ -22,10 +24,32 @@ let mockCreated: Station[] = [];
 const mockUpdated = new Map<string, Station>();
 const mockDeleted = new Set<string>();
 
+/** Manajemen Stasiun SENGAJA hit `GET /devices` (punya `elevation`), bukan
+ *  `/devices/status` yang dipakai `stationApi` untuk halaman lain. Company
+ *  scoping tetap dari `resolveCompanyId()` di Route Handler pemanggil
+ *  (`createApiClient(companyCode)` meng-inject `company_code`). */
 async function fetchRealStations(): Promise<Station[]> {
-  // Tanpa page/pageSize → balikin SEMUA stasiun (lihat station-client.ts).
-  const res = await stationApi.getStations();
-  return res.data;
+  try {
+    const res = await createApiClient().get<{
+      status: boolean;
+      message: string;
+      data: RawAdminDevice[];
+    }>("/devices");
+    if (!res.data.status) {
+      throw new ApiError(
+        "STATION_FETCH_FAILED",
+        res.data.message || "Gagal mengambil data stasiun dari server.",
+      );
+    }
+    return res.data.data.map(mapAdminDeviceToStation);
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(
+      "STATION_FETCH_FAILED",
+      extractBackendErrorMessage(err) ??
+        "Gagal terhubung ke server. Periksa koneksi internet.",
+    );
+  }
 }
 
 async function resolveCompanyName(code: string): Promise<string> {
@@ -64,6 +88,7 @@ export const stationsAdminClient: StationsAdminApi = {
       companyName: await resolveCompanyName(input.companyCode),
       lat: input.latitude,
       long: input.longitude,
+      elevation: input.elevation ?? null,
       status: "off",
       sinkronisasiTerakhir: null,
     };
@@ -87,6 +112,7 @@ export const stationsAdminClient: StationsAdminApi = {
       companyName: await resolveCompanyName(input.companyCode),
       lat: input.latitude,
       long: input.longitude,
+      elevation: input.elevation ?? null,
     };
     if (created) {
       mockCreated = mockCreated.map((s) => (s.id === input.id ? updated : s));

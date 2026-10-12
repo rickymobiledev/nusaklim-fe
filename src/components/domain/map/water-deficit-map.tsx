@@ -17,6 +17,7 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildWaterDeficitCsv } from "@/lib/map-utils";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
+import { downloadElementAsPng } from "@/lib/map-image";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { WaterDeficitLegend } from "./WaterDeficitLegend";
@@ -134,6 +135,14 @@ export function WaterDeficitMap({ rows }: { rows: StationWaterDeficit[] }) {
     );
   }, [rows]);
 
+  const handleDownloadImage = useCallback(() => {
+    if (!wrapperRef.current) return;
+    void downloadElementAsPng(
+      wrapperRef.current,
+      `defisit-air_${format(new Date(), "yyyy-MM-dd")}.png`,
+    );
+  }, []);
+
   const maxDefisitAir = useMemo(() => {
     const values = rows.map((r) => r.defisitAir).filter((v): v is number => v !== null);
     return values.length > 0 ? Math.max(...values) : 0;
@@ -146,6 +155,7 @@ export function WaterDeficitMap({ rows }: { rows: StationWaterDeficit[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
+        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer
@@ -226,7 +236,7 @@ export function WaterDeficitMap({ rows }: { rows: StationWaterDeficit[] }) {
         <MapZoomControls />
       </MapContainer>
 
-      <WaterDeficitGauge maxValue={maxDefisitAir} />
+      {/* <WaterDeficitGauge maxValue={maxDefisitAir} /> */}
       <WaterDeficitLegend />
     </Wrapper>
   );

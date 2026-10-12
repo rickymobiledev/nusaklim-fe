@@ -54,3 +54,28 @@ export function pickLatestDrySpellReport(rows: DrySpellReport[]): DrySpellReport
     row.tanggalSelesai > latest.tanggalSelesai ? row : latest,
   );
 }
+
+/** CSV halaman Monitoring > Hari Tanpa Hujan — satu baris per periode
+ *  (urut durasi terpanjang, sama dengan `DrySpellList`). Tanggal ISO
+ *  `yyyy-MM-dd`; "Keterangan" = label level tanpa kata "Hari" (mis. "> 10"). */
+export function buildDrySpellCsv(rows: DrySpellReport[]): string {
+  const header = [
+    "Stasiun",
+    "Tanggal Mulai",
+    "Tanggal Selesai",
+    "Durasi (Hari)",
+    "Keterangan",
+  ];
+  const lines = [...rows]
+    .sort((a, b) => b.totalHariKering - a.totalHariKering)
+    .map((row) =>
+      [
+        row.stasiun,
+        row.tanggalMulai.slice(0, 10),
+        row.tanggalSelesai.slice(0, 10),
+        row.totalHariKering,
+        DRY_SPELL_LABEL[getDrySpellLevel(row.totalHariKering)].replace(" Hari", ""),
+      ].join(","),
+    );
+  return [header.join(","), ...lines].join("\n");
+}

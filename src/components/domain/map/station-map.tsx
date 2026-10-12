@@ -21,6 +21,7 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildStationsCsv } from "@/lib/map-utils";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
+import { downloadElementAsPng } from "@/lib/map-image";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapLegend } from "./MapLegend";
@@ -178,6 +179,14 @@ export function StationMap({
     );
   }, [stations]);
 
+  const handleDownloadImage = useCallback(() => {
+    if (!wrapperRef.current) return;
+    void downloadElementAsPng(
+      wrapperRef.current,
+      `status-stasiun_${format(new Date(), "yyyy-MM-dd")}.png`,
+    );
+  }, []);
+
   return (
     <Wrapper ref={wrapperRef} $fullscreen={isFullscreen}>
       <MapToolbar
@@ -185,6 +194,7 @@ export function StationMap({
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
+        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

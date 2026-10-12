@@ -54,6 +54,10 @@ const schema = z.object({
   brand: z.string().min(1, "Merek wajib dipilih"),
   latitude: coordinate("Latitude", -90, 90),
   longitude: coordinate("Longitude", -180, 180),
+  elevation: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || Number.isFinite(Number(v)), "Elevasi harus berupa angka"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -127,6 +131,7 @@ function StationForm({ mode, station }: { mode: "create" | "edit"; station?: Sta
       brand: station?.brand ?? "",
       latitude: station ? String(station.lat) : "",
       longitude: station ? String(station.long) : "",
+      elevation: station?.elevation != null ? String(station.elevation) : "",
     },
   });
 
@@ -142,6 +147,7 @@ function StationForm({ mode, station }: { mode: "create" | "edit"; station?: Sta
       brand: values.brand,
       latitude: Number(values.latitude),
       longitude: Number(values.longitude),
+      elevation: values.elevation === "" ? null : Number(values.elevation),
     };
     if (mode === "create") {
       createStation.mutate(input, { onSuccess: goToList });
@@ -239,6 +245,15 @@ function StationForm({ mode, station }: { mode: "create" | "edit"; station?: Sta
             {...register("latitude")}
           />
         </CoordRow>
+
+        <UserFormField
+          id="elevation"
+          label="Elevasi (opsional)"
+          placeholder="e.g. 125.5"
+          inputMode="decimal"
+          error={errors.elevation?.message}
+          {...register("elevation")}
+        />
       </Fields>
 
       <Actions>

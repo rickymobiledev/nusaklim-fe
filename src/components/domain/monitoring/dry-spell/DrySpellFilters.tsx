@@ -21,6 +21,7 @@ export function DrySpellFilters({
   onStationIdChange,
   dateRange,
   onDateRangeChange,
+  onDownload,
   downloadDisabled,
 }: {
   stations: Station[];
@@ -29,6 +30,7 @@ export function DrySpellFilters({
   onStationIdChange: (stationId: string) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
+  onDownload: () => void;
   downloadDisabled: boolean;
 }) {
   return (
@@ -55,10 +57,7 @@ export function DrySpellFilters({
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
 
-      {/* TODO: belum ada handler — sama seperti tombol "Unduh Data"
-          placeholder di halaman Monitoring lain, export data belum
-          diimplementasi. */}
-      <DownloadButton type="button" disabled={downloadDisabled}>
+      <DownloadButton type="button" onClick={onDownload} disabled={downloadDisabled}>
         <Download size={20} />
         Unduh Data
       </DownloadButton>

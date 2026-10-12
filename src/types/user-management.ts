@@ -96,6 +96,8 @@ export interface StationFields {
   brand: string;
   latitude: number;
   longitude: number;
+  /** Opsional, decimal (meter). `null`/tidak ada = tidak diisi. */
+  elevation?: number | null;
 }
 
 /** `id` diisi user saat Tambah (ID Stasiun/device_id), terkunci saat Edit. */

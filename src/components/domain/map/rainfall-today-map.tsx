@@ -18,6 +18,7 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildRainfallTodayCsv } from "@/lib/map-utils";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
+import { downloadElementAsPng } from "@/lib/map-image";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { RainfallTodayLegend } from "./RainfallTodayLegend";
@@ -111,6 +112,14 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
     );
   }, [rows]);
 
+  const handleDownloadImage = useCallback(() => {
+    if (!wrapperRef.current) return;
+    void downloadElementAsPng(
+      wrapperRef.current,
+      `curah-hujan-hari-ini_${format(new Date(), "yyyy-MM-dd")}.png`,
+    );
+  }, []);
+
   return (
     <Wrapper ref={wrapperRef} $fullscreen={isFullscreen}>
       <MapToolbar
@@ -118,6 +127,7 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
+        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

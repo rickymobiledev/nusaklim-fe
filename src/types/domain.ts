@@ -21,6 +21,7 @@ export interface Station {
   companyName: string;
   lat: number;
   long: number;
+  elevation?: number | null; // opsional (decimal, meter) — field `elevation` API asli
   status: StationStatus;
   sinkronisasiTerakhir: string | null; // dari field `last_sync_time` API asli — BUKAN `updated_at` (field beda, updated_at cuma timestamp record berubah)
 }

@@ -3,6 +3,7 @@
 import styled from "styled-components";
 import { Plus, Minus } from "lucide-react";
 import { useMap } from "react-leaflet";
+import { MAP_EXPORT_IGNORE_ATTR } from "@/lib/map-image";
 
 /** Kontrol zoom custom (Figma) — menggantikan default Leaflet zoom control
  *  (`zoomControl={false}` di `MapContainer`). Wajib jadi child di dalam
@@ -11,7 +12,7 @@ export function MapZoomControls() {
   const map = useMap();
 
   return (
-    <Wrapper>
+    <Wrapper {...{ [MAP_EXPORT_IGNORE_ATTR]: "" }}>
       <Button type="button" aria-label="Perbesar peta" onClick={() => map.zoomIn()}>
         <Plus size={16} strokeWidth={2.5} color="#000000" />
       </Button>

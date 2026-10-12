@@ -11,7 +11,15 @@ export function parseStationBody(
   const latitude = Number(body.latitude);
   const longitude = Number(body.longitude);
 
+  const rawElevation = body.elevation;
+  const hasElevation =
+    rawElevation !== undefined &&
+    rawElevation !== null &&
+    !(typeof rawElevation === "string" && rawElevation.trim() === "");
+  const elevation = hasElevation ? Number(rawElevation) : null;
+
   const valid =
+    (elevation === null || Number.isFinite(elevation)) &&
     name &&
     companyCode &&
     (STATION_BRANDS as readonly string[]).includes(brand) &&
@@ -22,7 +30,7 @@ export function parseStationBody(
     longitude >= -180 &&
     longitude <= 180;
 
-  return valid ? { name, companyCode, brand, latitude, longitude } : null;
+  return valid ? { name, companyCode, brand, latitude, longitude, elevation } : null;
 }
 
 /** ID stasiun dari body POST: wajib, tanpa `/` (dipakai di path `[id]`). */

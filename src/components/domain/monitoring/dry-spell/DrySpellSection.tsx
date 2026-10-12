@@ -6,6 +6,8 @@ import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useDrySpell } from "@/hooks/use-dry-spell";
+import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import { buildDrySpellCsv } from "@/lib/dry-spell-level";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { DrySpellFilters } from "./DrySpellFilters";
 import { DrySpellList } from "./DrySpellList";
@@ -35,6 +37,14 @@ export function DrySpellSection() {
     dateTo: dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : undefined,
   });
   const rows = data ?? [];
+  const visibleRows = selectedStationId ? rows : [];
+
+  function handleDownload() {
+    if (visibleRows.length === 0) return;
+    const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
+    const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
+    downloadCsvFile(`hari-tanpa-hujan_${from}_${to}.csv`, buildDrySpellCsv(visibleRows));
+  }
 
   return (
     <Wrapper>
@@ -53,11 +63,12 @@ export function DrySpellSection() {
         onStationIdChange={setStationId}
         dateRange={dateRange}
         onDateRangeChange={(range) => range && setDateRange(range)}
-        downloadDisabled={rows.length === 0}
+        onDownload={handleDownload}
+        downloadDisabled={visibleRows.length === 0}
       />
 
       <DrySpellList
-        data={selectedStationId ? rows : []}
+        data={visibleRows}
         isLoading={isLoading || isLoadingStations}
         isError={isError}
         error={error}

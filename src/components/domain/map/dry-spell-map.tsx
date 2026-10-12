@@ -21,6 +21,7 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildDrySpellCsv } from "@/lib/map-utils";
 import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
+import { downloadElementAsPng } from "@/lib/map-image";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { DrySpellLegend } from "./DrySpellLegend";
@@ -137,6 +138,14 @@ export function DrySpellMap({ rows }: { rows: StationDrySpell[] }) {
     );
   }, [rows]);
 
+  const handleDownloadImage = useCallback(() => {
+    if (!wrapperRef.current) return;
+    void downloadElementAsPng(
+      wrapperRef.current,
+      `deret-hari-tidak-hujan_${format(new Date(), "yyyy-MM-dd")}.png`,
+    );
+  }, []);
+
   const maxDurasi = useMemo(() => {
     const values = rows
       .map((r) => r.durasiTerakhir)
@@ -151,6 +160,7 @@ export function DrySpellMap({ rows }: { rows: StationDrySpell[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
+        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer
@@ -223,7 +233,7 @@ export function DrySpellMap({ rows }: { rows: StationDrySpell[] }) {
         <MapZoomControls />
       </MapContainer>
 
-      <DrySpellGauge maxValue={maxDurasi} />
+      {/* <DrySpellGauge maxValue={maxDurasi} /> */}
       <DrySpellLegend />
     </Wrapper>
   );
