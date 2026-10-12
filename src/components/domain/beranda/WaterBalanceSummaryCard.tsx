@@ -5,6 +5,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardWaterBalance } from "@/hooks/use-dashboard-sidebar";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
+import { FitText } from "@/components/shared/FitText";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
 import { media } from "@/lib/breakpoints";
@@ -106,10 +107,12 @@ function MetricTile({
       {loading ? (
         <SkeletonBlock $w="64px" $h="28px" $radius="8px" />
       ) : (
-        <TileValue>
-          {value}
-          {unit && value !== "—" && <Unit> {unit}</Unit>}
-        </TileValue>
+        <FitText maxPx={24} minPx={14}>
+          <TileValue>
+            {value}
+            {unit && value !== "—" && <Unit> {unit}</Unit>}
+          </TileValue>
+        </FitText>
       )}
     </Tile>
   );
@@ -220,9 +223,11 @@ const TileLabel = styled.span`
   color: #667a6c;
 `;
 
+/* Font-size final diatur `FitText` (24px, turun kalau angka tidak muat di
+ * tile) — makanya `inherit`, bukan literal 24px. */
 const TileValue = styled.span`
   font-family: var(--font-manrope), sans-serif;
-  font-size: 24px;
+  font-size: inherit;
   font-weight: 700;
   line-height: 28px;
   color: #006ab5;
@@ -230,7 +235,8 @@ const TileValue = styled.span`
 `;
 
 /* Unit "mm" lebih kecil dari angka di screenshot Figma (CSS Figma cuma
- * mencatat satu ukuran 24px) — ukuran 16px perkiraan visual. */
+ * mencatat satu ukuran 24px) — 0.67em (= 16px di 24px) perkiraan visual,
+ * `em` supaya ikut mengecil bareng angka saat `FitText` menyusutkan. */
 const Unit = styled.span`
-  font-size: 16px;
+  font-size: 0.67em;
 `;
