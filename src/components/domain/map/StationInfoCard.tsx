@@ -17,11 +17,11 @@ import type { Station } from "@/types/domain";
 
 type StatusFilter = "semua" | "aktif" | "tidak_aktif";
 
-/** Warna pill status di tabel ini hex literal Figma (Green/500 & Red/500) —
+/** Warna pill status di tabel ini hex literal (Aktif biru `#175FE2`, Red/500) —
  *  BEDA dari `STATION_STATUS_BADGE.tidak_aktif` (`#b91c1c`, dipakai popup
  *  peta), jadi sengaja tidak reuse konstanta itu. */
 const STATUS_PILL: Record<"aktif" | "tidak_aktif", { label: string; bg: string }> = {
-  aktif: { label: "Aktif", bg: "#43B75D" },
+  aktif: { label: "Aktif", bg: "#175FE2" },
   tidak_aktif: { label: "Tidak Aktif", bg: "#EE443F" },
 };
 
