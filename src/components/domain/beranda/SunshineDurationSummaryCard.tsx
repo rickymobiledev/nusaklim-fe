@@ -3,6 +3,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardSunshineDuration } from "@/hooks/use-dashboard-sidebar";
+import { SidePanelSyncAlert } from "@/components/domain/beranda/SidePanelSyncAlert";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
@@ -32,11 +33,11 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
       </Header>
 
       <Row>
-        <Label>Batas Bawah</Label>
+        <Label>Tanggal</Label>
         {pending ? (
-          <SkeletonBlock $w="48px" $h="14px" />
+          <SkeletonBlock $w="64px" $h="14px" />
         ) : (
-          <Value $muted={false}>{minThresholdText}</Value>
+          <Value $muted={!data?.date}>{data?.date || "—"}</Value>
         )}
       </Row>
       <Row>
@@ -47,8 +48,17 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
           <Value $muted={!data}>{durationText}</Value>
         )}
       </Row>
+      <Row>
+        <Label>Batas Bawah</Label>
+        {pending ? (
+          <SkeletonBlock $w="48px" $h="14px" />
+        ) : (
+          <Value $muted={false}>{minThresholdText}</Value>
+        )}
+      </Row>
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending ? <SidePanelSyncAlert title={data?.title} /> : null}
     </Card>
   );
 }

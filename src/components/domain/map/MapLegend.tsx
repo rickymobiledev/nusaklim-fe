@@ -9,8 +9,8 @@ export function MapLegend() {
   return (
     <Wrapper>
       <Item>
-        <LegendDot $color="#43B75D" />
-        <Label $color="#43B75D">Stasiun Aktif</Label>
+        <LegendDot $color="#175FE2" />
+        <Label $color="#175FE2">Stasiun Aktif</Label>
       </Item>
       <Item>
         <LegendDot $color="#EE443F" />

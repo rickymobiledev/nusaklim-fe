@@ -28,6 +28,9 @@ export interface LatestWeatherItem {
   avg_today_direction?: string;
   last_3_days: LatestWeatherDayItem[];
   interpretation: string;
+  /** Tingkat interpretasi dari BE: `maximum` (merah), `optimum` (hijau),
+   *  `minimum` (kuning). Tidak dikirim saat `interpretation` = "---". */
+  interpretation_level?: "maximum" | "optimum" | "minimum" | string;
 }
 
 export interface LatestWeatherData {

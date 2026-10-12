@@ -37,7 +37,7 @@ export function TrendChart<T extends Record<string, unknown>>({
           dataKey={yKey as string}
           name={label}
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={3}
           dot={false}
         />
       </LineChart>

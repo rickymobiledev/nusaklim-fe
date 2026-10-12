@@ -2,6 +2,9 @@ import { ApiError } from "@/types/api";
 import { createApiClient } from "./fetcher";
 import { extractBackendErrorMessage } from "./backend-error";
 
+/* `title` = keterangan siap tampil dari BE (mis. "VPD Kemarin"), dipakai apa
+ * adanya oleh `SidePanelSyncAlert` — tidak perlu format di FE. */
+
 export interface DashboardWaterBalanceData {
   year: string;
   total_rainfall: string;
@@ -9,12 +12,14 @@ export interface DashboardWaterBalanceData {
   total_water_deficit: string;
   total_water_surplus: string;
   insight: string;
+  title?: string;
 }
 
 export interface DashboardDrySpellData {
   total_dry_spell: string;
   date: string;
   insight: string;
+  title?: string;
 }
 
 export interface DashboardSunshineDurationData {
@@ -22,6 +27,7 @@ export interface DashboardSunshineDurationData {
   total_solar_sunshine_duration: string;
   min_threshold: string;
   insight: string;
+  title?: string;
 }
 
 export interface DashboardVpdData {
@@ -29,6 +35,7 @@ export interface DashboardVpdData {
   vpd: string;
   max_threshold: string;
   insight: string;
+  title?: string;
 }
 
 interface Envelope<T> {

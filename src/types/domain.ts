@@ -48,7 +48,8 @@ export interface WeatherChartPoint {
 }
 
 export interface WeatherStatus {
-  tone: "success" | "warning";
+  /** `success` hijau, `warning` merah, `caution` kuning. */
+  tone: "success" | "warning" | "caution";
   message: string;
 }
 

@@ -13,6 +13,7 @@ import { BerandaHeroBanner } from "@/components/domain/beranda/BerandaHeroBanner
 import { WeatherSummaryCard } from "@/components/domain/beranda/WeatherSummaryCard";
 import { useLatestWeather } from "@/hooks/use-latest-weather";
 import type { LatestWeatherItem } from "@/lib/api/latest-weather-client";
+import { toneFromInterpretationLevel } from "@/lib/interpretation-level";
 import { useStations } from "@/hooks/use-stations";
 
 function toCardProps(
@@ -31,7 +32,7 @@ function toCardProps(
           : (d.average ?? d.sum ?? "--"),
       })) ?? [],
     status: {
-      tone: "warning" as const,
+      tone: toneFromInterpretationLevel(item?.interpretation_level),
       message:
         item?.interpretation && item.interpretation !== "---"
           ? item.interpretation

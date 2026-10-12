@@ -22,11 +22,12 @@ interface PillBarProps {
   onMouseLeave?: React.MouseEventHandler<SVGGElement>;
 }
 
-/** Batang pil sesuai Figma untuk `<Bar shape={<PillBar />} />` Recharts:
- *  bingkai luar `#F6F8F7` (radius atas 24) + isi `#0039FF` (radius atas 24,
- *  bawah 4), lebar mengikuti slot (lihat `BAR_WIDTH`). Dipakai Monitoring >
- *  Lama Penyinaran, Ramalan Cuaca, dan chart detail cuaca (curah hujan,
- *  radiasi, kecepatan & arah angin — `color` per-stasiun). */
+/** Batang KOTAK (sudut siku, tanpa radius) untuk `<Bar shape={<PillBar />} />`
+ *  Recharts: bingkai luar `#F6F8F7` + isi `#0039FF`, lebar mengikuti slot
+ *  (lihat `BAR_WIDTH`). Dipakai Monitoring > Lama Penyinaran, Ramalan Cuaca,
+ *  dan chart detail cuaca (curah hujan, radiasi, kecepatan & arah angin —
+ *  `color` per-stasiun). Nama "PillBar" peninggalan bentuk pil lama —
+ *  sengaja tidak di-rename (banyak pemakai). */
 export function PillBar({
   x = 0,
   y = 0,
@@ -44,45 +45,16 @@ export function PillBar({
     Math.max(Math.min(BAR_WIDTH, width * MIN_SLOT_FILL), width * BAR_WIDTH_RATIO),
   );
   const left = x + (width - barWidth) / 2;
-  const radius = Math.min(barWidth / 2, height);
   return (
     <g onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-      <path
-        d={roundedTopPath(
-          left - BAR_FRAME,
-          y - BAR_FRAME,
-          barWidth + BAR_FRAME * 2,
-          height + BAR_FRAME,
-          radius + BAR_FRAME,
-          6,
-        )}
+      <rect
+        x={left - BAR_FRAME}
+        y={y - BAR_FRAME}
+        width={barWidth + BAR_FRAME * 2}
+        height={height + BAR_FRAME}
         fill="#F6F8F7"
       />
-      <path d={roundedTopPath(left, y, barWidth, height, radius, 4)} fill={color} />
+      <rect x={left} y={y} width={barWidth} height={height} fill={color} />
     </g>
   );
-}
-
-/** Path persegi panjang dengan radius sudut atas `top` dan bawah `bottom`. */
-function roundedTopPath(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  top: number,
-  bottom: number,
-): string {
-  const t = Math.min(top, w / 2, h);
-  const b = Math.min(bottom, w / 2, Math.max(h - t, 0));
-  return [
-    `M ${x} ${y + t}`,
-    `Q ${x} ${y} ${x + t} ${y}`,
-    `L ${x + w - t} ${y}`,
-    `Q ${x + w} ${y} ${x + w} ${y + t}`,
-    `L ${x + w} ${y + h - b}`,
-    `Q ${x + w} ${y + h} ${x + w - b} ${y + h}`,
-    `L ${x + b} ${y + h}`,
-    `Q ${x} ${y + h} ${x} ${y + h - b}`,
-    "Z",
-  ].join(" ");
 }

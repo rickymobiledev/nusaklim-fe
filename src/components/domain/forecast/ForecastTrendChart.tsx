@@ -159,7 +159,7 @@ export function ForecastTrendChart({
                   type="monotone"
                   dataKey="value"
                   stroke="#0039FF"
-                  strokeWidth={1}
+                  strokeWidth={3}
                   dot={false}
                   activeDot={{ r: 4, fill: "#ffffff", stroke: "#0039FF" }}
                 />
