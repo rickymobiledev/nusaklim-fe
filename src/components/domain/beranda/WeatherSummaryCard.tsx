@@ -390,9 +390,10 @@ const StatusRow = styled.div`
 const TONE_COLORS = {
   warning: { bg: "#FAC5C3", badge: "#EE443F" },
   success: { bg: "#C5E9CD", badge: "#43B75D" },
+  caution: { bg: "#FFE5B0", badge: "#FFAA00" },
 } as const;
 
-const StatusBanner = styled.div<{ $tone: "success" | "warning" }>`
+const StatusBanner = styled.div<{ $tone: WeatherStatus["tone"] }>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -401,7 +402,7 @@ const StatusBanner = styled.div<{ $tone: "success" | "warning" }>`
   background: ${(p) => TONE_COLORS[p.$tone].bg};
 `;
 
-const IconCircle = styled.div<{ $tone: "success" | "warning" }>`
+const IconCircle = styled.div<{ $tone: WeatherStatus["tone"] }>`
   display: flex;
   align-items: center;
   justify-content: center;
