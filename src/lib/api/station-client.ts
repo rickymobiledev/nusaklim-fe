@@ -17,11 +17,10 @@ import type { GetStationsParams, StationApi } from "./station-api";
  *  request BERSAMAAN ke endpoint identik jadi ~10-11s MASING-MASING
  *  (dikonfirmasi lewat testing curl manual, reproducible total di luar
  *  app ini — bukan bug di kode kita, karakteristik backend). Tab `/map`
- *  MEMANG manggil `stationApi.getStations()` 4x nyaris bersamaan (1x
- *  langsung dari `useStations()`, 3x lagi sebagai join
- *  `sinkronisasiTerakhir` di `water-deficit-client.ts`,
- *  `dry-spell-client.ts`, `mock/water-deficit-comparison-api.ts`) —
- *  dedup ini menyusutkannya jadi 1 network call asli. Lihat
+ *  dulu manggil `stationApi.getStations()` beberapa kali nyaris bersamaan
+ *  (langsung dari `useStations()` + join `sinkronisasiTerakhir` di client
+ *  domain lain) — dedup ini menyusutkannya jadi 1 network call asli
+ *  kalau masih ada caller konkuren. Lihat
  *  `docs/ARCHITECTURE.md`/`CLAUDE.md` untuk detail diagnosisnya. */
 const inFlightFetchDevices = new Map<string, Promise<Station[]>>();
 
