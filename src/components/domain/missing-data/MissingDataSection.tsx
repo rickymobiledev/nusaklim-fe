@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { format, isValid, parse, startOfDay } from "date-fns";
+import { format, isValid, parse, startOfMonth } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useStations } from "@/hooks/use-stations";
@@ -72,16 +72,6 @@ const columns: ColumnDef<DisplayRow>[] = [
   metricColumn("arahMataAngin", "Arah Mata Angin"),
 ];
 
-const METRIC_KEYS: (keyof MissingDataRow)[] = [
-  "temperaturUdara",
-  "kelembapanUdara",
-  "curahHujan",
-  "radiasiMatahari",
-  "tekananUdara",
-  "kecepatanAngin",
-  "arahMataAngin",
-];
-
 function fmtNumber(value: number | null, unit: string, minFraction = 0): string | null {
   if (value == null) return null;
   const text = value.toLocaleString("id-ID", {
@@ -113,67 +103,58 @@ function toDisplayRow(row: MissingDataRow, no: number): DisplayRow {
 }
 
 export function MissingDataSection() {
-  const [stationId, setStationId] = useState<string>();
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [selectedStationId, setSelectedStationId] = useState<string>();
+  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
 
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
   const stations = stationsResponse?.data ?? [];
-  const { data, isLoading, isError, error } = useMissingData();
 
-  const allRows = useMemo<MissingDataRow[]>(() => data?.data ?? [], [data]);
+  // Derived, BUKAN useEffect+setState (ditolak lint react-hooks/set-state-in-effect):
+  // `station_id` wajib di `/weathers/missing`, jadi stasiun pertama terpilih
+  // otomatis begitu daftar termuat (pola sama Beranda/Monitoring).
+  const stationId = selectedStationId ?? stations[0]?.id;
 
-  // Kartu ringkasan dihitung dari SEMUA baris (bukan yang terfilter): total
-  // sel Missing & jumlah stasiun unik yang punya minimal 1 sel Missing.
-  const { missingCount, affectedStationCount } = useMemo(() => {
-    let missing = 0;
-    const affected = new Set<string>();
-    for (const row of allRows) {
-      const rowMissing = METRIC_KEYS.filter((key) => row[key] == null).length;
-      missing += rowMissing;
-      if (rowMissing > 0) affected.add(row.stasiun);
-    }
-    return { missingCount: missing, affectedStationCount: affected.size };
-  }, [allRows]);
+  // Default rentang = awal bulan berjalan s/d hari ini. Dihitung sekali supaya
+  // query key stabil walau tanggal berganti saat halaman terbuka.
+  const [defaultRange] = useState(() => {
+    const today = new Date();
+    return { from: startOfMonth(today), to: today };
+  });
+  const dateRange: DateRange = selectedRange?.from ? selectedRange : defaultRange;
+  const rangeFrom = dateRange.from ?? defaultRange.from;
+  const rangeTo = dateRange.to ?? rangeFrom;
 
-  // Cocokkan berdasarkan NAMA stasiun (kontrak asli `/weathers/missing`
-  // belum dikonfirmasi apakah membawa id device, jadi nama yang aman).
-  const stationName = stations.find((s) => s.id === stationId)?.nama;
-  const filteredRows = useMemo(() => {
-    const from = dateRange?.from ? startOfDay(dateRange.from) : null;
-    const to = dateRange?.to ? startOfDay(dateRange.to) : from;
-    return allRows.filter((row) => {
-      if (stationName && row.stasiun !== stationName) return false;
-      if (from && to) {
-        const parsed = parseDatetime(row.datetime);
-        if (!parsed) return false;
-        const day = startOfDay(parsed);
-        if (day < from || day > to) return false;
-      }
-      return true;
-    });
-  }, [allRows, stationName, dateRange]);
+  const { data, isLoading, isError, error } = useMissingData({
+    stationId,
+    dateFrom: format(rangeFrom, "yyyy-MM-dd"),
+    dateTo: format(rangeTo, "yyyy-MM-dd"),
+    page,
+    pageSize,
+  });
 
-  const total = filteredRows.length;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  // Derived, BUKAN useEffect+setPage (ditolak lint react-hooks/set-state-in-effect).
-  const effectivePage = Math.min(page, pageCount);
+  const isTableLoading = isLoadingStations || isLoading;
+  const total = data?.meta.total ?? 0;
+
+  // Kartu ringkasan menghitung pembacaan missing untuk stasiun + rentang
+  // terpilih (server-side, `meta.total`): "Stasiun Terdampak" otomatis 0/1
+  // karena `station_id` wajib.
+  const missingCount = total;
+  const affectedStationCount = total > 0 ? 1 : 0;
 
   const rows = useMemo<DisplayRow[]>(() => {
-    const start = (effectivePage - 1) * pageSize;
-    return filteredRows
-      .slice(start, start + pageSize)
-      .map((row, index) => toDisplayRow(row, start + index + 1));
-  }, [filteredRows, effectivePage, pageSize]);
+    const start = ((data?.meta.page ?? page) - 1) * pageSize;
+    return (data?.data ?? []).map((row, index) => toDisplayRow(row, start + index + 1));
+  }, [data, page, pageSize]);
 
   function handleStationIdChange(id: string) {
-    setStationId(id);
+    setSelectedStationId(id);
     setPage(1);
   }
 
   function handleDateRangeChange(range: DateRange | undefined) {
-    setDateRange(range);
+    setSelectedRange(range);
     setPage(1);
   }
 
@@ -189,7 +170,7 @@ export function MissingDataSection() {
       <MissingDataSummary
         missingCount={missingCount}
         affectedStationCount={affectedStationCount}
-        isLoading={isLoading}
+        isLoading={isTableLoading}
       />
 
       <FilterAndTableGroup>
@@ -204,7 +185,7 @@ export function MissingDataSection() {
 
         <TableCard>
           <DataState
-            isLoading={isLoading}
+            isLoading={isTableLoading}
             isError={isError}
             error={error}
             isEmpty={rows.length === 0}
@@ -223,8 +204,8 @@ export function MissingDataSection() {
       </FilterAndTableGroup>
 
       <DownloadDataPagination
-        meta={{ page: effectivePage, pageSize, total }}
-        isLoading={isLoading}
+        meta={{ page: data?.meta.page ?? page, pageSize, total }}
+        isLoading={isTableLoading}
         onPageChange={setPage}
         onPageSizeChange={handlePageSizeChange}
       />
