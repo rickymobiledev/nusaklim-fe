@@ -1,19 +1,20 @@
 "use client";
 
 import styled from "styled-components";
-import { WarningTriangleIcon } from "@/components/shared/DashboardIcons";
+import { WarningCircleIcon } from "@/components/shared/DashboardIcons";
 
-/** Banner peringatan merah yang dipakai SEMUA kartu sidebar kanan Beranda —
- *  Deret Hari Terpanjang Tidak Hujan, Keseimbangan Air, Lama Penyinaran,
- *  VPD. Warna/ikon disamakan dengan banner `warning` di kartu metrik kiri
- *  (`TONE_COLORS.warning` di `WeatherSummaryCard.tsx`). Spec-nya identik di
- *  keempat kartu, makanya dijadikan satu komponen. `z-index` di atas lapisan
- *  latar dekoratif kartu (glow/hujan) yang berada di `z-index: 0`. */
+/** Banner peringatan merah (Figma "Frame 191") yang dipakai SEMUA kartu
+ *  sidebar kanan Beranda — Deret Hari Terpanjang Tidak Hujan, Keseimbangan
+ *  Air, Lama Penyinaran, VPD. Merah `#FAC5C3` + border `#EE443F`, teks
+ *  `#27313F` (persis Figma; beda dari banner kiri yang tanpa border),
+ *  ikon lingkaran-tanda-seru tetap yang lama. Spec-nya identik di keempat
+ *  kartu, makanya dijadikan satu komponen. `z-index` di atas lapisan latar
+ *  dekoratif kartu (glow/hujan) yang berada di `z-index: 0`. */
 export function SidePanelWarningBanner({ message }: { message: string }) {
   return (
     <Banner>
       <BannerIcon>
-        <WarningTriangleIcon />
+        <WarningCircleIcon />
       </BannerIcon>
       <BannerText>{message}</BannerText>
     </Banner>
@@ -30,6 +31,7 @@ const Banner = styled.div`
   gap: 8px;
   padding: 4px 8px;
   background: #fac5c3;
+  border: 1px solid #ee443f;
   border-radius: 8px;
 `;
 
@@ -51,5 +53,5 @@ const BannerText = styled.p`
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
-  color: #1d2520;
+  color: #27313f;
 `;

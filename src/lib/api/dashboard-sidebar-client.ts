@@ -2,6 +2,11 @@ import { ApiError } from "@/types/api";
 import { createApiClient } from "./fetcher";
 import { extractBackendErrorMessage } from "./backend-error";
 
+/* `last_update` (opsional) = waktu sinkronisasi terakhir data, dipakai
+ * `SidePanelSyncAlert`. BE BELUM mengirimnya (dicek langsung ke 4 endpoint)
+ * — disiapkan dulu supaya alert tampil otomatis begitu BE menambahkannya;
+ * kalau nama field-nya ternyata beda, cukup ganti di 4 interface ini. */
+
 export interface DashboardWaterBalanceData {
   year: string;
   total_rainfall: string;
@@ -9,12 +14,14 @@ export interface DashboardWaterBalanceData {
   total_water_deficit: string;
   total_water_surplus: string;
   insight: string;
+  last_update?: string | null;
 }
 
 export interface DashboardDrySpellData {
   total_dry_spell: string;
   date: string;
   insight: string;
+  last_update?: string | null;
 }
 
 export interface DashboardSunshineDurationData {
@@ -22,6 +29,7 @@ export interface DashboardSunshineDurationData {
   total_solar_sunshine_duration: string;
   min_threshold: string;
   insight: string;
+  last_update?: string | null;
 }
 
 export interface DashboardVpdData {
@@ -29,6 +37,7 @@ export interface DashboardVpdData {
   vpd: string;
   max_threshold: string;
   insight: string;
+  last_update?: string | null;
 }
 
 interface Envelope<T> {

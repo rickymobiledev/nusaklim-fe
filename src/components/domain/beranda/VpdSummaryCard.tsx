@@ -3,6 +3,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardVpd } from "@/hooks/use-dashboard-sidebar";
+import { SidePanelSyncAlert } from "@/components/domain/beranda/SidePanelSyncAlert";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
@@ -48,6 +49,7 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
       </Row>
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending ? <SidePanelSyncAlert lastUpdate={data?.last_update} /> : null}
     </Card>
   );
 }

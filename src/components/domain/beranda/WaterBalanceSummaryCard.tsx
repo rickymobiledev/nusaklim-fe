@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardWaterBalance } from "@/hooks/use-dashboard-sidebar";
+import { SidePanelSyncAlert } from "@/components/domain/beranda/SidePanelSyncAlert";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { FitText } from "@/components/shared/FitText";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
@@ -77,6 +78,7 @@ export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
       </TileRow>
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending ? <SidePanelSyncAlert lastUpdate={data?.last_update} /> : null}
     </Card>
   );
 }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardDrySpell } from "@/hooks/use-dashboard-sidebar";
+import { SidePanelSyncAlert } from "@/components/domain/beranda/SidePanelSyncAlert";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
@@ -53,6 +54,7 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
       )}
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
+      {!pending ? <SidePanelSyncAlert lastUpdate={data?.last_update} /> : null}
     </Card>
   );
 }
