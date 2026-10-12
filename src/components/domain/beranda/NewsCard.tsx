@@ -14,31 +14,31 @@ import { JournalIcon } from "@/components/shared/DashboardIcons";
 import { media } from "@/lib/breakpoints";
 import type { NewsItem } from "@/types/domain";
 
-/** 1 kartu featured + sampai 3 kartu kecil (lihat `slice(0, 4)` di `NewsCard`). */
-const NEWS_SKELETON_SMALL_CARDS = 3;
+/** 1 kartu featured + sampai 4 kartu kecil (lihat `slice(0, 5)` di `NewsCard`). */
+const NEWS_SKELETON_SMALL_CARDS = 4;
 
-/** "Berita Pilihan" — card ringkas di Beranda, sampai 4 berita terbaru
+/** "Berita Pilihan" — card ringkas di Beranda, sampai 5 berita terbaru
  *  dari `GET /news/published` via `useNews()`. 1 kartu \"featured\" besar
- *  (gambar + overlay gradasi, teks putih) + 3 kartu kecil. Featured sudah
+ *  (gambar + overlay gradasi, teks putih) + 4 kartu kecil. Featured sudah
  *  di-sort ke depan oleh `compareNews` di `news-client.ts`. \"Lihat Semua\"
  *  → `/news` (daftar penuh), tiap kartu → `/news/[id]` (detail).
  *
  *  Struktur mengikuti CSS Figma persis (bukan approksimasi lagi): 1
  *  kartu \"featured\" besar (gambar + overlay gradasi, teks putih) + kartu
  *  kecil (bg putih polos, thumbnail tanpa overlay, tanggal + judul +
- *  ringkasan). Di desktop (Figma 1392px, kartu tinggi 269px) keduanya
- *  punya tombol \"Baca Selengkapnya\" dan kartu kecil juga ringkasan —
- *  ringkasan kartu kecil & tombol DESKTOP-ONLY (Figma mobile belum ada,
- *  preseden sama `NewsArticleCards.tsx`).
+ *  ringkasan + tombol \"Baca Selengkapnya\" di SEMUA breakpoint). Tombol
+ *  kartu featured DESKTOP-ONLY (Figma mobile featured memang tanpa tombol).
+ *  Desktop: kartu tinggi 269px; mobile: featured 200px, kartu kecil 314px
+ *  dalam grid 2 kolom gap 12px.
  *  BEDA dari kebanyakan card Beranda lain: `Section` (wrapper terluar)
  *  SENGAJA tanpa background/border/padding — Figma (\"Frame 3\") menaruh
  *  section ini polos di atas background halaman, radius cuma ada di tiap
  *  kartu artikel individual. */
 export function NewsCard() {
   const { data, isLoading, isError, error } = useNews();
-  /** Ambil maksimal 4 item — featured di depan (sudah disortir BE+client),
-   *  sisanya 3 kartu kecil. */
-  const items = (data ?? []).slice(0, 4);
+  /** Ambil maksimal 5 item — featured di depan (sudah disortir BE+client),
+   *  sisanya 4 kartu kecil (Figma desktop & mobile). */
+  const items = (data ?? []).slice(0, 5);
   const featured = items[0];
   const smallItems = items.slice(1);
 
@@ -172,10 +172,18 @@ const Section = styled.div`
   gap: 16px;
 `;
 
+/* Mobile: "Lihat Semua" di ujung kanan (space-between); desktop: menempel
+ * di sebelah judul (gap 16px) — sesuai Frame 12 Figma masing-masing. */
 const HeaderRow = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
+
+  ${media.desktop} {
+    justify-content: flex-start;
+    gap: 16px;
+  }
 `;
 
 const HeaderLeft = styled.div`
@@ -200,18 +208,18 @@ const SeeAllLink = styled(Link)`
   color: #175fe2;
 `;
 
-/* Mobile = grid auto-fill (2 kolom di lebar HP): semua kartu kecil sama lebar,
- * kartu ganjil menempati SATU kolom (tidak melebar penuh). Desktop kembali ke
- * flex-wrap dengan lebar kartu kecil dibatasi 260px. */
+/* Mobile = grid 2 kolom gap 12px (Figma: 192.5px @397px). Desktop = flex-wrap
+ * gap 16px: featured 530px tetap + kartu kecil mengisi sisa lebar. */
 const CardsRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 16px;
+  gap: 12px;
 
   ${media.desktop} {
     display: flex;
     flex-wrap: wrap;
+    gap: 16px;
   }
 `;
 
@@ -219,23 +227,22 @@ const CardsRow = styled.div`
  * melompat saat berita datang. */
 const FeaturedSkeleton = styled(SkeletonBlock)`
   grid-column: 1 / -1;
-  flex: 1 1 530px;
   width: auto;
-  max-width: 530px;
-  height: 204px;
+  height: 200px;
+  margin-bottom: 4px;
   border-radius: 8px;
 
   ${media.desktop} {
     flex: 0 0 530px;
     height: 269px;
+    margin-bottom: 0;
   }
 `;
 
 const SmallSkeleton = styled(SkeletonBlock)`
-  flex: 1 1 180px;
   width: auto;
   max-width: none;
-  height: 241px;
+  height: 314px;
   border-radius: 8px;
 
   ${media.desktop} {
@@ -254,9 +261,8 @@ const ImagePlaceholder = styled.div`
 const FeaturedArticle = styled(Link)`
   position: relative;
   grid-column: 1 / -1;
-  flex: 1 1 530px;
-  max-width: 530px;
-  height: 204px;
+  height: 200px;
+  margin-bottom: 4px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -269,6 +275,7 @@ const FeaturedArticle = styled(Link)`
   ${media.desktop} {
     flex: 0 0 530px;
     height: 269px;
+    margin-bottom: 0;
   }
 `;
 
@@ -318,35 +325,35 @@ const FeaturedExcerpt = styled.p`
 `;
 
 const ReadMore = styled.span`
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 12px;
   font-weight: 600;
   line-height: 16px;
+`;
+
+/* Figma mobile: featured tanpa tombol, tombol hanya di desktop. */
+const FeaturedReadMore = styled(ReadMore)`
+  display: none;
+  color: #ffffff;
 
   ${media.desktop} {
     display: inline-flex;
   }
 `;
 
-const FeaturedReadMore = styled(ReadMore)`
-  color: #ffffff;
-`;
-
 const SmallReadMore = styled(ReadMore)`
-  margin-top: auto;
   color: #175fe2;
 `;
 
-/* Ukuran mobile (height241/gambar137/judul16-24) BEDA dari desktop
- * (height204/gambar100/judul14-20) — dikonfirmasi CSS Figma mobile
+/* Ukuran mobile (height314/gambar137/judul16-24) BEDA dari desktop
+ * (height269/gambar100/judul14-20) — dikonfirmasi CSS Figma mobile
  * persis, kartu kecil mobile lebih tinggi & teksnya lebih besar,
  * BUKAN cuma versi diperkecil dari desktop. */
 const SmallArticle = styled(Link)`
-  flex: 1 1 180px;
-  height: 241px;
+  height: 314px;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -375,7 +382,7 @@ const SmallTextBlock = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   padding: 16px;
 `;
@@ -406,17 +413,13 @@ const SmallTitle = styled.h3`
 `;
 
 const SmallExcerpt = styled.p`
-  display: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
   font-family: var(--font-plus-jakarta-sans), sans-serif;
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
   color: #667a6c;
-
-  ${media.desktop} {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
 `;
