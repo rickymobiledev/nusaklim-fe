@@ -40,8 +40,7 @@ function assertStationActive(params: MonitoringFilterParams) {
 
 /** Hash string -> pecahan stabil [0,1) — supaya nilai mock per
  *  stasiun+tahun konsisten antar-request/reload (bukan `Math.random()`
- *  polos), pola sama seperti `seededFraction` di
- *  `water-deficit-comparison-api.ts`. */
+ *  polos). */
 function seededFraction(seed: string): number {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {

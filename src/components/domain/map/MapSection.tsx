@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { useStations } from "@/hooks/use-stations";
 import { useWaterDeficit } from "@/hooks/use-water-deficit";
-import { useWaterDeficitComparison } from "@/hooks/use-water-deficit-comparison";
 import { useDrySpellMap } from "@/hooks/use-dry-spell-map";
 import { useRainfallToday } from "@/hooks/use-rainfall-today";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,10 +23,6 @@ export function MapSection() {
 
   const { data: waterDeficitRows = [], isLoading: isWaterDeficitLoading } =
     useWaterDeficit();
-  // TODO: panel "Perbandingan Defisit Air" masih mock, beda sumber dari
-  // peta di atas — lihat catatan di use-water-deficit-comparison.ts.
-  const { data: waterDeficitComparisonRows = [], isLoading: isComparisonLoading } =
-    useWaterDeficitComparison();
 
   const { data: drySpellRows = [], isLoading: isDrySpellLoading } = useDrySpellMap();
 
@@ -63,7 +58,7 @@ export function MapSection() {
           </Wrapper>
         )
       ) : activeTab === "keseimbangan-air" ? (
-        isWaterDeficitLoading || isComparisonLoading ? (
+        isWaterDeficitLoading ? (
           <Wrapper>
             <Skeleton className="h-140 w-full rounded-[20px]" />
             <Skeleton className="h-96 w-full rounded-[16px]" />
@@ -72,7 +67,7 @@ export function MapSection() {
           <Wrapper>
             <DynamicWaterDeficitMap rows={waterDeficitRows} />
 
-            <WaterDeficitPanel rows={waterDeficitComparisonRows} />
+            <WaterDeficitPanel rows={waterDeficitRows} />
           </Wrapper>
         )
       ) : activeTab === "dry-spell" ? (

@@ -22,9 +22,8 @@ export interface WaterDeficitParams {
  *  awal bulan) bisa balikin `water_deficit: []` untuk SEMUA device,
  *  bukan cuma yang benar-benar tidak ada datanya (dikonfirmasi lewat
  *  testing manual: bulan berjalan kosong semua, bulan lalu ada isinya).
- *  Dipakai bareng oleh `app/api/map/water-deficit/route.ts` DAN
- *  `app/api/map/water-deficit-comparison/route.ts` supaya keduanya
- *  konsisten bicara "periode" yang sama. */
+ *  Dipakai `app/api/map/water-deficit/route.ts` — datanya dipakai bareng
+ *  oleh peta DAN panel "Perbandingan Defisit Air". */
 export function getDefaultWaterDeficitPeriod(): { year: number; month: number } {
   const now = new Date();
   const currentMonth = now.getMonth() + 1; // 1-12

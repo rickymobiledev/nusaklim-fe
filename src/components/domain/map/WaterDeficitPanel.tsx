@@ -21,8 +21,8 @@ type SortDirection = "desc" | "asc";
 
 /** Kartu "Perbandingan Defisit Air" tab Peta > Keseimbangan Air — layout
  *  Figma baru: di BAWAH peta full-width (bukan panel kanan 300px lagi), pola
- *  sama `StationInfoCard.tsx` (tab Status Stasiun). Data masih mock
- *  (`useWaterDeficitComparison`), beda sumber dari peta. */
+ *  sama `StationInfoCard.tsx` (tab Status Stasiun). Data real, sumber SAMA
+ *  dengan peta (`useWaterDeficit` -> `GET /devices/water_deficit`). */
 export function WaterDeficitPanel({ rows }: { rows: StationWaterDeficit[] }) {
   const [sortDir, setSortDir] = useState<SortDirection>("desc");
   const [searchTerm, setSearchTerm] = useState("");

@@ -5,7 +5,6 @@ import { vpdClient } from "./vpd-client";
 import { drySpellReportClient } from "./dry-spell-report-client";
 import { forecastClient } from "./forecast-client";
 import { mockMonitoringApi } from "./mock/monitoring-api";
-import { mockWaterDeficitComparisonApi } from "./mock/water-deficit-comparison-api";
 import { waterDeficitClient } from "./water-deficit-client";
 import { drySpellClient } from "./dry-spell-client";
 import { rainfallTodayClient } from "./rainfall-today-client";
@@ -78,11 +77,6 @@ export const downloadApi: DownloadApi = downloadClient;
 // `mock/download-api.ts` di atas.
 export const forecastApi: ForecastApi = forecastClient;
 export const waterDeficitApi: WaterDeficitApi = waterDeficitClient;
-// TODO: belum ada endpoint BE terkonfirmasi untuk panel "Perbandingan
-// Defisit Air" (WaterDeficitPanel.tsx) — beda dari `waterDeficitApi` di
-// atas (peta, sudah real). Ganti begitu kontraknya ada, lihat catatan di
-// mock/water-deficit-comparison-api.ts.
-export const waterDeficitComparisonApi: WaterDeficitApi = mockWaterDeficitComparisonApi;
 export const drySpellApi: DrySpellApi = drySpellClient;
 export const rainfallTodayApi: RainfallTodayApi = rainfallTodayClient;
 // Real sejak awal via `GET /news`, dikonfirmasi user lewat tes langsung ke
