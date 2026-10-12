@@ -98,7 +98,7 @@ export function VpdChart({
                   dataKey="vpd"
                   name="VPD"
                   stroke="#0039FF"
-                  strokeWidth={1}
+                  strokeWidth={3}
                   dot={false}
                   activeDot={{ r: 4, fill: "#FFFFFF", stroke: "#0039FF", strokeWidth: 1 }}
                   connectNulls={false}

@@ -80,7 +80,7 @@ export function AirTemperatureChart({
                     dataKey={s.stationId}
                     name={s.stationName}
                     stroke={s.color}
-                    strokeWidth={2}
+                    strokeWidth={3}
                     dot={false}
                     activeDot={{
                       r: 4,
