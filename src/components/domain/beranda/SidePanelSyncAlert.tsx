@@ -2,25 +2,19 @@
 
 import styled from "styled-components";
 import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
-import { formatSyncDate } from "@/lib/sync-date";
 
 /** Alert info biru (Figma "Alert") di bawah banner peringatan tiap kartu
- *  sidebar kanan Beranda: tanggal sinkronisasi terakhir. Tidak dirender
- *  kalau `lastUpdate` kosong/tidak valid (BE belum mengirim field-nya —
- *  lihat `last_update` di `dashboard-sidebar-client.ts`). Ejaan
- *  "Sinkronisasi" sengaja dikoreksi dari "sinkornisasi" di Figma. `z-index`
- *  di atas lapisan latar dekoratif kartu, sama seperti
- *  `SidePanelWarningBanner`. */
-export function SidePanelSyncAlert({ lastUpdate }: { lastUpdate?: string | null }) {
-  const date = formatSyncDate(lastUpdate);
-  // if (!date) return null;
+ *  sidebar kanan Beranda. Isinya field `title` dari BE apa adanya (mis.
+ *  "Lama Penyinaran Matahari Kemarin") — tanpa format/prefix tambahan.
+ *  Tidak dirender kalau `title` kosong. `z-index` di atas lapisan latar
+ *  dekoratif kartu, sama seperti `SidePanelWarningBanner`. */
+export function SidePanelSyncAlert({ title }: { title?: string | null }) {
+  if (!title) return null;
 
   return (
     <Alert>
       <InfoEmptyIcon size={20} color="#175FE2" />
-      <AlertText>
-        Sinkronisasi terakhir: <strong>{date}</strong>
-      </AlertText>
+      <AlertText>{title}</AlertText>
     </Alert>
   );
 }
@@ -51,8 +45,4 @@ const AlertText = styled.p`
   font-weight: 400;
   line-height: 16px;
   color: #667a6c;
-
-  strong {
-    font-weight: 600;
-  }
 `;

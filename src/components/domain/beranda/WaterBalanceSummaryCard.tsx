@@ -78,7 +78,7 @@ export function WaterBalanceSummaryCard({ stationId }: { stationId?: string }) {
       </TileRow>
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
-      {!pending ? <SidePanelSyncAlert lastUpdate={data?.last_update} /> : null}
+      {!pending ? <SidePanelSyncAlert title={data?.title} /> : null}
     </Card>
   );
 }
