@@ -6,13 +6,7 @@ import { useStations } from "@/hooks/use-stations";
 import { media } from "@/lib/breakpoints";
 import { RefreshDoubleIcon } from "@/components/shared/DashboardIcons";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 
 export function StationSyncCard({
   value,
@@ -37,20 +31,13 @@ export function StationSyncCard({
     <Card>
       <Field>
         <Label htmlFor="station-select">Pilih Stasiun</Label>
-        <Select value={value} onValueChange={onChange} disabled={isLoading}>
-          <Trigger id="station-select">
-            <SelectValue
-              placeholder={isLoading ? "Memuat stasiun..." : "Pilih Stasiun"}
-            />
-          </Trigger>
-          <SelectContent>
-            {stations?.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.nama}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <StationSearchSelect
+          id="station-select"
+          stations={stations ?? []}
+          value={value}
+          onChange={onChange}
+          isLoading={isLoading}
+        />
       </Field>
 
       <SyncBlock>
@@ -115,24 +102,6 @@ const Label = styled.label`
   line-height: 16px;
   color: #ffffff;
   white-space: nowrap;
-`;
-
-const Trigger = styled(SelectTrigger)`
-  width: 300px;
-  max-width: 100%;
-  height: 48px;
-  padding: 12px;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: none;
-  border-radius: 12px;
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 16px;
-  color: #1d2520;
-
-  ${media.desktop} {
-    width: 410px;
-  }
 `;
 
 /* Dulu punya box gelap `rgba(0,0,0,0.2)` pembungkus khusus mobile —

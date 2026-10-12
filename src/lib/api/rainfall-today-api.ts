@@ -7,7 +7,9 @@ import type { StationRainfallToday } from "@/types/domain";
  * BEDA dari `WaterDeficitParams`/`DrySpellParams`: TIDAK ada param
  * tanggal/year/month sama sekali — endpoint asli
  * `GET /devices/rainfall_today?company_code=` cuma terima `company_code`
- * (dikonfirmasi lewat tes langsung), otomatis "hari ini" di sisi BE. */
+ * (dikonfirmasi lewat tes langsung), otomatis "hari ini" di sisi BE.
+ * `companyId` kosong (ADMINISTRATOR/RESEARCHER tanpa pilihan company) =
+ * request TANPA `company_code` (semua company). */
 export interface RainfallTodayParams {
   companyId?: string;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import styled from "styled-components";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -20,6 +21,26 @@ export function DateRangePicker({
   value?: DateRange;
   onChange: (range: DateRange | undefined) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  // Pilihan sementara selama popover terbuka — rentang setengah jadi (baru
+  // tanggal mulai) TIDAK dikirim ke parent supaya tidak memicu fetch.
+  const [draft, setDraft] = useState<DateRange>();
+
+  const handleOpenChange = (next: boolean) => {
+    // Mulai dari kosong tiap dibuka: klik pertama = tanggal mulai, klik
+    // kedua = tanggal akhir, tidak menggeser ujung rentang lama.
+    if (next) setDraft(undefined);
+    setOpen(next);
+  };
+
+  const handleSelect = (range: DateRange | undefined) => {
+    setDraft(range);
+    if (range?.from && range.to) {
+      onChange(range);
+      setOpen(false);
+    }
+  };
+
   const label = value?.from
     ? value.to
       ? `${format(value.from, "dd MMM yyyy", { locale: id })} – ${format(value.to, "dd MMM yyyy", { locale: id })}`
@@ -27,7 +48,7 @@ export function DateRangePicker({
     : "Pilih rentang tanggal";
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Trigger type="button">
           {label}
@@ -35,7 +56,14 @@ export function DateRangePicker({
         </Trigger>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="range" selected={value} onSelect={onChange} numberOfMonths={2} />
+        <Calendar
+          mode="range"
+          resetOnSelect
+          selected={draft ?? value}
+          onSelect={handleSelect}
+          defaultMonth={value?.from}
+          numberOfMonths={2}
+        />
       </PopoverContent>
     </Popover>
   );

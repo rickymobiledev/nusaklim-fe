@@ -39,7 +39,7 @@ export function parseFilterNumeric(raw: string | undefined): number | null {
 
 /** Request mentah ke `/weathers/filter` untuk SATU device — dipakai
  *  `download-client.ts` untuk granularitas selain "Per Hari" (10
- *  Menit/Pagi/Siang/Malam) di halaman `/download-data`. Error SENGAJA tidak
+ *  Menit + 4 jendela 6 jam) di halaman `/download-data`. Error SENGAJA tidak
  *  ditangkap/di-fallback di sini — biar gagal (`ApiError`), konsisten
  *  kebijakan Stasiun/Weather "tidak ada jalur mock sama sekali", caller
  *  (`download-client.ts`) yang membungkus jadi `ApiError` domain-nya

@@ -67,8 +67,8 @@ export const monitoringApi: MonitoringApi = {
   getVPD: vpdClient.getVPD,
   getDrySpell: drySpellReportClient.getDrySpell,
 };
-// Real via `/weathers/daily` (harian) + `/weathers/filter` (10 menit/pagi/
-// siang/malam), dikonfirmasi lewat tes langsung ke backend asli —
+// Real via `/weathers/daily` (harian) + `/weathers/filter` (10 menit/
+// 4 jendela 6 jam), dikonfirmasi lewat tes langsung ke backend asli —
 // `mock/download-api.ts` dibiarkan ada tapi VESTIGIAL (tidak dipakai lagi),
 // pola sama `mockMonitoringApi` di atas.
 export const downloadApi: DownloadApi = downloadClient;

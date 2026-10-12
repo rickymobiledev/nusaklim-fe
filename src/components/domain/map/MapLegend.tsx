@@ -9,29 +9,14 @@ export function MapLegend() {
   return (
     <Wrapper>
       <Item>
-        <GlowDot $color="#43B75D" />
+        <LegendDot $color="#43B75D" />
         <Label $color="#43B75D">Stasiun Aktif</Label>
       </Item>
       <Item>
-        <GlowDot $color="#EE443F" />
+        <LegendDot $color="#EE443F" />
         <Label $color="#EE443F">Stasiun Tidak Aktif</Label>
       </Item>
     </Wrapper>
-  );
-}
-
-/** Titik 3 lingkaran nested (glow) — sama gayanya seperti marker stasiun di
- *  peta (`getStationDivIcon` di `station-map.tsx`), cuma di sini boleh JSX
- *  styled-components biasa (bukan HTML string mentah Leaflet `divIcon`).
- *  Ukuran & opacity ikut spec Figma legend (beda dikit dari marker peta:
- *  16px/~11px/~5px, bukan 12px/8px/4px). */
-function GlowDot({ $color }: { $color: string }) {
-  return (
-    <DotWrapper>
-      <DotLayer $color={$color} $size={16} $opacity={0.26} />
-      <DotLayer $color={$color} $size={11} $opacity={0.5} />
-      <DotLayer $color={$color} $size={5} $opacity={1} />
-    </DotWrapper>
   );
 }
 
@@ -57,23 +42,19 @@ const Item = styled.div`
   gap: 4px;
 `;
 
-const DotWrapper = styled.span`
-  position: relative;
+/* Titik legend — inti solid + cincin putih + bayangan, sama gayanya dengan
+ * marker stasiun di peta (`getStationDotIcon` di `lib/map-marker-icon.ts`). */
+const LegendDot = styled.span<{ $color: string }>`
+  box-sizing: border-box;
+  flex: none;
   width: 16px;
   height: 16px;
-  flex: none;
-`;
-
-const DotLayer = styled.span<{ $color: string; $size: number; $opacity: number }>`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: ${(p) => p.$size}px;
-  height: ${(p) => p.$size}px;
   border-radius: 50%;
   background: ${(p) => p.$color};
-  opacity: ${(p) => p.$opacity};
-  transform: translate(-50%, -50%);
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 1px 4px rgba(0, 0, 0, 0.4);
 `;
 
 const Label = styled.span<{ $color: string }>`

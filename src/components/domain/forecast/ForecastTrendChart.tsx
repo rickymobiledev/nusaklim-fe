@@ -14,6 +14,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { PillBar } from "@/components/shared/PillBar";
 import {
   Select,
   SelectContent,
@@ -104,7 +105,7 @@ export function ForecastTrendChart({
   );
   const tooltip = (
     <Tooltip
-      cursor={isBar ? { fill: "#F6F8F7" } : undefined}
+      cursor={isBar ? false : undefined}
       content={<ChartTooltip stationName={stationName} label={meta.label} unit={unit} />}
     />
   );
@@ -146,13 +147,7 @@ export function ForecastTrendChart({
                 {xAxis}
                 {yAxis}
                 {tooltip}
-                <Bar
-                  dataKey="value"
-                  fill="#0039FF"
-                  radius={[4, 4, 0, 0]}
-                  barSize={24}
-                  isAnimationActive={false}
-                />
+                <Bar dataKey="value" shape={<PillBar />} isAnimationActive={false} />
               </BarChart>
             ) : (
               <LineChart data={rows} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>

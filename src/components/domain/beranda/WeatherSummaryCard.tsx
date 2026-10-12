@@ -4,7 +4,6 @@ import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "re
 import Image from "next/image";
 import styled from "styled-components";
 import {
-  ArrowDownIcon,
   CheckCircleIcon,
   ChevronCircleDownIcon,
   WarningTriangleIcon,
@@ -28,11 +27,6 @@ export interface WeatherSummaryCardProps {
   /** Daftar 3 hari terakhir siap-tampil, mengabaikan slice dari `chart`. */
   days?: WeatherSummaryDayItem[];
   status: WeatherStatus;
-  /** Nilai persentase tren eksplisit (mis. dihitung dari 3 hari terakhir backend). */
-  trendPercent?: number | null;
-  /** `false` = sembunyikan chip persentase (mis. arah angin: perubahan
-   *  derajat tidak bermakna). */
-  showTrend?: boolean;
   /** Teks kecil di samping nilai besar (mis. nama arah "Barat"). */
   valueSuffix?: string;
   /** Format nilai di 3 kotak hari (mis. derajat → nama arah); default =
@@ -47,7 +41,7 @@ export interface WeatherSummaryCardProps {
 const RECENT_DAYS = 3;
 
 /** Kartu ringkasan metrik cuaca Beranda (Frame 27 Figma): tab label, nilai
- *  terkini + chip perubahan, 3 hari terakhir, ilustrasi, banner status.
+ *  terkini, 3 hari terakhir, ilustrasi, banner status.
  *  Dipakai ketujuh kartu metrik Beranda (Curah Hujan, Kelembapan Relatif,
  *  Temperatur, Radiasi, Tekanan, Kecepatan Angin, Arah Mata Angin). */
 export function WeatherSummaryCard({
@@ -59,8 +53,6 @@ export function WeatherSummaryCard({
   chart,
   days,
   status,
-  trendPercent,
-  showTrend = true,
   valueSuffix,
   formatDayValue,
   isLoading = false,
@@ -76,14 +68,6 @@ export function WeatherSummaryCard({
             : formatWithUnit(day.value, unit),
         }))
       : []);
-
-  const trend = showTrend
-    ? trendPercent !== undefined
-      ? trendPercent
-      : chart
-        ? computeTrendPercent(chart)
-        : null
-    : null;
 
   const renderedValue = displayValue ?? formatWithUnit(value ?? null, unit);
 
@@ -108,12 +92,6 @@ export function WeatherSummaryCard({
                     <Value>{renderedValue}</Value>
                     {valueSuffix && <ValueSuffix>{valueSuffix}</ValueSuffix>}
                   </ValueGroup>
-                  {trend !== null && (
-                    <TrendChip>
-                      <TrendArrow $up={trend > 0} size={16} />
-                      <TrendText>{Math.abs(trend)}%</TrendText>
-                    </TrendChip>
-                  )}
                 </>
               )}
             </ValueRow>
@@ -238,22 +216,6 @@ function formatWithUnit(value: number | null, unit: string): string {
   return glued ? `${rounded}${unit}` : `${rounded} ${unit}`;
 }
 
-/** Perubahan nilai hari ini vs kemarin (dari 2 titik terakhir `chart`,
- *  sumber yang sama supaya apple-to-apple) — tidak ada field persentase
- *  dari BE manapun, jadi derived di sini. `null` (badge disembunyikan) kalau
- *  salah satu hari tanpa data (mis. kelembapan), kemarin 0 (pembagi nol),
- *  atau hasil pembulatan 0%. Catatan: angka hari ini bisa masih parsial
- *  (hari berjalan, terutama curah hujan), jadi di pagi hari hampir selalu
- *  turun. */
-function computeTrendPercent(chart: WeatherChartPoint[]): number | null {
-  const today = chart[chart.length - 1]?.value;
-  const yesterday = chart[chart.length - 2]?.value;
-  if (today == null || yesterday == null || yesterday === 0) return null;
-
-  const percent = Math.round(((today - yesterday) / yesterday) * 100);
-  return percent === 0 ? null : percent;
-}
-
 /* Kartu fluid (lebar ikut cell grid, bukan viewport) — makanya pakai
  * `@container` di lebar kartu, bukan `media.desktop`. Base = spec Figma
  * (kartu 530px); <500px = versi ringkas (ilustrasi 82px, padding
@@ -360,31 +322,6 @@ const Value = styled.span`
   line-height: 38px;
   color: #1d2520;
   white-space: nowrap;
-`;
-
-const TrendChip = styled.div`
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 24px;
-  padding: 6px 8px;
-  background: #dce9ff;
-  border: 1.5px solid #bbd3ff;
-  border-radius: 100px;
-`;
-
-const TrendArrow = styled(ArrowDownIcon)<{ $up: boolean }>`
-  flex-shrink: 0;
-  transform: ${(p) => (p.$up ? "rotate(180deg)" : "none")};
-`;
-
-const TrendText = styled.span`
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 12px;
-  color: #1454c9;
 `;
 
 const RecentDays = styled.div`

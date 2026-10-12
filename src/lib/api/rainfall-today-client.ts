@@ -1,3 +1,4 @@
+import { isAxiosError } from "axios";
 import { ApiError, type ApiListResponse } from "@/types/api";
 import type { StationRainfallToday } from "@/types/domain";
 import { createApiClient } from "./fetcher";

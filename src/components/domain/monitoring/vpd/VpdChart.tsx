@@ -19,10 +19,12 @@ import { DataState } from "@/components/shared/DataState";
 import { getBatasAmanKpa, isMeaningfulVpdRow, formatKpa } from "@/lib/vpd-summary";
 import type { VPDReport } from "@/types/domain";
 
-/** Estimasi lebar per titik tanggal supaya label "01 Agt 2026" tidak
- *  bertumpuk di mobile — chart di-scroll horizontal (pola sama Lama
- *  Penyinaran), BELUM spec Figma. */
-const CHART_MIN_WIDTH_PER_POINT = 90;
+/** Lebar minimum per titik tanggal — chart di-scroll horizontal kalau
+ *  titiknya lebih banyak dari lebar card (pola sama Lama Penyinaran).
+ *  Sengaja kecil (40px): dulu 90px + scrollbar disembunyikan, sehingga
+ *  rentang > ±14 hari terpotong diam-diam di desktop. Label sumbu X yang
+ *  bertumpuk dilewati Recharts (`minTickGap`). BELUM spec Figma. */
+const CHART_MIN_WIDTH_PER_POINT = 40;
 const Y_MIN_MAX = 3;
 
 interface ChartRow {
@@ -74,6 +76,7 @@ export function VpdChart({
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EA" />
                 <XAxis
                   dataKey="tanggal"
+                  minTickGap={8}
                   tick={{ fontSize: 12, fill: "#6D717F" }}
                   tickLine={false}
                   axisLine={{ stroke: "#D2D5DB" }}
@@ -170,12 +173,7 @@ const Heading = styled.h3`
 
 const ChartScroll = styled.div`
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  -webkit-overflow-scrolling: touch;
 `;
 
 const ChartInner = styled.div<{ $minWidth: number }>`

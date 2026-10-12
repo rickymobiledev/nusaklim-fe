@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { media } from "@/lib/breakpoints";
 import type { ApiMeta } from "@/types/api";
 
@@ -90,6 +91,50 @@ export function DownloadDataTable<T>({
   );
 }
 
+/** Skeleton tabel: kolom (lebar dari `size`), tinggi header & baris sama
+ *  dengan `DownloadDataTable` asli supaya card tidak melompat saat data datang. */
+export function DownloadDataTableSkeleton<T>({
+  columns,
+  rows = 10,
+  headerHeight = 88,
+}: {
+  columns: ColumnDef<T>[];
+  rows?: number;
+  headerHeight?: number;
+}) {
+  return (
+    <ScrollArea>
+      <Table>
+        <colgroup>
+          {columns.map((column, col) => (
+            <col key={col} style={{ width: column.size }} />
+          ))}
+        </colgroup>
+        <thead>
+          <tr>
+            {columns.map((_, col) => (
+              <Th key={col} $height={headerHeight}>
+                <SkeletonBlock $w="60%" $h="16px" style={{ margin: "0 auto" }} />
+              </Th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: rows }, (_, row) => (
+            <Tr key={row} $odd={row % 2 === 0}>
+              {columns.map((_, col) => (
+                <Td key={col}>
+                  <SkeletonBlock $w="60%" $h="16px" style={{ margin: "0 auto" }} />
+                </Td>
+              ))}
+            </Tr>
+          ))}
+        </tbody>
+      </Table>
+    </ScrollArea>
+  );
+}
+
 /** Footer "Jumlah data perbaris" + "Menampilkan X-Y dari Z data" + panah —
  *  di Figma ini SIBLING di bawah card tabel (bukan di dalamnya, lihat
  *  layer "Frame 73" ada di luar "Frame 16"), makanya dirender terpisah
@@ -101,11 +146,14 @@ export function DownloadDataPagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50, 100],
+  isLoading = false,
 }: {
   meta?: ApiMeta;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
   pageSizeOptions?: number[];
+  /** Selama data dimuat, teks "Menampilkan X-Y dari Z data" diganti skeleton. */
+  isLoading?: boolean;
 }) {
   if (!meta) return null;
 
@@ -134,11 +182,15 @@ export function DownloadDataPagination({
         </Select>
       </PageSizeGroup>
 
-      <FooterLabel>
-        {meta.total > 0
-          ? `Menampilkan ${rangeStart}-${rangeEnd} dari ${meta.total} data`
-          : "Tidak ada data"}
-      </FooterLabel>
+      {isLoading ? (
+        <SkeletonBlock $w="140px" $h="12px" />
+      ) : (
+        <FooterLabel>
+          {meta.total > 0
+            ? `Menampilkan ${rangeStart}-${rangeEnd} dari ${meta.total} data`
+            : "Tidak ada data"}
+        </FooterLabel>
+      )}
 
       <ArrowButton
         type="button"

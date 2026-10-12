@@ -18,7 +18,7 @@ export function DrySpellLegend() {
     <Wrapper>
       {LEVELS.map((level) => (
         <Item key={level}>
-          <GlowDot $color={DRY_SPELL_COLOR[level]} />
+          <LegendDot $color={DRY_SPELL_COLOR[level]} />
           <Label $color={DRY_SPELL_COLOR[level]}>{DRY_SPELL_LABEL[level]}</Label>
         </Item>
       ))}
@@ -26,15 +26,8 @@ export function DrySpellLegend() {
   );
 }
 
-function GlowDot({ $color }: { $color: string }) {
-  return (
-    <DotWrapper>
-      <DotLayer $color={$color} $size={16} $opacity={0.2} />
-      <DotLayer $color={$color} $size={8} $opacity={0.5} />
-      <DotLayer $color={$color} $size={4} $opacity={1} />
-    </DotWrapper>
-  );
-}
+/** Titik legend — inti solid + cincin putih + bayangan, sama gayanya dengan
+ *  marker peta (`getStationDotIcon` di `lib/map-marker-icon.ts`). */
 
 const Wrapper = styled.div`
   position: absolute;
@@ -58,23 +51,17 @@ const Item = styled.div`
   gap: 4px;
 `;
 
-const DotWrapper = styled.span`
-  position: relative;
+const LegendDot = styled.span<{ $color: string }>`
+  box-sizing: border-box;
+  flex: none;
   width: 16px;
   height: 16px;
-  flex: none;
-`;
-
-const DotLayer = styled.span<{ $color: string; $size: number; $opacity: number }>`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: ${(p) => p.$size}px;
-  height: ${(p) => p.$size}px;
   border-radius: 50%;
   background: ${(p) => p.$color};
-  opacity: ${(p) => p.$opacity};
-  transform: translate(-50%, -50%);
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 1px 4px rgba(0, 0, 0, 0.4);
 `;
 
 const Label = styled.span<{ $color: string }>`

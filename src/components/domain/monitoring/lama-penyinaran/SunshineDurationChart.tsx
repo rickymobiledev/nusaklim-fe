@@ -16,13 +16,16 @@ import {
 } from "recharts";
 import { ChartSkeleton } from "@/components/shared/ChartSkeleton";
 import { DataState } from "@/components/shared/DataState";
+import { PillBar } from "@/components/shared/PillBar";
 import { getBatasBawahJam } from "@/lib/sunshine-duration-summary";
 import type { SunshineDuration } from "@/types/domain";
 
-/** Estimasi lebar per titik tanggal supaya label "01 Agt 2026" tidak
- *  bertumpuk di mobile — chart di-scroll horizontal (pola sama
- *  `air-temperature`), BELUM spec Figma. */
-const CHART_MIN_WIDTH_PER_POINT = 90;
+/** Lebar minimum per titik tanggal — chart di-scroll horizontal kalau
+ *  titiknya lebih banyak dari lebar card (pola sama `air-temperature`).
+ *  Sengaja kecil (40px): dulu 90px + scrollbar disembunyikan, sehingga
+ *  rentang > ±14 hari terpotong diam-diam di desktop. Label sumbu X yang
+ *  bertumpuk dilewati Recharts (`minTickGap`). BELUM spec Figma. */
+const CHART_MIN_WIDTH_PER_POINT = 40;
 const Y_TICKS = [0, 2, 4, 6, 8, 10, 12, 14];
 
 interface ChartRow {
@@ -72,6 +75,7 @@ export function SunshineDurationChart({
                 <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EA" />
                 <XAxis
                   dataKey="tanggal"
+                  minTickGap={8}
                   tick={{ fontSize: 12, fill: "#6D717F" }}
                   tickLine={false}
                   axisLine={{ stroke: "#D2D5DB" }}
@@ -102,69 +106,6 @@ export function SunshineDurationChart({
       </DataState>
     </Card>
   );
-}
-
-/** Lebar batang: minimum 36px (Figma, dipakai saat banyak hari), membesar
- *  mengikuti lebar slot saat hari sedikit, maksimum 96px. */
-const BAR_WIDTH = 36;
-const MAX_BAR_WIDTH = 96;
-const BAR_WIDTH_RATIO = 0.6;
-const BAR_FRAME = 2;
-
-interface PillBarProps {
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-}
-
-/** Batang pil sesuai Figma: bingkai luar `#F6F8F7` (radius atas 24) + isi
- *  `#0039FF` (radius atas 24, bawah 4), lebar tetap 36px di tengah slot. */
-function PillBar({ x = 0, y = 0, width = 0, height = 0 }: PillBarProps) {
-  if (height <= 0) return null;
-  const barWidth = Math.min(MAX_BAR_WIDTH, Math.max(BAR_WIDTH, width * BAR_WIDTH_RATIO));
-  const left = x + (width - barWidth) / 2;
-  const radius = Math.min(barWidth / 2, height);
-  return (
-    <g>
-      <path
-        d={roundedTopPath(
-          left - BAR_FRAME,
-          y - BAR_FRAME,
-          barWidth + BAR_FRAME * 2,
-          height + BAR_FRAME,
-          radius + BAR_FRAME,
-          6,
-        )}
-        fill="#F6F8F7"
-      />
-      <path d={roundedTopPath(left, y, barWidth, height, radius, 4)} fill="#0039FF" />
-    </g>
-  );
-}
-
-/** Path persegi panjang dengan radius sudut atas `top` dan bawah `bottom`. */
-function roundedTopPath(
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  top: number,
-  bottom: number,
-): string {
-  const t = Math.min(top, w / 2, h);
-  const b = Math.min(bottom, w / 2, Math.max(h - t, 0));
-  return [
-    `M ${x} ${y + t}`,
-    `Q ${x} ${y} ${x + t} ${y}`,
-    `L ${x + w - t} ${y}`,
-    `Q ${x + w} ${y} ${x + w} ${y + t}`,
-    `L ${x + w} ${y + h - b}`,
-    `Q ${x + w} ${y + h} ${x + w - b} ${y + h}`,
-    `L ${x + b} ${y + h}`,
-    `Q ${x} ${y + h} ${x} ${y + h - b}`,
-    "Z",
-  ].join(" ");
 }
 
 interface ChartTooltipPayloadEntry {
@@ -222,12 +163,7 @@ const Heading = styled.h3`
 
 const ChartScroll = styled.div`
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  -webkit-overflow-scrolling: touch;
 `;
 
 const ChartInner = styled.div<{ $minWidth: number }>`

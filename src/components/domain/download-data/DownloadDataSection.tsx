@@ -8,7 +8,11 @@ import type { DateRange } from "react-day-picker";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useStations } from "@/hooks/use-stations";
 import { useDownloadData } from "@/hooks/use-download-data";
-import { DownloadDataTable, DownloadDataPagination } from "./DownloadDataTable";
+import {
+  DownloadDataTable,
+  DownloadDataTableSkeleton,
+  DownloadDataPagination,
+} from "./DownloadDataTable";
 import { DataState } from "@/components/shared/DataState";
 import { buildDownloadDataCsv, downloadCsvFile } from "@/lib/download-data-csv-utils";
 import type { DataGranularity, DownloadDataRow } from "@/types/domain";
@@ -174,6 +178,12 @@ export function DownloadDataSection() {
             isError={isError}
             error={error}
             isEmpty={!isFetching && rows.length === 0}
+            skeleton={
+              <DownloadDataTableSkeleton
+                columns={columns}
+                rows={Math.min(pageSize, 10)}
+              />
+            }
             emptyMessage={
               isFetching
                 ? "Memuat data..."
@@ -189,6 +199,7 @@ export function DownloadDataSection() {
 
       <DownloadDataPagination
         meta={{ page: effectivePage, pageSize, total }}
+        isLoading={isLoading}
         onPageChange={setPage}
         onPageSizeChange={handlePageSizeChange}
       />

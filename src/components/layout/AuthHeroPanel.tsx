@@ -52,7 +52,7 @@ const Headline = styled.h2`
   top: 91px;
   left: 72px;
   right: 72px;
-  max-width: 400px;
+  max-width: 420px;
   color: #ffffff;
   font-family: var(--font-manrope), sans-serif;
   font-size: 28px;

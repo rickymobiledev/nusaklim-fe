@@ -4,7 +4,7 @@ import { AuthFooter } from "@/components/domain/auth/AuthCopy";
 import { AuthHeroCard } from "@/components/layout/AuthHeroCard";
 import { AuthHeroPanel } from "@/components/layout/AuthHeroPanel";
 
-const HERO_HEADLINE = "Pantau data iklim terpadu dan akurat untuk tanaman kelapa sawit";
+const HERO_HEADLINE = "Empowering your Climate Data";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
