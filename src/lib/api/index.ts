@@ -94,9 +94,9 @@ export const companiesApi: CompaniesApi = companiesClient;
 // Manajemen > Stasiun (admin-only): daftar real, CRUD SEMENTARA mock.
 export const stationsAdminApi: StationsAdminApi = stationsAdminClient;
 export const userRolesApi: UserRolesApi = userRolesClient;
-// Domain "Missing Data" (admin-only) — SEMENTARA mock di dalam
-// `missing-data-client.ts` (`TEMP_USE_MOCK_MISSING_DATA`), endpoint asli
-// `GET /weathers/missing` & `POST /import/aws` belum punya kontrak response.
+// Domain "Missing Data" (admin-only) — daftar real (`GET /weathers/missing`),
+// import Excel SEMENTARA mock di dalam `missing-data-client.ts`
+// (`TEMP_USE_MOCK_MISSING_IMPORT`), `POST /import/aws` belum punya contoh response.
 export const missingDataApi: MissingDataApi = missingDataClient;
 // Pengguna Aghris (admin-only) — SEMENTARA mock di dalam `aghris-users-client.ts`
 // (`TEMP_USE_MOCK_AGHRIS`), endpoint BE belum ada.

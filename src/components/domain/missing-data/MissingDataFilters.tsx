@@ -2,14 +2,8 @@
 
 import styled from "styled-components";
 import type { DateRange } from "react-day-picker";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
+import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
 
@@ -33,24 +27,14 @@ export function MissingDataFilters({
   return (
     <Header>
       <Filters>
-        <Select
+        <StationSearchSelect
+          variant="outlined"
+          desktopWidth={250}
+          stations={stations}
           value={stationId}
-          onValueChange={onStationIdChange}
-          disabled={isLoadingStations}
-        >
-          <StationTrigger aria-label="Pilih Stasiun">
-            <SelectValue
-              placeholder={isLoadingStations ? "Memuat stasiun..." : "Pilih Stasiun"}
-            />
-          </StationTrigger>
-          <SelectContent>
-            {stations.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.nama}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={onStationIdChange}
+          isLoading={isLoadingStations}
+        />
 
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
@@ -79,26 +63,5 @@ const Filters = styled.div`
     flex-direction: row;
     align-items: center;
     width: auto;
-  }
-`;
-
-const StationTrigger = styled(SelectTrigger)`
-  width: 100%;
-  height: 48px;
-  padding: 12px;
-  background: #ffffff;
-  border: 1.5px solid #d6dcd8;
-  border-radius: 12px;
-  font-family: var(--font-body), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #1d2520;
-
-  ${media.desktop} {
-    width: 250px;
-  }
-
-  & svg {
-    color: #8b9c90;
   }
 `;

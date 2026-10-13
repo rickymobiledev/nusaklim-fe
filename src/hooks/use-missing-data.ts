@@ -9,12 +9,47 @@ import { getErrorMessage } from "@/lib/api/error-messages";
 
 const MISSING_DATA_QUERY_KEY = ["missing-data"];
 
-/** `/api/missing-data` balikin SEMUA baris sekaligus — filter stasiun/tanggal
- *  & pagination dilakukan di client (pola `useDownloadData()`). */
-export function useMissingData() {
+export interface MissingDataQuery {
+  stationId?: string;
+  /** `yyyy-MM-dd` */
+  dateFrom: string;
+  /** `yyyy-MM-dd` */
+  dateTo: string;
+  page: number;
+  pageSize: number;
+}
+
+/** Filter stasiun/tanggal & pagination SERVER-SIDE (`GET /weathers/missing`) —
+ *  `/api/missing-data` balikin SATU halaman + `meta` dari BE. Query baru
+ *  menunggu `stationId` terisi. SENGAJA tanpa `keepPreviousData`: tiap
+ *  stasiun/tanggal/halaman baru `isLoading = true` sampai data tiba, supaya
+ *  skeleton tabel muncul dan user tahu data sedang diganti (dengan
+ *  placeholder, tabel lama tampil terus tanpa penanda loading). */
+export function useMissingData({
+  stationId,
+  dateFrom,
+  dateTo,
+  page,
+  pageSize,
+}: MissingDataQuery) {
   return useQuery({
-    queryKey: MISSING_DATA_QUERY_KEY,
-    queryFn: () => fetchJson<ApiListResponse<MissingDataRow>>("/api/missing-data"),
+    queryKey: [
+      ...MISSING_DATA_QUERY_KEY,
+      { stationId, dateFrom, dateTo, page, pageSize },
+    ],
+    queryFn: () => {
+      const query = new URLSearchParams({
+        stationId: stationId ?? "",
+        dateFrom,
+        dateTo,
+        page: String(page),
+        pageSize: String(pageSize),
+      });
+      return fetchJson<ApiListResponse<MissingDataRow>>(
+        `/api/missing-data?${query.toString()}`,
+      );
+    },
+    enabled: Boolean(stationId),
   });
 }
 
