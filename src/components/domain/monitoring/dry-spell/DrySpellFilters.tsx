@@ -52,7 +52,7 @@ export function DrySpellFilters({
 const Row = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 16px;
 
   ${media.desktop} {
@@ -62,11 +62,19 @@ const Row = styled.div`
   }
 `;
 
+// Mobile: kotak stasiun & tanggal ditumpuk dan selebar sama (stretch);
+// desktop: satu baris, lebar masing-masing mengikuti isi.
 const Filters = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
+
+  ${media.desktop} {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 `;
 
 const DownloadButton = styled.button`

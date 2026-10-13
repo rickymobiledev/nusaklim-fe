@@ -2,16 +2,21 @@
 
 import type { ReactNode } from "react";
 import styled from "styled-components";
+import { media } from "@/lib/breakpoints";
 
 export function ForecastMetricCard({
   icon,
   label,
   value,
+  unit,
   caption,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
+  /** Dipisah dari `value` supaya boleh turun baris di kartu sempit (mobile)
+   *  alih-alih terpotong. */
+  unit?: string;
   caption: string;
 }) {
   return (
@@ -21,7 +26,10 @@ export function ForecastMetricCard({
         <Label>{label}</Label>
       </LabelRow>
       <Body>
-        <Value>{value}</Value>
+        <ValueRow>
+          <Value>{value}</Value>
+          {unit && <Unit $tight={unit === "%"}>{unit}</Unit>}
+        </ValueRow>
         <Caption>{caption}</Caption>
       </Body>
     </Card>
@@ -65,13 +73,40 @@ const Body = styled.div`
   gap: 4px;
 `;
 
+const ValueRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 4px;
+`;
+
 const Value = styled.span`
   font-family: var(--font-manrope), sans-serif;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
-  line-height: 34px;
+  line-height: 30px;
   color: #1d2520;
   white-space: nowrap;
+
+  ${media.desktop} {
+    font-size: 28px;
+    line-height: 34px;
+  }
+`;
+
+const Unit = styled.span<{ $tight: boolean }>`
+  margin-left: ${(p) => (p.$tight ? "-4px" : "0")};
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #1d2520;
+  white-space: nowrap;
+
+  ${media.desktop} {
+    font-size: 28px;
+    line-height: 34px;
+  }
 `;
 
 const Caption = styled.span`
