@@ -295,7 +295,7 @@ const ScrollArea = styled.div`
 
 const Table = styled.table`
   width: 100%;
-  min-width: 400px;
+  min-width: 460px;
   border-collapse: collapse;
   table-layout: fixed;
 `;
