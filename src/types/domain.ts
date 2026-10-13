@@ -433,9 +433,10 @@ export interface StationDrySpell {
 /** Level status hujan hari ini untuk warna marker/legend/chip Peta >
  *  Curah Hujan Hari Ini — BUKAN threshold turunan seperti
  *  `WaterDeficitLevel`/`DrySpellLevel`, BE sudah balikin status biner
- *  langsung lewat field `is_rain` (lihat `StationRainfallToday`). Lihat
+ *  langsung lewat field `is_rain` (lihat `StationRainfallToday`), plus
+ *  `tidak_aktif` untuk stasiun yang alatnya mati hari ini. Lihat
  *  `lib/rainfall-today-level.ts`. */
-export type RainfallTodayLevel = "hujan" | "tidak_hujan";
+export type RainfallTodayLevel = "hujan" | "tidak_hujan" | "tidak_aktif";
 
 /** Snapshot HARI INI (tanpa param tanggal/year/month sama sekali) untuk
  *  SATU stasiun, tab Peta > Curah Hujan Hari Ini — company-wide (list
@@ -452,9 +453,12 @@ export type RainfallTodayLevel = "hujan" | "tidak_hujan";
  *  "tidak ada data" (dikonfirmasi dari response asli), `Number("---")`
  *  jadi `NaN` sehingga di-treat `null` oleh
  *  `parseRainfallValue()` (`lib/api/adapters/rainfall-today-adapter.ts`).
- *  `isHujan` diambil APA ADANYA dari field `is_rain` — BE yang menentukan
- *  status hujan/tidak, BUKAN turunan threshold dari `curahHujan` seperti
- *  `getWaterDeficitLevel`/`getDrySpellLevel`.
+ *  `isHujan` diambil dari field `is_rain` — BE yang menentukan status
+ *  hujan/tidak, BUKAN turunan threshold dari `curahHujan` seperti
+ *  `getWaterDeficitLevel`/`getDrySpellLevel`. Arti nilai (dikonfirmasi tim
+ *  BE): `false` = tidak hujan, alat hidup; `true` = hujan, alat hidup;
+ *  `rainfall` DAN `is_rain` sama-sama `"---"` = stasiun cuaca tidak aktif
+ *  hari ini → `isHujan: null` (+ `curahHujan: null`).
  *
  *  `stationId`/`nama`/`brand`/`lat`/`long`/`companyCode`/`companyName`
  *  menempel langsung di tiap device response asli (endpoint ini
@@ -473,7 +477,7 @@ export interface StationRainfallToday {
   companyCode: string;
   companyName: string;
   curahHujan: number | null;
-  isHujan: boolean;
+  isHujan: boolean | null;
   sinkronisasiTerakhir: string | null;
 }
 

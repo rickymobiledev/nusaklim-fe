@@ -29,6 +29,7 @@ type StatusFilter = "semua" | RainfallTodayLevel;
 const PILL_BG: Record<RainfallTodayLevel, string> = {
   hujan: "#175FE2",
   tidak_hujan: RAINFALL_TODAY_COLOR.tidak_hujan,
+  tidak_aktif: RAINFALL_TODAY_COLOR.tidak_aktif,
 };
 
 /** Kartu "Informasi Curah Hujan" tab Peta > Curah Hujan Hari Ini — layout
@@ -105,6 +106,9 @@ export function RainfallTodayPanel({ rows }: { rows: StationRainfallToday[] }) {
               <SelectItem value="hujan">{RAINFALL_TODAY_LABEL.hujan}</SelectItem>
               <SelectItem value="tidak_hujan">
                 {RAINFALL_TODAY_LABEL.tidak_hujan}
+              </SelectItem>
+              <SelectItem value="tidak_aktif">
+                {RAINFALL_TODAY_LABEL.tidak_aktif}
               </SelectItem>
             </SelectContent>
           </Select>
