@@ -33,7 +33,7 @@ const mockDeleted = new Set<number>();
 // Jauh di atas ID asli supaya tidak bentrok.
 let nextMockId = 900001;
 
-async function fetchRealCompanies(): Promise<Company[]> {
+export async function fetchRealCompanies(): Promise<Company[]> {
   try {
     const res = await client.get<{
       status: boolean;

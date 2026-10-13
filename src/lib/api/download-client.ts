@@ -1,4 +1,4 @@
-import { parse as parseDate } from "date-fns";
+import { format } from "date-fns";
 import { ApiError } from "@/types/api";
 import type { ApiListResponse } from "@/types/api";
 import type { DataGranularity, DownloadDataRow } from "@/types/domain";
@@ -17,6 +17,7 @@ import {
 } from "./weather-daily-client";
 import {
   fetchRawFilter,
+  parseFilterDatetime,
   parseFilterNumeric,
   type RawWeatherFilter,
 } from "./weather-filter-client";
@@ -40,11 +41,11 @@ function mapDailyRow(row: RawWeatherDaily): DownloadDataRow {
 function mapFilterRow(row: RawWeatherFilter): DownloadDataRow {
   const windDeg = parseFilterNumeric(row.wind_direction);
   return {
-    tanggal: row.datetime,
+    tanggal: format(parseFilterDatetime(row.datetime), "dd-MM-yyyy HH:mm"),
     rerataTemperatur: parseFilterNumeric(row.temperature),
     rerataKelembapanRelatif: parseFilterNumeric(row.humidity),
     totalCurahHujan: parseFilterNumeric(row.rainfall),
-    totalRadiasi: parseFilterNumeric(row.radiation),
+    totalRadiasi: parseFilterNumeric(row.solar_radiation),
     rerataTekananUdara: parseFilterNumeric(row.air_pressure),
     rerataKecepatanAngin: parseFilterNumeric(row.wind_speed),
     arahMataAngin: windDeg === null ? null : degreesToCompass(windDeg),
@@ -53,7 +54,7 @@ function mapFilterRow(row: RawWeatherFilter): DownloadDataRow {
 
 /** Jendela 6 jam "00:01–06:00"/"06:01–12:00"/"12:01–18:00"/"18:01–00:00"
  *  dari `DATA_GRANULARITY` (`constants/index.ts`) — dipakai buat filter
- *  baris `/weathers/filter` (data mentah per ~10 menit, BUKAN diagregasi
+ *  baris `/weathers/per_10_minute` (data mentah per ~10 menit, BUKAN diagregasi
  *  ulang jadi 1 baris/hari, cuma disubset jamnya). `00:00` sendiri masuk
  *  jendela terakhir "18:01–00:00" (ujung akhir), bukan "00:01–06:00". */
 function matchesTimeWindow(granularity: DataGranularity, minutesSinceMidnight: number) {
@@ -87,7 +88,7 @@ async function fetchRows(
 
   const parsed = raw.map((row) => ({
     row,
-    date: parseDate(row.datetime, "dd-MM-yyyy HH:mm", new Date()),
+    date: parseFilterDatetime(row.datetime),
   }));
 
   const filtered = parsed.filter(({ date }) =>
@@ -107,7 +108,7 @@ async function fetchRows(
  *  tes langsung ke backend asli):
  *  - `"harian"` → `/weathers/daily` (`fetchRawDaily`, 1 baris/hari, sudah
  *    dipakai halaman lain juga).
- *  - `"10menit"/"00-06"/"06-12"/"12-18"/"18-24"` → `/weathers/filter`
+ *  - `"10menit"/"00-06"/"06-12"/"12-18"/"18-24"` → `/weathers/per_10_minute`
  *    (`fetchRawFilter`, pembacaan mentah ~tiap 10 menit, BARU khusus dipakai
  *    halaman ini) — jendela 6 jam cuma SUBSET jam dari data mentah yang
  *    sama, bukan agregasi ulang.

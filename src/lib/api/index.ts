@@ -15,6 +15,7 @@ import { stationApi as stationClient } from "./station-client";
 import { usersClient } from "./users-client";
 import { companiesClient } from "./companies-client";
 import { stationsAdminClient } from "./stations-admin-client";
+import { regionalClient } from "./regional-client";
 import { userRolesClient } from "./user-roles-client";
 import { missingDataClient } from "./missing-data-client";
 import { aghrisUsersClient } from "./aghris-users-client";
@@ -31,6 +32,7 @@ import type { NotificationApi } from "./notification-api";
 import type { UsersApi } from "./users-api";
 import type { CompaniesApi } from "./companies-api";
 import type { StationsAdminApi } from "./stations-admin-api";
+import type { RegionalApi } from "./regional-api";
 import type { UserRolesApi } from "./user-roles-api";
 import type { MissingDataApi } from "./missing-data-api";
 import type { AghrisUsersApi } from "./aghris-users-api";
@@ -71,6 +73,10 @@ export const monitoringApi: MonitoringApi = {
 // `mock/download-api.ts` dibiarkan ada tapi VESTIGIAL (tidak dipakai lagi),
 // pola sama `mockMonitoringApi` di atas.
 export const downloadApi: DownloadApi = downloadClient;
+// Filter "Regional" → "Stasiun" Unduh Data: `GET /companies` (real-only) &
+// `GET /devices?company_code=`. Terbuka untuk semua role login (beda dari
+// `companiesApi` yang admin-only), dibatasi per-company di Route Handler.
+export const regionalApi: RegionalApi = regionalClient;
 // Real via `POST /forecast` (body form `station_id`), dikonfirmasi lewat
 // curl langsung ke backend asli — `mock/forecast-api.ts` dibiarkan
 // ada tapi VESTIGIAL (tidak dipakai lagi), pola sama `mockMonitoringApi`/

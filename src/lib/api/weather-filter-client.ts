@@ -1,9 +1,10 @@
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ApiError } from "@/types/api";
 import { createApiClient } from "./fetcher";
 
 /** Satu pembacaan mentah (~tiap 10 menit, tidak selalu genap — bisa ada
- *  gap) dari `GET /weathers/filter` — BEDA TOTAL dari `/weathers/daily`
+ *  gap) dari `GET /weathers/per_10_minute` (menggantikan `/weathers/filter`
+ *  lama) — BEDA TOTAL dari `/weathers/daily`
  *  (`weather-daily-client.ts`, agregat 1 baris per HARI): endpoint ini
  *  balikin data MENTAH per pembacaan, dikonfirmasi lewat tes langsung ke
  *  backend asli. Semua field metrik STRING (bukan number) dan pakai
@@ -12,15 +13,16 @@ import { createApiClient } from "./fetcher";
  *  seperti `StationRainfallToday.rainfall` mentah — lihat
  *  `rainfall-today-adapter.ts`). `air_pressure` SATU-SATUNYA field yang
  *  pakai pemisah ribuan koma di response asli (mis. `"1,006.07"`), field
- *  lain tidak. `datetime` formatnya `"DD-MM-YYYY HH:mm"` (BUKAN ISO),
- *  descending (terbaru dulu) di response asli. */
+ *  lain tidak. `datetime` formatnya `"YYYY/MM/DD HH:mm"` (BUKAN ISO; beda
+ *  dari endpoint lama yang `"DD-MM-YYYY HH:mm"`), descending (terbaru
+ *  dulu) di response asli. Field radiasi bernama `solar_radiation`. */
 export interface RawWeatherFilter {
   device_id: string;
   datetime: string;
   temperature: string;
   humidity: string;
   rainfall: string;
-  radiation: string;
+  solar_radiation: string;
   air_pressure: string;
   wind_speed: string;
   wind_direction: string;
@@ -37,7 +39,14 @@ export function parseFilterNumeric(raw: string | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Request mentah ke `/weathers/filter` untuk SATU device — dipakai
+/** `"YYYY/MM/DD HH:mm"` → `Date`. `download-client.ts` lalu menormalkan
+ *  ulang ke `"dd-MM-yyyy HH:mm"` supaya kontrak `DownloadDataRow.tanggal`
+ *  (dan formatter UI/CSV) tidak berubah. */
+export function parseFilterDatetime(raw: string): Date {
+  return parse(raw, "yyyy/MM/dd HH:mm", new Date());
+}
+
+/** Request mentah ke `/weathers/per_10_minute` untuk SATU device — dipakai
  *  `download-client.ts` untuk granularitas selain "Per Hari" (10
  *  Menit + 4 jendela 6 jam) di halaman `/download-data`. Error SENGAJA tidak
  *  ditangkap/di-fallback di sini — biar gagal (`ApiError`), konsisten
@@ -55,7 +64,7 @@ export async function fetchRawFilter(
     status: boolean;
     message: string;
     data: RawWeatherFilter[];
-  }>("/weathers/filter", {
+  }>("/weathers/per_10_minute", {
     params: {
       device_id: deviceId,
       start_date: format(start, "yyyy-MM-dd"),

@@ -6,7 +6,7 @@ import { format, parse } from "date-fns";
 import { id } from "date-fns/locale";
 import type { DateRange } from "react-day-picker";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useStations } from "@/hooks/use-stations";
+import { useRegionalCompanies, useRegionalStations } from "@/hooks/use-regional-filter";
 import { useDownloadData } from "@/hooks/use-download-data";
 import {
   DownloadDataTable,
@@ -51,7 +51,7 @@ const columns: ColumnDef<DisplayRow>[] = [
 /** `row.tanggal` bentuknya beda tergantung granularitas — lihat docblock
  *  `DownloadDataRow` (`types/domain.ts`): "harian" → `"yyyy-MM-dd"` dari
  *  `/weathers/daily`, granularitas lain → datetime asli
- *  `"dd-MM-yyyy HH:mm"` dari `/weathers/filter` (satu baris = satu
+ *  `"dd-MM-yyyy HH:mm"` (dinormalkan dari `/weathers/per_10_minute`) (satu baris = satu
  *  pembacaan mentah, jadi tampilkan jamnya juga). */
 function formatTanggal(tanggal: string, granularity: DataGranularity): string {
   if (granularity === "harian") {
@@ -75,13 +75,23 @@ export function DownloadDataSection() {
   // TIDAK auto-select stasiun pertama — Unduh Data tidak ikut daftar
   // pengecualian auto-select (Beranda/Water Balance/Lama Penyinaran/VPD/
   // Dry Spell), lihat CLAUDE.md.
+  const [selectedCompanyCode, setSelectedCompanyCode] = useState<string>();
   const [stationId, setStationId] = useState<string>();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [granularity, setGranularity] = useState<DataGranularity>("harian");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
+  const { data: companiesResponse, isLoading: isLoadingCompanies } =
+    useRegionalCompanies();
+  const companies = useMemo(() => companiesResponse?.data ?? [], [companiesResponse]);
+  // Derived (bukan useEffect+setState): role yang cuma punya 1 regional
+  // (viewer) otomatis terpilih, tanpa harus memilih manual.
+  const companyCode =
+    selectedCompanyCode ?? (companies.length === 1 ? companies[0].code : undefined);
+
+  const { data: stationsResponse, isLoading: isLoadingStations } =
+    useRegionalStations(companyCode);
   const stations = stationsResponse?.data ?? [];
 
   const dateFrom = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "";
@@ -120,6 +130,13 @@ export function DownloadDataSection() {
       arahMataAngin: row.arahMataAngin ?? "--",
     }));
   }, [fullRows, effectivePage, pageSize, granularity]);
+
+  function handleCompanyCodeChange(code: string) {
+    setSelectedCompanyCode(code);
+    // Stasiun milik regional lama tidak valid lagi di regional baru.
+    setStationId(undefined);
+    setPage(1);
+  }
 
   function handleStationIdChange(id: string) {
     setStationId(id);
@@ -160,6 +177,10 @@ export function DownloadDataSection() {
           bukan di dalam card). */}
       <FilterAndTableGroup>
         <DownloadDataFilters
+          companies={companies}
+          isLoadingCompanies={isLoadingCompanies}
+          companyCode={companyCode}
+          onCompanyCodeChange={handleCompanyCodeChange}
           stations={stations}
           isLoadingStations={isLoadingStations}
           stationId={stationId}
@@ -188,7 +209,7 @@ export function DownloadDataSection() {
               isFetching
                 ? "Memuat data..."
                 : !stationId || !dateFrom || !dateTo
-                  ? "Pilih stasiun dan rentang tanggal untuk melihat data."
+                  ? "Pilih regional, stasiun, dan rentang tanggal untuk melihat data."
                   : "Data Tidak Tersedia"
             }
           >

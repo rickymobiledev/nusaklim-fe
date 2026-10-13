@@ -15,8 +15,13 @@ import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
 import { DATA_GRANULARITY } from "@/constants";
 import type { DataGranularity, Station } from "@/types/domain";
+import type { Company } from "@/types/user-management";
 
 export function DownloadDataFilters({
+  companies,
+  isLoadingCompanies,
+  companyCode,
+  onCompanyCodeChange,
   stations,
   isLoadingStations,
   stationId,
@@ -28,6 +33,10 @@ export function DownloadDataFilters({
   onDownload,
   downloadDisabled,
 }: {
+  companies: Company[];
+  isLoadingCompanies: boolean;
+  companyCode?: string;
+  onCompanyCodeChange: (companyCode: string) => void;
   stations: Station[];
   isLoadingStations: boolean;
   stationId?: string;
@@ -42,13 +51,32 @@ export function DownloadDataFilters({
   return (
     <Row>
       <Filters>
+        <Select
+          value={companyCode ?? ""}
+          onValueChange={onCompanyCodeChange}
+          disabled={isLoadingCompanies}
+        >
+          <RegionalTrigger aria-label="Regional">
+            <SelectValue
+              placeholder={isLoadingCompanies ? "Memuat regional..." : "Pilih Regional"}
+            />
+          </RegionalTrigger>
+          <SelectContent>
+            {companies.map((c) => (
+              <SelectItem key={c.code} value={c.code}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <StationSearchSelect
           variant="outlined"
           desktopWidth={250}
           stations={stations}
           value={stationId}
           onChange={onStationIdChange}
-          isLoading={isLoadingStations}
+          isLoading={isLoadingStations || !companyCode}
         />
 
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
@@ -101,6 +129,28 @@ const Filters = styled.div`
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+  }
+`;
+
+const RegionalTrigger = styled(SelectTrigger)`
+  width: 100%;
+
+  ${media.desktop} {
+    width: 250px;
+  }
+
+  height: 48px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1.5px solid #d6dcd8;
+  border-radius: 12px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #1d2520;
+
+  & svg {
+    color: #8b9c90;
   }
 `;
 
