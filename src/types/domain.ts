@@ -479,9 +479,11 @@ export interface StationRainfallToday {
 
 /** Baris tabel "Unduh Data" — SUDAH 100% real (`lib/api/download-client.ts`),
  *  bukan mock lagi. `tanggal` bentuknya beda tergantung `DataGranularity`:
- *  `"harian"` → `"YYYY-MM-DD"` (dari `/weathers/daily`), granularitas lain
- *  → datetime asli `"DD-MM-YYYY HH:mm"` dari `/weathers/filter` (satu baris
- *  = satu pembacaan mentah, BUKAN agregat). `rerataKelembapanRelatif`
+ *  `"harian"` → `"YYYY-MM-DD"` (dari `/weathers/daily`), `"pagi"/"siang"/
+ *  "malam"` → `"YYYY-MM-DD"` juga (agregat per hari dari
+ *  `/weathers/morning|afternoon|evening`), `"10menit"` → datetime asli
+ *  `"DD-MM-YYYY HH:mm"` dari `/weathers/filter` (satu baris = satu
+ *  pembacaan mentah, BUKAN agregat). `rerataKelembapanRelatif`
  *  ditambahkan belakangan (field ke-8 sesuai desain Figma, sebelumnya
  *  tidak ada di tipe ini sama sekali). */
 export interface DownloadDataRow {
@@ -495,13 +497,7 @@ export interface DownloadDataRow {
   arahMataAngin: string | null;
 }
 
-export type DataGranularity =
-  | "harian"
-  | "10menit"
-  | "00-06"
-  | "06-12"
-  | "12-18"
-  | "18-24";
+export type DataGranularity = "harian" | "10menit" | "pagi" | "siang" | "malam";
 
 /** Kartu "Berita Pilihan" di Beranda — `GET /news` asli, dikonfirmasi user.
  *  PENGECUALIAN sengaja dari konvensi "kontrak Indonesia" di docblock atas

@@ -49,12 +49,12 @@ const columns: ColumnDef<DisplayRow>[] = [
 ];
 
 /** `row.tanggal` bentuknya beda tergantung granularitas — lihat docblock
- *  `DownloadDataRow` (`types/domain.ts`): "harian" → `"yyyy-MM-dd"` dari
- *  `/weathers/daily`, granularitas lain → datetime asli
- *  `"dd-MM-yyyy HH:mm"` (dinormalkan dari `/weathers/per_10_minute`) (satu baris = satu
+ *  `DownloadDataRow` (`types/domain.ts`): "harian" dan "pagi"/"siang"/
+ *  "malam" → `"yyyy-MM-dd"` (agregat per hari), "10menit" → datetime asli
+ *  `"dd-MM-yyyy HH:mm"` (dari `/weathers/filter`; satu baris = satu
  *  pembacaan mentah, jadi tampilkan jamnya juga). */
 function formatTanggal(tanggal: string, granularity: DataGranularity): string {
-  if (granularity === "harian") {
+  if (granularity !== "10menit") {
     return format(parse(tanggal, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: id });
   }
   return format(parse(tanggal, "dd-MM-yyyy HH:mm", new Date()), "dd/MM/yyyy HH:mm", {
