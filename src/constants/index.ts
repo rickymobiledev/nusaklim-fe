@@ -83,10 +83,10 @@ export const NAV_ITEMS: NavItem[] = [
 export const DATA_GRANULARITY = [
   { value: "harian", label: "Per Hari" },
   { value: "10menit", label: "Per 10 Menit" },
-  { value: "00-06", label: "00:01–06:00" },
-  { value: "06-12", label: "06:01–12:00" },
-  { value: "12-18", label: "12:01–18:00" },
-  { value: "18-24", label: "18:01–00:00" },
+  { value: "00-06", label: "00:00–05:59" },
+  { value: "06-12", label: "06:00–11:59" },
+  { value: "12-18", label: "12:00–17:59" },
+  { value: "18-24", label: "18:00–23:59" },
 ] as const;
 
 /** Title untuk route yang tidak persis cocok dengan NAV_ITEMS (sub-halaman Monitoring).
