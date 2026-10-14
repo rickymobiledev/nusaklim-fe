@@ -141,8 +141,23 @@ export function getPageTitle(pathname: string): string {
   return resolveTopLevelNavItem(pathname)?.label ?? "Beranda";
 }
 
-export function getActiveNavHref(pathname: string): string {
-  return resolveTopLevelNavItem(pathname)?.href ?? "/";
+/** Item nav yang harus menyala untuk `pathname`. `items` = daftar yang SUDAH
+ *  difilter per role (default semua) — supaya item tersembunyi (mis. pill
+ *  "Ramalan Cuaca" untuk admin) tidak jadi kandidat. Item ber-`children`
+ *  (mis. "Lainnya") juga cocok lewat `href` anak-anaknya (`/forecast`,
+ *  `/missing-data`, dst), bukan cuma `href` induknya. Prefix terpanjang
+ *  menang; tanpa kecocokan → "/" (Dashboard). */
+export function getActiveNavHref(pathname: string, items: NavItem[] = NAV_ITEMS): string {
+  let best: { href: string; length: number } | undefined;
+  for (const item of items) {
+    const keys = [item.href, ...(item.children?.map((child) => child.href) ?? [])];
+    for (const key of keys) {
+      if (key === "/" || !pathname.startsWith(key)) continue;
+      if (!best || key.length > best.length)
+        best = { href: item.href, length: key.length };
+    }
+  }
+  return best?.href ?? "/";
 }
 
 export type BreadcrumbCrumb = { label: string; href: string };
