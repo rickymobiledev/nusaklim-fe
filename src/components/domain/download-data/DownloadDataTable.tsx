@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import styled from "styled-components";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type SortingFn,
+  type SortingState,
 } from "@tanstack/react-table";
 import {
   Select,
@@ -18,6 +22,46 @@ import {
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { media } from "@/lib/breakpoints";
 import type { ApiMeta } from "@/types/api";
+
+/** Nilai sel sudah berupa string terformat ("12,5 °C", "1.234 mm",
+ *  "05/03/2026 10:30", "--"), jadi sort string biasa salah (mis. "10" < "9").
+ *  Tanggal & angka format id-ID diurai dulu; nilai kosong ("--") selalu di
+ *  akhir, apapun arah sort-nya. */
+function toSortable(value: unknown): number | string | null {
+  if (value == null) return null;
+  if (typeof value === "number") return value;
+  const text = String(value).trim();
+  if (text === "" || text === "--") return null;
+  const date = text.match(/^(\d{2})[/-](\d{2})[/-](\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+  if (date) {
+    const [, dd, mm, yyyy, hh = "0", mi = "0"] = date;
+    return new Date(+yyyy, +mm - 1, +dd, +hh, +mi).getTime();
+  }
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]).getTime();
+  const num = text.match(/^-?[\d.]+(?:,\d+)?/);
+  if (num) {
+    const parsed = Number(num[0].replace(/\./g, "").replace(",", "."));
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return text.toLowerCase();
+}
+
+function compareCells(a: number | string | null, b: number | string | null): number {
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return String(a).localeCompare(String(b), "id-ID");
+}
+
+const smartSort: SortingFn<unknown> = (rowA, rowB, columnId) => {
+  const a = toSortable(rowA.getValue(columnId));
+  const b = toSortable(rowB.getValue(columnId));
+  if (a === b) return 0;
+  // Kosong selalu di akhir: dikompensasi arah sort supaya tetap di bawah.
+  const desc = rowA.getAllCells()[0]?.getContext().table.getState().sorting[0]?.desc;
+  if (a === null) return desc ? -1 : 1;
+  if (b === null) return desc ? 1 : -1;
+  return compareCells(a, b);
+};
 
 /** Tabel Unduh Data — SENGAJA tidak reuse `components/shared/DataTable.tsx`
  *  (dipakai juga Ramalan Cuaca yang belum di-redesign Figma). Warna/lebar
@@ -39,10 +83,16 @@ export function DownloadDataTable<T>({
    *  yang reuse tabel ini boleh override (mis. Missing Data: 64). */
   headerHeight?: number;
 }) {
+  const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
     data,
     columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    defaultColumn: { sortingFn: smartSort as SortingFn<T> },
+    sortDescFirst: false,
   });
 
   const headerGroups = table.getHeaderGroups();
@@ -60,10 +110,34 @@ export function DownloadDataTable<T>({
           {headerGroups.map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <Th key={header.id} $height={headerHeight}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
+                <Th
+                  key={header.id}
+                  $height={headerHeight}
+                  aria-sort={
+                    header.column.getIsSorted() === "asc"
+                      ? "ascending"
+                      : header.column.getIsSorted() === "desc"
+                        ? "descending"
+                        : undefined
+                  }
+                >
+                  {header.isPlaceholder ? null : (
+                    <SortButton
+                      type="button"
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      <SortIcon $active={!!header.column.getIsSorted()}>
+                        {header.column.getIsSorted() === "asc" ? (
+                          <ArrowUp size={14} />
+                        ) : header.column.getIsSorted() === "desc" ? (
+                          <ArrowDown size={14} />
+                        ) : (
+                          <ArrowUpDown size={14} />
+                        )}
+                      </SortIcon>
+                    </SortButton>
+                  )}
                 </Th>
               ))}
             </tr>
@@ -236,6 +310,27 @@ const Th = styled.th<{ $height: number }>`
   line-height: 24px;
   font-weight: 700;
   color: #09275f;
+`;
+
+const SortButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+`;
+
+const SortIcon = styled.span<{ $active: boolean }>`
+  display: inline-flex;
+  flex-shrink: 0;
+  color: ${(p) => (p.$active ? "#175fe2" : "#9ca3af")};
 `;
 
 const Tr = styled.tr<{ $odd: boolean }>`
