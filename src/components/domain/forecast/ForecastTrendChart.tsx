@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import {
   FORECAST_PARAMETERS,
+  formatForecastNumber,
   getParameterUnit,
   type ForecastParameter,
 } from "@/lib/forecast-display";
@@ -93,7 +94,7 @@ export function ForecastTrendChart({
       tick={{ fontSize: 12, fill: "#6D717F" }}
       tickLine={false}
       domain={yDomain}
-      tickFormatter={(value: number) => value.toLocaleString("id-ID")}
+      tickFormatter={(value: number) => formatForecastNumber(value)}
       label={{
         value: `${meta.axisLabel} (${unit})`,
         angle: -90,
@@ -115,7 +116,9 @@ export function ForecastTrendChart({
       <Head>
         <HeadText>
           <Title>Tren Prediksi</Title>
-          <Subtitle>Grafik prediksi parameter cuaca harian untuk 7 hari ke depan</Subtitle>
+          <Subtitle>
+            Grafik prediksi parameter cuaca harian untuk 7 hari ke depan
+          </Subtitle>
         </HeadText>
 
         <Field>
@@ -198,7 +201,7 @@ function ChartTooltip({
           <div>
             <TooltipMetric>{label}</TooltipMetric>
             <TooltipValue>
-              {Number(entry.value).toLocaleString("id-ID", { maximumFractionDigits: 1 })}
+              {formatForecastNumber(Number(entry.value))}
               {unit}
             </TooltipValue>
           </div>

@@ -1,5 +1,5 @@
 import { ApiError, type ApiItemResponse } from "@/types/api";
-import type { ForecastResult } from "@/types/forecast";
+import type { ForecastModel, ForecastResult } from "@/types/forecast";
 import { createApiClient } from "./fetcher";
 import {
   mapRawForecastResult,
@@ -30,6 +30,7 @@ export const forecastClient: ForecastApi = {
   async getForecast(
     stationId: string,
     companyId?: string,
+    model: ForecastModel = "sekunder",
   ): Promise<ApiItemResponse<ForecastResult>> {
     // Belum ada stasiun dipilih di UI — tampilkan kosong, jangan error
     // (pola sama mock/forecast-api.ts yang digantikan file ini).
@@ -49,11 +50,19 @@ export const forecastClient: ForecastApi = {
 
     try {
       const client = createApiClient(companyId);
-      const res = await client.post<RawForecastResponse>(
-        "/forecast",
-        new URLSearchParams({ station_id: stationId }).toString(),
-        { headers: FORM_HEADERS },
-      );
+      // Primer: `GET /forecast/premier?weather_station_id=`. Sekunder: endpoint
+      // lama `POST /forecast` (body form `station_id`). Bentuk response premier
+      // diasumsikan sama dengan sekunder — belum dikonfirmasi ke BE.
+      const res =
+        model === "primer"
+          ? await client.get<RawForecastResponse>("/forecast/premier", {
+              params: { weather_station_id: stationId },
+            })
+          : await client.post<RawForecastResponse>(
+              "/forecast",
+              new URLSearchParams({ station_id: stationId }).toString(),
+              { headers: FORM_HEADERS },
+            );
 
       if (!res.data.status) {
         throw new ApiError(

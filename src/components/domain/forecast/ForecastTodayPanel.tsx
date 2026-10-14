@@ -8,6 +8,7 @@ import { id } from "date-fns/locale";
 import { FORECAST_ICON_SRC, getForecastIconLevel } from "@/lib/forecast-icon-level";
 import {
   FORECAST_BACKGROUND_SRC,
+  formatForecastNumber,
   getForecastCategory,
   getParameterUnit,
   getRange,
@@ -26,7 +27,7 @@ import type { ForecastDay } from "@/types/forecast";
 import { ForecastMetricCard } from "./ForecastMetricCard";
 
 function formatNumber(value: number) {
-  return value.toLocaleString("id-ID", { maximumFractionDigits: 1 });
+  return formatForecastNumber(value);
 }
 
 export function ForecastTodayPanel({

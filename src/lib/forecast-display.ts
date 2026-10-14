@@ -1,6 +1,12 @@
 import type { ForecastDay } from "@/types/forecast";
 import { getForecastIconLevel, type ForecastIconLevel } from "@/lib/forecast-icon-level";
 
+/** Angka halaman /forecast: desimal pakai titik (bukan koma id-ID), tanpa
+ *  pemisah ribuan supaya tidak ambigu dengan titik desimal. */
+export function formatForecastNumber(value: number, maximumFractionDigits = 1): string {
+  return value.toLocaleString("en-US", { maximumFractionDigits, useGrouping: false });
+}
+
 /** Label kategori hujan per hari di halaman /forecast. Threshold SENGAJA
  *  ikut `getForecastIconLevel` supaya icon & label selalu konsisten —
  *  BELUM FINAL (butuh konfirmasi Data Analyst), sama status-nya dengan

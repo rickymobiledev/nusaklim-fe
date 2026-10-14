@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { FORECAST_ICON_SRC, getForecastIconLevel } from "@/lib/forecast-icon-level";
-import { getForecastCategory } from "@/lib/forecast-display";
+import { formatForecastNumber, getForecastCategory } from "@/lib/forecast-display";
 import { media } from "@/lib/breakpoints";
 import type { ForecastDay } from "@/types/forecast";
 
@@ -49,7 +49,7 @@ export function ForecastDayStrip({
               />
               <ValueBlock>
                 <RainfallValue $active={active}>
-                  {day.rainfall} <small>{rainfallUnit}</small>
+                  {formatForecastNumber(day.rainfall)} <small>{rainfallUnit}</small>
                 </RainfallValue>
                 <Category $active={active}>{getForecastCategory(day.rainfall)}</Category>
               </ValueBlock>

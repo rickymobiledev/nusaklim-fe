@@ -21,3 +21,16 @@ export interface ForecastResult {
   forecast: ForecastDay[];
   units: Record<string, string>;
 }
+
+/** Model ramalan: "primer" = model ML ukuran lebih kecil, "sekunder" = model
+ *  lain (endpoint/param BE-nya belum ada, lihat `app/api/forecast/route.ts`). */
+export type ForecastModel = "primer" | "sekunder";
+
+export const FORECAST_MODELS: { id: ForecastModel; label: string; note: string }[] = [
+  {
+    id: "primer",
+    label: "Primer",
+    note: "*Model dibangun dengan algoritma machine learning",
+  },
+  { id: "sekunder", label: "Sekunder", note: "*Model diambil dari pihak ketiga" },
+];

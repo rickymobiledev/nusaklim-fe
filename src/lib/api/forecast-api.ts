@@ -1,5 +1,5 @@
 import type { ApiItemResponse } from "@/types/api";
-import type { ForecastResult } from "@/types/forecast";
+import type { ForecastModel, ForecastResult } from "@/types/forecast";
 
 /**
  * Kontrak BE asli, dikonfirmasi lewat curl langsung ke backend asli (bukan
@@ -22,5 +22,6 @@ export interface ForecastApi {
   getForecast(
     stationId: string,
     companyId?: string,
+    model?: ForecastModel,
   ): Promise<ApiItemResponse<ForecastResult>>;
 }

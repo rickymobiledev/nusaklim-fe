@@ -12,6 +12,7 @@ import {
   type ForecastParameter,
 } from "@/lib/forecast-display";
 import { media } from "@/lib/breakpoints";
+import { FORECAST_MODELS, type ForecastModel } from "@/types/forecast";
 import { ForecastHeader } from "./ForecastHeader";
 import { ForecastDayStrip } from "./ForecastDayStrip";
 import { ForecastTodayPanel } from "./ForecastTodayPanel";
@@ -26,13 +27,16 @@ export function ForecastSection() {
   const [selectedStationId, setSelectedStationId] = useState<string>();
   const [selectedDate, setSelectedDate] = useState<string>();
   const [parameter, setParameter] = useState<ForecastParameter>("rainfall");
+  const [model, setModel] = useState<ForecastModel>("primer");
 
   // Auto-select stasiun PERTAMA begitu daftar termuat — derived value, bukan
   // useEffect+setState (ditolak lint `react-hooks/set-state-in-effect`),
   // pola sama Beranda/Water Balance.
   const stationId = selectedStationId ?? stations[0]?.id;
 
-  const { data, isLoading, isError, error } = useForecast(stationId);
+  // `isFetching` (bukan `isLoading`): ganti tab/stasiun yang sudah pernah
+  // dimuat punya cache, tapi tetap hit API ulang → skeleton harus tampil.
+  const { data, isFetching, isError, error } = useForecast(stationId, model);
   // Panjang ikut array `forecast` apa adanya (horizon bisa berubah, jangan
   // hardcode 7). Tanggal terpilih yang tidak ada di data baru (ganti
   // stasiun) otomatis jatuh ke hari pertama.
@@ -52,10 +56,12 @@ export function ForecastSection() {
         isLoadingStations={isLoadingStations}
         stationId={stationId}
         onStationIdChange={handleStationChange}
+        model={model}
+        onModelChange={setModel}
       />
 
       <DataState
-        isLoading={isLoadingStations || (!!stationId && isLoading)}
+        isLoading={isLoadingStations || (!!stationId && isFetching)}
         isError={isError}
         error={error}
         isEmpty={!data || !activeDay}
@@ -86,6 +92,8 @@ export function ForecastSection() {
               parameter={parameter}
               onParameterChange={setParameter}
             />
+
+            <ModelNote>{FORECAST_MODELS.find((m) => m.id === model)?.note}</ModelNote>
 
             <ForecastAlert day={findHeavyRainDay(days)} />
           </>
@@ -160,6 +168,13 @@ const TodayPanelSkeleton = styled(SkeletonBlock)`
   ${media.desktop} {
     height: 244px;
   }
+`;
+
+const ModelNote = styled.p`
+  margin: -8px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: #667a6c;
 `;
 
 const Left = styled.div`
