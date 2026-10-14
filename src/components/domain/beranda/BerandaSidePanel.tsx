@@ -1,30 +1,41 @@
 "use client";
 
+import Link from "next/link";
 import styled from "styled-components";
 import { DrySpellSummaryCard } from "@/components/domain/beranda/DrySpellSummaryCard";
 import { WaterBalanceSummaryCard } from "@/components/domain/beranda/WaterBalanceSummaryCard";
 import { SunshineDurationSummaryCard } from "@/components/domain/beranda/SunshineDurationSummaryCard";
 import { VpdSummaryCard } from "@/components/domain/beranda/VpdSummaryCard";
-import { InfoEmptyIcon } from "@/components/shared/DashboardIcons";
 
 /** Sidebar kanan Beranda (Figma "Frame 35"): alert info + kartu Deret
  *  Hari Terpanjang Tidak Hujan, Keseimbangan Air, Lama Penyinaran & VPD —
- *  seluruh widget sidebar dari Figma sudah lengkap. */
+ *  seluruh widget sidebar dari Figma sudah lengkap. Tiap kartu adalah link
+ *  ke halaman Monitoring domain yang sama. */
 export function BerandaSidePanel({ stationId }: { stationId?: string }) {
   return (
     <Panel>
-      <InfoAlert>
-        <InfoEmptyIcon />
-        <AlertText>Data diambil dari tanggal atau bulan sebelumnya.</AlertText>
-      </InfoAlert>
-
-      <DrySpellSummaryCard stationId={stationId} />
-      <WaterBalanceSummaryCard stationId={stationId} />
-      <SunshineDurationSummaryCard stationId={stationId} />
-      <VpdSummaryCard stationId={stationId} />
+      <CardLink href="/monitoring/dry-spell">
+        <DrySpellSummaryCard stationId={stationId} />
+      </CardLink>
+      <CardLink href="/monitoring/water-balance">
+        <WaterBalanceSummaryCard stationId={stationId} />
+      </CardLink>
+      <CardLink href="/monitoring/lama-penyinaran">
+        <SunshineDurationSummaryCard stationId={stationId} />
+      </CardLink>
+      <CardLink href="/monitoring/vpd">
+        <VpdSummaryCard stationId={stationId} />
+      </CardLink>
     </Panel>
   );
 }
+
+const CardLink = styled(Link)`
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+`;
 
 const Panel = styled.aside`
   box-sizing: border-box;
@@ -38,30 +49,4 @@ const Panel = styled.aside`
   background: #ffffff;
   border: 1px solid #ecefed;
   border-radius: 20px;
-`;
-
-const InfoAlert = styled.div`
-  box-sizing: border-box;
-  display: flex;
-  align-items: flex-start;
-  align-self: stretch;
-  gap: 16px;
-  padding: 16px;
-  background: #eff5ff;
-  border: 1.5px solid #175fe2;
-  border-radius: 12px;
-
-  svg {
-    flex: none;
-  }
-`;
-
-const AlertText = styled.p`
-  margin: 0;
-  flex: 1;
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 24px;
-  color: #667a6c;
 `;

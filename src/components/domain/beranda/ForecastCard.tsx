@@ -85,7 +85,6 @@ const Card = styled.div`
   min-width: 0;
   padding: 16px;
   gap: 4px;
-  max-width: 530px;
   width: 100%;
   background: #ffffff;
   border: 1px solid #ecefed;

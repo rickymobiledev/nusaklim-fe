@@ -218,7 +218,8 @@ function formatWithUnit(value: number | null, unit: string): string {
 
 /* Kartu fluid (lebar ikut cell grid, bukan viewport) — makanya pakai
  * `@container` di lebar kartu, bukan `media.desktop`. Base = spec Figma
- * (kartu 530px); <500px = versi ringkas (ilustrasi 82px, padding
+ * (kartu 530px, tapi sengaja TANPA max-width supaya melebar mengisi cell
+ * grid di layar besar); <500px = versi ringkas (ilustrasi 82px, padding
  * dikurangi) supaya 3 kotak hari tetap muat di lebar sempit — ukuran
  * 82px dikonfirmasi dari CSS Figma mobile persis (kartu ~397px lebar),
  * BUKAN lagi tebakan 96px/disembunyikan di bawah 420px seperti revisi
@@ -228,7 +229,6 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 530px;
   width: 100%;
   background: #ffffff;
   border: 1px solid #ecefed;

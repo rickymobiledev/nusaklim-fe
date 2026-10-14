@@ -4,8 +4,10 @@ import type { RainfallTodayLevel } from "@/types/domain";
  *  turunan dari angka, BE sudah balikin status hujan/tidak langsung
  *  lewat field `is_rain` (lihat `StationRainfallToday`) — fungsi ini
  *  cuma menerjemahkan boolean itu ke union type yang konsisten dengan
- *  pola `*Level` lain di codebase. */
-export function getRainfallTodayLevel(isHujan: boolean): RainfallTodayLevel {
+ *  pola `*Level` lain di codebase. `null` = stasiun tidak aktif hari ini
+ *  (`is_rain` `"---"` dari BE). */
+export function getRainfallTodayLevel(isHujan: boolean | null): RainfallTodayLevel {
+  if (isHujan === null) return "tidak_aktif";
   return isHujan ? "hujan" : "tidak_hujan";
 }
 
@@ -17,9 +19,11 @@ export function getRainfallTodayLevel(isHujan: boolean): RainfallTodayLevel {
 export const RAINFALL_TODAY_COLOR: Record<RainfallTodayLevel, string> = {
   hujan: "#0095FF",
   tidak_hujan: "#EE443F",
+  tidak_aktif: "#8B9C90",
 };
 
 export const RAINFALL_TODAY_LABEL: Record<RainfallTodayLevel, string> = {
   hujan: "Hujan",
   tidak_hujan: "Tidak Hujan",
+  tidak_aktif: "Tidak Aktif",
 };

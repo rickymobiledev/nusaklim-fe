@@ -21,7 +21,7 @@ export function getDrySpellLevel(durasiTerakhir: number | null): DrySpellLevel {
  *  ternary warna berulang di komponen (`dry-spell-map.tsx`,
  *  `DrySpellLegend.tsx`, `DrySpellPanel.tsx`). */
 export const DRY_SPELL_COLOR: Record<DrySpellLevel, string> = {
-  rendah: "#43B75D",
+  rendah: "#175FE2",
   sedang: "#E2AF17",
   tinggi: "#EE443F",
 };

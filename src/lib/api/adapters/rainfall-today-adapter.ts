@@ -11,6 +11,10 @@ import type { StationRainfallToday } from "@/types/domain";
  * `rainfall` STRING (bukan number) — salah satu device (brand "Meteo
  * Nusantara Instrumen"/ARR) pernah balikin literal `"---"` sebagai
  * sentinel "tidak ada data", lihat `parseRainfallValue()`.
+ *
+ * `is_rain` boolean untuk stasiun aktif, tapi STRING `"---"` (bukan
+ * boolean) untuk stasiun yang tidak aktif hari ini — dikonfirmasi tes
+ * langsung dan tim BE (`rainfall` ikut `"---"`).
  */
 export interface RawRainfallTodayDevice {
   id: string;
@@ -21,7 +25,7 @@ export interface RawRainfallTodayDevice {
   company_code: string;
   company_name: string;
   rainfall: string;
-  is_rain: boolean;
+  is_rain: boolean | string;
 }
 
 /** `Number("---")` = `NaN` — sentinel "tidak ada data" yang dikonfirmasi
@@ -50,7 +54,8 @@ export function mapRawDeviceToRainfallToday(
     companyCode: raw.company_code,
     companyName: raw.company_name,
     curahHujan: parseRainfallValue(raw.rainfall),
-    isHujan: raw.is_rain,
+    // Bukan boolean (`"---"`) = stasiun tidak aktif → `null`.
+    isHujan: typeof raw.is_rain === "boolean" ? raw.is_rain : null,
     sinkronisasiTerakhir: new Date().toISOString(),
   };
 }

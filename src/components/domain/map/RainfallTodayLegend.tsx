@@ -21,6 +21,12 @@ export function RainfallTodayLegend() {
           {RAINFALL_TODAY_LABEL.tidak_hujan}
         </Label>
       </Item>
+      <Item>
+        <LegendDot $color={RAINFALL_TODAY_COLOR.tidak_aktif} />
+        <Label $color={RAINFALL_TODAY_COLOR.tidak_aktif}>
+          {RAINFALL_TODAY_LABEL.tidak_aktif}
+        </Label>
+      </Item>
     </Wrapper>
   );
 }

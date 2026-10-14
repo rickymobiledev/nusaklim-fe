@@ -83,10 +83,9 @@ export const NAV_ITEMS: NavItem[] = [
 export const DATA_GRANULARITY = [
   { value: "harian", label: "Per Hari" },
   { value: "10menit", label: "Per 10 Menit" },
-  { value: "00-06", label: "00:00–05:59" },
-  { value: "06-12", label: "06:00–11:59" },
-  { value: "12-18", label: "12:00–17:59" },
-  { value: "18-24", label: "18:00–23:59" },
+  { value: "pagi", label: "Pagi (00:01 - 12:00)" },
+  { value: "siang", label: "Siang (12:01 - 18:00)" },
+  { value: "malam", label: "Malam (18:01 - 00:00)" },
 ] as const;
 
 /** Title untuk route yang tidak persis cocok dengan NAV_ITEMS (sub-halaman Monitoring).
@@ -142,8 +141,23 @@ export function getPageTitle(pathname: string): string {
   return resolveTopLevelNavItem(pathname)?.label ?? "Beranda";
 }
 
-export function getActiveNavHref(pathname: string): string {
-  return resolveTopLevelNavItem(pathname)?.href ?? "/";
+/** Item nav yang harus menyala untuk `pathname`. `items` = daftar yang SUDAH
+ *  difilter per role (default semua) — supaya item tersembunyi (mis. pill
+ *  "Ramalan Cuaca" untuk admin) tidak jadi kandidat. Item ber-`children`
+ *  (mis. "Lainnya") juga cocok lewat `href` anak-anaknya (`/forecast`,
+ *  `/missing-data`, dst), bukan cuma `href` induknya. Prefix terpanjang
+ *  menang; tanpa kecocokan → "/" (Dashboard). */
+export function getActiveNavHref(pathname: string, items: NavItem[] = NAV_ITEMS): string {
+  let best: { href: string; length: number } | undefined;
+  for (const item of items) {
+    const keys = [item.href, ...(item.children?.map((child) => child.href) ?? [])];
+    for (const key of keys) {
+      if (key === "/" || !pathname.startsWith(key)) continue;
+      if (!best || key.length > best.length)
+        best = { href: item.href, length: key.length };
+    }
+  }
+  return best?.href ?? "/";
 }
 
 export type BreadcrumbCrumb = { label: string; href: string };

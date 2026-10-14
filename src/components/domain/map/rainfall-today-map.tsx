@@ -8,9 +8,9 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import L, { type Map as LeafletMap, type PolylineOptions } from "leaflet";
 import { MapContainer, GeoJSON, Marker, Popup } from "react-leaflet";
-import { Info } from "lucide-react";
+import { Info, PowerOff } from "lucide-react";
 import { RainIcon, SunIcon } from "@/components/shared/RainfallIcons";
-import type { StationRainfallToday } from "@/types/domain";
+import type { RainfallTodayLevel, StationRainfallToday } from "@/types/domain";
 import { getRainfallTodayLevel, RAINFALL_TODAY_COLOR } from "@/lib/rainfall-today-level";
 import {
   INDONESIA_PROVINCE_BOUNDARIES,
@@ -34,6 +34,12 @@ import { RainfallTodayLegend } from "./RainfallTodayLegend";
  * min-max bar), dan popup cuma tampilkan icon+status teks (bukan angka
  * mm) — ikut Figma persis.
  */
+
+const POPUP_STATUS_TEXT: Record<RainfallTodayLevel, string> = {
+  hujan: "Terjadi Hujan",
+  tidak_hujan: "Tidak Terjadi Hujan",
+  tidak_aktif: "Stasiun Tidak Aktif",
+};
 
 const PROVINCE_LABEL_ICON_CACHE = new Map<string, L.DivIcon>();
 
@@ -148,12 +154,12 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
                   <PopupName>{row.nama}</PopupName>
 
                   <PopupStatus>
-                    {row.isHujan ? (
-                      <RainIcon size={16} color="#ffffff" />
-                    ) : (
-                      <SunIcon size={16} color="#ffffff" />
+                    {level === "hujan" && <RainIcon size={16} color="#ffffff" />}
+                    {level === "tidak_hujan" && <SunIcon size={16} color="#ffffff" />}
+                    {level === "tidak_aktif" && (
+                      <PowerOff size={16} strokeWidth={1.5} color="#ffffff" />
                     )}
-                    <span>{row.isHujan ? "Terjadi Hujan" : "Tidak Terjadi Hujan"}</span>
+                    <span>{POPUP_STATUS_TEXT[level]}</span>
                   </PopupStatus>
 
                   <PopupSync>

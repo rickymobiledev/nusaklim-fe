@@ -96,31 +96,36 @@ export function ForecastTodayPanel({
         <ForecastMetricCard
           icon={<TemperatureLowIcon />}
           label="Temperatur"
-          value={withUnit(day.temperature, unit("temperature"))}
+          value={formatNumber(day.temperature)}
+          unit={unit("temperature")}
           caption={rangeText(tempRange, unit("temperature"))}
         />
         <ForecastMetricCard
           icon={<DropletHalfIcon />}
           label="Kelembapan Udara"
-          value={withUnit(day.humidity, unit("humidity"))}
+          value={formatNumber(day.humidity)}
+          unit={unit("humidity")}
           caption={rangeText(humidityRange, unit("humidity"))}
         />
         <ForecastMetricCard
           icon={<SunLightIcon />}
           label="Radiasi Matahari"
-          value={withUnit(day.radiation, unit("radiation"))}
+          value={formatNumber(day.radiation)}
+          unit={unit("radiation")}
           caption={rangeText(radiationRange, unit("radiation"))}
         />
         <ForecastMetricCard
           icon={<CompressIcon />}
           label="Tekanan Udara"
-          value={withUnit(day.airPressure, unit("airPressure"))}
+          value={formatNumber(day.airPressure)}
+          unit={unit("airPressure")}
           caption={rangeText(pressureRange, unit("airPressure"))}
         />
         <ForecastMetricCard
           icon={<WindIcon />}
           label="Kecepatan Angin"
-          value={withUnit(day.windSpeed, unit("windSpeed"))}
+          value={formatNumber(day.windSpeed)}
+          unit={unit("windSpeed")}
           caption={rangeText(windRange, unit("windSpeed"))}
         />
         <ForecastMetricCard

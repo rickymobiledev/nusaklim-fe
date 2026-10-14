@@ -16,12 +16,9 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter(
     (item) => !item.roles || (user?.role && item.roles.includes(user.role)),
   );
-  // Item top-level yang disembunyikan untuk role ini (mis. "Ramalan Cuaca"
-  // untuk admin) tidak boleh jadi active — fallback ke Dashboard.
-  const resolvedHref = getActiveNavHref(pathname);
-  const activeHref = visibleItems.some((item) => item.href === resolvedHref)
-    ? resolvedHref
-    : "/";
+  // Hanya item yang terlihat untuk role ini yang jadi kandidat active; halaman
+  // anak (mis. /missing-data) tidak lagi jatuh ke Dashboard.
+  const activeHref = getActiveNavHref(pathname, visibleItems);
 
   // Drawer mobile TETAP flat-list (tidak ada dropdown nested) — item dengan
   // `children` (mis. "Lainnya") di-flatten jadi SidebarItem tersendiri per

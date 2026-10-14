@@ -6,6 +6,7 @@ import { id } from "date-fns/locale";
 import { CalendarIcon, Info } from "lucide-react";
 import { DataState } from "@/components/shared/DataState";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
+import { media } from "@/lib/breakpoints";
 import {
   getDrySpellLevel,
   DRY_SPELL_COLOR,
@@ -128,6 +129,7 @@ const List = styled.div`
 
 const PeriodCard = styled.div`
   box-sizing: border-box;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -140,6 +142,7 @@ const PeriodCard = styled.div`
 `;
 
 const PeriodInfo = styled.div`
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -167,7 +170,11 @@ const PeriodDateText = styled.span`
   line-height: 16px;
   font-weight: 600;
   color: #8b9c90;
-  white-space: nowrap;
+  white-space: normal;
+
+  ${media.desktop} {
+    white-space: nowrap;
+  }
 `;
 
 const LevelBadge = styled.span<{ $color: string }>`
@@ -182,5 +189,12 @@ const LevelBadge = styled.span<{ $color: string }>`
   line-height: 24px;
   font-weight: 400;
   color: #ffffff;
-  white-space: nowrap;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+
+  ${media.desktop} {
+    white-space: nowrap;
+  }
 `;

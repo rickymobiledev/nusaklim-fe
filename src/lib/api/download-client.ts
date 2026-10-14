@@ -21,6 +21,11 @@ import {
   parseFilterNumeric,
   type RawWeatherFilter,
 } from "./weather-filter-client";
+import {
+  fetchRawPeriod,
+  type RawWeatherPeriod,
+  type WeatherPeriod,
+} from "./weather-period-client";
 import { extractBackendErrorMessage } from "./backend-error";
 import type { DownloadApi, GetDownloadDataParams } from "./download-api";
 
@@ -45,29 +50,33 @@ function mapFilterRow(row: RawWeatherFilter): DownloadDataRow {
     rerataTemperatur: parseFilterNumeric(row.temperature),
     rerataKelembapanRelatif: parseFilterNumeric(row.humidity),
     totalCurahHujan: parseFilterNumeric(row.rainfall),
-    totalRadiasi: parseFilterNumeric(row.solar_radiation),
+    totalRadiasi: parseFilterNumeric(row.radiation),
     rerataTekananUdara: parseFilterNumeric(row.air_pressure),
     rerataKecepatanAngin: parseFilterNumeric(row.wind_speed),
     arahMataAngin: windDeg === null ? null : degreesToCompass(windDeg),
   };
 }
 
-/** Jendela 6 jam "00:01–06:00"/"06:01–12:00"/"12:01–18:00"/"18:01–00:00"
- *  dari `DATA_GRANULARITY` (`constants/index.ts`) — dipakai buat filter
- *  baris `/weathers/per_10_minute` (data mentah per ~10 menit, BUKAN diagregasi
- *  ulang jadi 1 baris/hari, cuma disubset jamnya). `00:00` sendiri masuk
- *  jendela terakhir "18:01–00:00" (ujung akhir), bukan "00:01–06:00". */
-function matchesTimeWindow(granularity: DataGranularity, minutesSinceMidnight: number) {
-  if (granularity === "00-06")
-    return minutesSinceMidnight > 0 && minutesSinceMidnight <= 360;
-  if (granularity === "06-12")
-    return minutesSinceMidnight > 360 && minutesSinceMidnight <= 720;
-  if (granularity === "12-18")
-    return minutesSinceMidnight > 720 && minutesSinceMidnight <= 1080;
-  if (granularity === "18-24")
-    return minutesSinceMidnight > 1080 || minutesSinceMidnight === 0;
-  return true; // "10menit": semua baris dipakai apa adanya.
+function mapPeriodRow(row: RawWeatherPeriod): DownloadDataRow {
+  const windDeg = parseNumeric(row.wind_direction);
+  return {
+    tanggal: row.datetime,
+    rerataTemperatur: parseNumeric(row.temperature),
+    rerataKelembapanRelatif: parseNumeric(row.humidity),
+    totalCurahHujan: parseNumeric(row.rainfall),
+    totalRadiasi: parseNumeric(row.solar_radiation),
+    rerataTekananUdara: parseNumeric(row.air_pressure),
+    rerataKecepatanAngin: parseNumeric(row.wind_speed),
+    arahMataAngin: windDeg === null ? null : degreesToCompass(windDeg),
+  };
 }
+
+/** Granularitas periode → endpoint backend (`/weathers/{morning|afternoon|evening}`). */
+const PERIOD_ENDPOINT: Partial<Record<DataGranularity, WeatherPeriod>> = {
+  pagi: "morning",
+  siang: "afternoon",
+  malam: "evening",
+};
 
 async function fetchRows(
   stationId: string,
@@ -84,19 +93,17 @@ async function fetchRows(
     return raw.map(mapDailyRow).sort((a, b) => b.tanggal.localeCompare(a.tanggal));
   }
 
+  const period = PERIOD_ENDPOINT[granularity];
+  if (period) {
+    const raw = await fetchRawPeriod(period, stationId, startDate, endDate, companyId);
+    // Descending juga — sama alasannya seperti "harian" di atas.
+    return raw.map(mapPeriodRow).sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+  }
+
+  // "10menit": semua pembacaan mentah dipakai apa adanya.
   const raw = await fetchRawFilter(stationId, startDate, endDate, companyId);
-
-  const parsed = raw.map((row) => ({
-    row,
-    date: parseFilterDatetime(row.datetime),
-  }));
-
-  const filtered = parsed.filter(({ date }) =>
-    matchesTimeWindow(granularity, date.getHours() * 60 + date.getMinutes()),
-  );
-
-  // Descending juga — sama alasannya seperti "harian" di atas.
-  return filtered
+  return raw
+    .map((row) => ({ row, date: parseFilterDatetime(row.datetime) }))
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map(({ row }) => mapFilterRow(row));
 }
@@ -104,15 +111,16 @@ async function fetchRows(
 /** Implementasi `DownloadApi` — pola sama `air-temperature-client.ts`:
  *  guard company via `stationApi.getStationDetail()` dulu (404-style kalau
  *  stasiun bukan milik company), lalu ambil data mentah dari salah satu
- *  dari DUA endpoint tergantung `granularity` (keduanya dikonfirmasi lewat
+ *  dari TIGA jenis endpoint tergantung `granularity` (dikonfirmasi lewat
  *  tes langsung ke backend asli):
  *  - `"harian"` → `/weathers/daily` (`fetchRawDaily`, 1 baris/hari, sudah
  *    dipakai halaman lain juga).
- *  - `"10menit"/"00-06"/"06-12"/"12-18"/"18-24"` → `/weathers/per_10_minute`
- *    (`fetchRawFilter`, pembacaan mentah ~tiap 10 menit, BARU khusus dipakai
- *    halaman ini) — jendela 6 jam cuma SUBSET jam dari data mentah yang
- *    sama, bukan agregasi ulang.
- *  Kedua endpoint balikin SELURUH rentang tanggal sekaligus (tidak native
+ *  - `"10menit"` → `/weathers/filter` (`fetchRawFilter`, pembacaan mentah
+ *    ~tiap 10 menit, khusus dipakai halaman ini).
+ *  - `"pagi"/"siang"/"malam"` → `/weathers/morning|afternoon|evening`
+ *    (`fetchRawPeriod`, 1 baris AGREGAT per hari per periode — bukan subset
+ *    jam dari data mentah).
+ *  Semua endpoint balikin SELURUH rentang tanggal sekaligus (tidak native
  *  paginated). Kalau caller (`use-download-data.ts`) TIDAK eksplisit minta
  *  `page`/`pageSize`, balikin SEMUA baris apa adanya — pola PERSIS
  *  `stationApi.getStations()` (`station-client.ts`): "jangan diam-diam

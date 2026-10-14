@@ -32,6 +32,14 @@ export function VpdSummaryCard({ stationId }: { stationId?: string }) {
       </Header>
 
       <Row>
+        <Label>Tanggal</Label>
+        {pending ? (
+          <SkeletonBlock $w="64px" $h="14px" />
+        ) : (
+          <Value $muted={!data?.date}>{data?.date || "—"}</Value>
+        )}
+      </Row>
+      <Row>
         <Label>Batas Aman</Label>
         {pending ? (
           <SkeletonBlock $w="48px" $h="14px" />
