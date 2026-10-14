@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import styled from "styled-components";
-import { useStations } from "@/hooks/use-stations";
-import { useForecast } from "@/hooks/use-forecast";
+import { useForecast, useForecastStations } from "@/hooks/use-forecast";
 import { DataState } from "@/components/shared/DataState";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import {
@@ -21,7 +20,7 @@ import { ForecastAlert } from "./ForecastAlert";
 import { DynamicForecastMap } from "./dynamic-forecast-map";
 
 export function ForecastSection() {
-  const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
+  const { data: stationsResponse, isLoading: isLoadingStations } = useForecastStations();
   const stations = useMemo(() => stationsResponse?.data ?? [], [stationsResponse]);
 
   const [selectedStationId, setSelectedStationId] = useState<string>();

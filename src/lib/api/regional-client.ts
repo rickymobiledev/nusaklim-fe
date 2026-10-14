@@ -24,7 +24,7 @@ export const regionalClient: RegionalApi = {
     );
   },
 
-  async getStationsByCompany(companyCode: string): Promise<ApiListResponse<Station>> {
+  async getStationsByCompany(companyCode?: string): Promise<ApiListResponse<Station>> {
     try {
       const res = await createApiClient(companyCode).get<{
         status: boolean;
@@ -42,7 +42,7 @@ export const regionalClient: RegionalApi = {
       // Defense-in-depth: jangan cuma percaya BE sudah memfilter company_code.
       return toList(
         res.data.data
-          .filter((d) => d.company_code === companyCode)
+          .filter((d) => !companyCode || d.company_code === companyCode)
           .map(mapAdminDeviceToStation),
       );
     } catch (err) {

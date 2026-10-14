@@ -15,7 +15,7 @@ import { media } from "@/lib/breakpoints";
 const FORECAST_SKELETON_DAYS = 7;
 
 export function ForecastCard({ stationId }: { stationId?: string }) {
-  const { data, isLoading } = useForecast(stationId);
+  const { data, isLoading } = useForecast(stationId, "primer");
   // Panjang ikut array `forecast` apa adanya — horizon bisa berubah begitu
   // model DL baru selesai, jangan hardcode 7 (pola sama /forecast).
   const days = data?.forecast ?? [];

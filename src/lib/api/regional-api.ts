@@ -9,6 +9,8 @@ export interface RegionalApi {
   /** `GET /companies` murni dari BE (tanpa overlay mock Manajemen
    *  Perusahaan), opsional dibatasi ke satu `companyCode`. */
   getCompanies(companyCode?: string): Promise<ApiListResponse<Company>>;
-  /** `GET /devices?company_code=` — stasiun milik satu regional. */
-  getStationsByCompany(companyCode: string): Promise<ApiListResponse<Station>>;
+  /** `GET /devices?company_code=` — stasiun milik satu regional. Tanpa
+   *  `companyCode` (hanya boleh dari `resolveCompanyId()` untuk role lintas
+   *  company) = semua stasiun tanpa filter. */
+  getStationsByCompany(companyCode?: string): Promise<ApiListResponse<Station>>;
 }
