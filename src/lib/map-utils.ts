@@ -7,6 +7,7 @@ import type {
 } from "@/types/domain";
 import { mapDeviceStatus, STATION_STATUS_BADGE } from "@/lib/status";
 import { RAINFALL_TODAY_LABEL, getRainfallTodayLevel } from "@/lib/rainfall-today-level";
+import { DRY_SPELL_LABEL } from "@/lib/dry-spell-level";
 
 function csvEscape(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -68,14 +69,25 @@ export function buildWaterDeficitCsv(rows: StationWaterDeficit[]): string {
  *  Deret Terpanjang Hari Tidak Hujan, semangatnya sama seperti
  *  `buildWaterDeficitCsv`. */
 export function buildDrySpellCsv(rows: StationDrySpell[]): string {
-  const header = ["Nama", "Durasi Terakhir (Hari)", "Tanggal Mulai", "Tanggal Selesai"];
+  const header = [
+    "Nama",
+    "Kode",
+    "Durasi Terakhir (Hari)",
+    "Tanggal Mulai",
+    "Tanggal Selesai",
+  ];
 
+  // Stasiun tanpa periode kekeringan (array `dry_spell` BE kosong) tidak
+  // punya durasi/tanggal — samakan dengan tabel panel yang menampilkannya
+  // sebagai level "rendah" ("< 10 Hari"), bukan kolom kosong. Suffix " Hari"
+  // dibuang karena sudah ada di judul kolom (pola sama `lib/dry-spell-level.ts`).
   const lines = rows.map((row) =>
     [
       csvEscape(row.nama),
-      row.durasiTerakhir ?? "",
-      row.tanggalMulai ?? "",
-      row.tanggalSelesai ?? "",
+      csvEscape(row.stationId),
+      row.durasiTerakhir ?? DRY_SPELL_LABEL.rendah.replace(" Hari", ""),
+      row.tanggalMulai ?? "-",
+      row.tanggalSelesai ?? "-",
     ].join(","),
   );
 
