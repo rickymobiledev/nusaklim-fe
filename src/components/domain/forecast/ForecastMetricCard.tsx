@@ -52,9 +52,16 @@ const LabelRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Tinggi header = 2 baris label (2 × 16px) supaya nilai antar kartu sejajar
+     di mobile, walau label ada yang 1 baris. */
+  min-height: 32px;
 
   svg {
     flex: none;
+  }
+
+  ${media.desktop} {
+    min-height: 0;
   }
 `;
 
