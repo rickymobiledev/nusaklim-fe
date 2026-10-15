@@ -4,14 +4,14 @@ import styled from "styled-components";
 import { DRY_SPELL_COLOR, DRY_SPELL_LABEL } from "@/lib/dry-spell-level";
 import type { DrySpellLevel } from "@/types/domain";
 
-// 3 chip warna sesuai Figma (<10/>10/>20 hari). Tidak ada level "tidak
+// 3 chip warna (<10/≥10/≥20 hari). Tidak ada level "tidak
 // ada data" terpisah — array `dry_spell` kosong tetap masuk `rendah`
 // (lihat `getDrySpellLevel`), jadi 3 level ini SUDAH cover semua kasus.
 const LEVELS: DrySpellLevel[] = ["rendah", "sedang", "tinggi"];
 
 /** Legend mengambang bawah-tengah peta tab Deret Terpanjang Hari Tidak
  *  Hujan — analog `WaterDeficitLegend.tsx`, cuma kategorinya beda
- *  (<10 Hari/>10 Hari/>20 Hari). Presentational murni, tidak butuh
+ *  (<10 Hari/≥10 Hari/≥20 Hari). Presentational murni, tidak butuh
  *  `useMap()`, dirender di luar `MapContainer`. */
 export function DrySpellLegend() {
   return (

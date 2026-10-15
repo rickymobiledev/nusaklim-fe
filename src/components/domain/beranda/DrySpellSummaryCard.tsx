@@ -25,7 +25,7 @@ export function DrySpellSummaryCard({ stationId }: { stationId?: string }) {
   const message = isError ? getErrorMessage(error) : (data?.insight ?? "");
 
   // TODO: SEMENTARA — menunggu rules warna baru dari peneliti. Threshold
-  // > 20 hari (getDrySpellLevel "tinggi") & warna merah belum final.
+  // ≥ 20 hari (getDrySpellLevel "tinggi") & warna merah belum final.
   const days = parseInt(data?.total_dry_spell ?? "", 10);
   const isHigh = getDrySpellLevel(Number.isNaN(days) ? null : days) === "tinggi";
 

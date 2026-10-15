@@ -1,6 +1,6 @@
 import type { DrySpellLevel, DrySpellReport } from "@/types/domain";
 
-/** Threshold <10/>10/>20 hari ikut label yang ditampilkan di Figma tab
+/** Threshold <10/≥10/≥20 hari (batas 10 & 20 masuk level atasnya) ikut label yang ditampilkan di Figma tab
  *  Peta > Deret Terpanjang Hari Tidak Hujan. BELUM ada konfirmasi resmi
  *  dari BE/Data Analyst — threshold sementara, status "belum final" sama
  *  seperti `getWaterDeficitLevel` di `water-deficit-level.ts`.
@@ -12,8 +12,8 @@ import type { DrySpellLevel, DrySpellReport } from "@/types/domain";
  *  "tidak ada data". */
 export function getDrySpellLevel(durasiTerakhir: number | null): DrySpellLevel {
   if (durasiTerakhir === null) return "rendah";
-  if (durasiTerakhir > 20) return "tinggi";
-  if (durasiTerakhir > 10) return "sedang";
+  if (durasiTerakhir >= 20) return "tinggi";
+  if (durasiTerakhir >= 10) return "sedang";
   return "rendah";
 }
 
@@ -28,8 +28,8 @@ export const DRY_SPELL_COLOR: Record<DrySpellLevel, string> = {
 
 export const DRY_SPELL_LABEL: Record<DrySpellLevel, string> = {
   rendah: "< 10 Hari",
-  sedang: "> 10 Hari",
-  tinggi: "> 20 Hari",
+  sedang: "≥ 10 Hari",
+  tinggi: "≥ 20 Hari",
 };
 
 /** Kalimat banner kartu "Deret Hari Terpanjang Tidak Hujan" di sidebar
@@ -41,7 +41,7 @@ export const DRY_SPELL_MESSAGE: Record<DrySpellLevel, string> = {
   sedang:
     "Hari Tidak Hujan Panjang: Indeks stress tanaman di atas batas aman selama 10 hari berturut-turut",
   tinggi:
-    "Deret hari tidak hujan lebih dari 20 hari: tanaman sawit anda akan mengalami cekaman kekeringan.",
+    "Deret hari tidak hujan 20 hari atau lebih: tanaman sawit anda akan mengalami cekaman kekeringan.",
 };
 
 /** Periode dengan `tanggalSelesai` PALING BARU (bukan durasi terbesar) —
@@ -57,7 +57,7 @@ export function pickLatestDrySpellReport(rows: DrySpellReport[]): DrySpellReport
 
 /** CSV halaman Monitoring > Hari Tanpa Hujan — satu baris per periode
  *  (urut durasi terpanjang, sama dengan `DrySpellList`). Tanggal ISO
- *  `yyyy-MM-dd`; "Keterangan" = label level tanpa kata "Hari" (mis. "> 10"). */
+ *  `yyyy-MM-dd`; "Keterangan" = label level tanpa kata "Hari" (mis. "≥ 10"). */
 export function buildDrySpellCsv(rows: DrySpellReport[]): string {
   const header = [
     "Stasiun",

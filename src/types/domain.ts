@@ -342,7 +342,7 @@ export interface StationWaterDeficit {
 
 /** Level kategori durasi deret hari tidak hujan untuk warna marker/legend
  *  Peta > Deret Terpanjang Hari Tidak Hujan — bukan field dari BE,
- *  threshold ikut label yang ditampilkan di Figma (<10/>10/>20 hari).
+ *  threshold ikut label yang ditampilkan di Figma (<10/≥10/≥20 hari).
  *  TIDAK ADA level "tidak ada data" terpisah — array `dry_spell` kosong
  *  di-treat SAMA seperti `rendah` (dikonfirmasi dari dashboard Nusaklim
  *  produksi/ground truth: stasiun tanpa periode tercatat ditampilkan
