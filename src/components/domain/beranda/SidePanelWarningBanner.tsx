@@ -30,8 +30,8 @@ const Banner = styled.div`
   align-self: stretch;
   gap: 8px;
   padding: 4px 8px;
-  background: #fac5c3;
-  border: 1px solid #ee443f;
+  background: #eff5ff;
+  border: 1px solid #b0deff;
   border-radius: 8px;
 `;
 
