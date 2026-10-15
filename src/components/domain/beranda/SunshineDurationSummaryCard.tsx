@@ -3,7 +3,6 @@
 import Image from "next/image";
 import styled from "styled-components";
 import { useDashboardSunshineDuration } from "@/hooks/use-dashboard-sidebar";
-import { SidePanelSyncAlert } from "@/components/domain/beranda/SidePanelSyncAlert";
 import { SidePanelWarningBanner } from "@/components/domain/beranda/SidePanelWarningBanner";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { getErrorMessage } from "@/lib/api/error-messages";
@@ -58,7 +57,6 @@ export function SunshineDurationSummaryCard({ stationId }: { stationId?: string 
       </Row>
 
       {!pending && message ? <SidePanelWarningBanner message={message} /> : null}
-      {!pending ? <SidePanelSyncAlert title={data?.title} /> : null}
     </Card>
   );
 }
