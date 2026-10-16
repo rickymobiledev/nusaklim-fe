@@ -57,9 +57,11 @@ export function DownloadDataFilters({
           onValueChange={onCompanyCodeChange}
           disabled={isLoadingCompanies}
         >
-          <RegionalTrigger aria-label="Regional">
+          <RegionalTrigger aria-label="Perusahaan">
             <SelectValue
-              placeholder={isLoadingCompanies ? "Memuat regional..." : "Pilih Regional"}
+              placeholder={
+                isLoadingCompanies ? "Memuat perusahaan..." : "Pilih Perusahaan"
+              }
             />
           </RegionalTrigger>
           <SelectContent>
@@ -77,7 +79,8 @@ export function DownloadDataFilters({
           stations={stations}
           value={stationId}
           onChange={onStationIdChange}
-          isLoading={isLoadingStations || !companyCode}
+          isLoading={isLoadingStations}
+          disabledText={!companyCode ? "Pilih Perusahaan Terlebih Dahulu" : undefined}
         />
 
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />

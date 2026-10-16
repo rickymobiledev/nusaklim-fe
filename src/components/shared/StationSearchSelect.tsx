@@ -20,6 +20,7 @@ export function StationSearchSelect({
   variant = "glass",
   icon,
   desktopWidth,
+  disabledText,
 }: {
   stations: Station[];
   value?: string;
@@ -30,6 +31,9 @@ export function StationSearchSelect({
   icon?: ReactNode;
   /** Lebar trigger (px) di desktop untuk varian "outlined"; default 291. */
   desktopWidth?: number;
+  /** Kalau diisi, trigger dinonaktifkan dan teks ini tampil sebagai placeholder
+   *  (mis. "Pilih Perusahaan Terlebih Dahulu"); menang atas `isLoading`. */
+  disabledText?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,14 +64,16 @@ export function StationSearchSelect({
         <Trigger
           id={id}
           type="button"
-          disabled={isLoading}
+          disabled={isLoading || !!disabledText}
           $variant={variant}
           $desktopWidth={desktopWidth}
         >
           <TriggerContent>
             {icon}
             <TriggerText $placeholder={!selected}>
-              {selected?.nama ?? (isLoading ? "Memuat stasiun..." : "Pilih Stasiun")}
+              {selected?.nama ??
+                disabledText ??
+                (isLoading ? "Memuat stasiun..." : "Pilih Stasiun")}
             </TriggerText>
           </TriggerContent>
           <ChevronDown size={20} color={variant === "outlined" ? "#8b9c90" : "#667a6c"} />
