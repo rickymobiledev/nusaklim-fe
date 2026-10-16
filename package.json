@@ -51,6 +51,7 @@
     "styled-components": "^6.5.3",
     "tailwind-merge": "^3.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "write-excel-file": "^4.1.1",
     "zod": "^4.4.3",
     "zustand": "^5.0.15"
   },

@@ -1,7 +1,9 @@
 "use client";
 
 import styled from "styled-components";
-import { Printer, Maximize, Minimize, Download, ImageDown } from "lucide-react";
+import { Printer, Maximize, Minimize } from "lucide-react";
+import { DownloadFormatMenu } from "@/components/shared/DownloadFormatMenu";
+import { ALL_FORMATS, type ExportFormat } from "@/lib/export";
 import { MAP_EXPORT_IGNORE_ATTR } from "@/lib/map-image";
 
 export function MapToolbar({
@@ -9,13 +11,11 @@ export function MapToolbar({
   onPrint,
   onToggleFullscreen,
   onDownload,
-  onDownloadImage,
 }: {
   isFullscreen: boolean;
   onPrint: () => void;
   onToggleFullscreen: () => void;
-  onDownload: () => void;
-  onDownloadImage: () => void;
+  onDownload: (format: ExportFormat) => void;
 }) {
   return (
     <Row {...{ [MAP_EXPORT_IGNORE_ATTR]: "" }}>
@@ -33,14 +33,12 @@ export function MapToolbar({
           <Maximize size={18} strokeWidth={1.5} color="#6d717f" />
         )}
       </IconButton>
-      <DownloadButton type="button" onClick={onDownload}>
-        <Download size={18} strokeWidth={1.5} />
-        Unduh
-      </DownloadButton>
-      <DownloadButton type="button" onClick={onDownloadImage}>
-        <ImageDown size={18} strokeWidth={1.5} />
-        Gambar
-      </DownloadButton>
+      <DownloadFormatMenu
+        variant="toolbar"
+        label="Unduh"
+        formats={ALL_FORMATS}
+        onSelect={onDownload}
+      />
     </Row>
   );
 }
@@ -70,27 +68,5 @@ const IconButton = styled.button`
 
   &:hover {
     background: rgba(255, 255, 255, 0.85);
-  }
-`;
-
-const DownloadButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 32px;
-  padding: 8px;
-  background: #175fe2;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #ffffff;
-  font-family: var(--font-body), sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 16px;
-
-  &:hover {
-    background: #124bb8;
   }
 `;

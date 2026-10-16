@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
@@ -8,7 +8,12 @@ import { useStations } from "@/hooks/use-stations";
 import { useVPD } from "@/hooks/use-vpd";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { Info } from "lucide-react";
-import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { buildVpdCsv, getBatasAmanKpa } from "@/lib/vpd-summary";
 import { VpdFilters } from "./VpdFilters";
 import { VpdChart } from "./VpdChart";
@@ -17,6 +22,7 @@ import { VpdSummary } from "./VpdSummary";
 const DEFAULT_RANGE_DAYS = 10;
 
 export function VpdSection() {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [stationId, setStationId] = useState<string>();
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     const to = new Date();
@@ -38,11 +44,17 @@ export function VpdSection() {
   const rows = data ?? [];
   const visibleRows = selectedStationId ? rows : [];
 
-  function handleDownload() {
+  function handleDownload(exportFormat: ExportFormat) {
     if (visibleRows.length === 0) return;
     const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
     const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
-    downloadCsvFile(`vpd_${from}_${to}.csv`, buildVpdCsv(visibleRows));
+    const basename = `vpd_${from}_${to}`;
+    if (isImageFormat(exportFormat)) {
+      if (chartRef.current)
+        void downloadElementAsImage(chartRef.current, basename, exportFormat);
+      return;
+    }
+    void downloadTabular(basename, buildVpdCsv(visibleRows), exportFormat);
   }
 
   return (
@@ -66,12 +78,14 @@ export function VpdSection() {
         downloadDisabled={rows.length === 0}
       />
 
-      <VpdChart
-        data={visibleRows}
-        isLoading={isLoading || isLoadingStations}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <VpdChart
+          data={visibleRows}
+          isLoading={isLoading || isLoadingStations}
+          isError={isError}
+          error={error}
+        />
+      </div>
 
       <VpdSummary data={visibleRows} />
 

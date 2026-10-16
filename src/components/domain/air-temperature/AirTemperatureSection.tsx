@@ -2,18 +2,25 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { format, subDays } from "date-fns";
+import { format as formatDate, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { useStations } from "@/hooks/use-stations";
 import { useAirTemperatureChart } from "@/hooks/use-air-temperature-chart";
 import { getStationColor } from "@/lib/station-colors";
-import { buildTemperatureCsv, downloadCsvFile } from "@/lib/air-temperature-chart-utils";
+import { buildTemperatureCsv } from "@/lib/air-temperature-chart-utils";
 import { AirTemperatureFilters } from "./AirTemperatureFilters";
 import { AirTemperatureChart } from "./AirTemperatureChart";
 
 const DEFAULT_RANGE_DAYS = 21;
 
 export function AirTemperatureSection() {
+  const chartRef = useRef<HTMLDivElement>(null);
   const { data: stationsResponse, isLoading: isLoadingStations } = useStations();
   const stations = useMemo(() => stationsResponse?.data ?? [], [stationsResponse]);
 
@@ -51,12 +58,18 @@ export function AirTemperatureSection() {
     color: getStationColor(index),
   }));
 
-  function handleDownloadCsv(stationIds: string[]) {
-    const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "mulai";
-    const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "akhir";
+  function handleDownload(stationIds: string[], format: ExportFormat) {
+    const from = dateRange.from ? formatDate(dateRange.from, "yyyy-MM-dd") : "mulai";
+    const to = dateRange.to ? formatDate(dateRange.to, "yyyy-MM-dd") : "akhir";
+    const basename = `temperatur-udara_${from}_${to}`;
+    if (isImageFormat(format)) {
+      if (chartRef.current)
+        void downloadElementAsImage(chartRef.current, basename, format);
+      return;
+    }
     const selected = coloredSeries.filter((s) => stationIds.includes(s.stationId));
     const csv = buildTemperatureCsv(selected);
-    downloadCsvFile(`temperatur-udara_${from}_${to}.csv`, csv);
+    void downloadTabular(basename, csv, format);
   }
 
   return (
@@ -68,7 +81,7 @@ export function AirTemperatureSection() {
         onSelectedIdsChange={setSelectedIds}
         dateRange={dateRange}
         onDateRangeChange={(range) => range && setDateRange(range)}
-        onDownload={handleDownloadCsv}
+        onDownload={handleDownload}
         downloadDisabled={coloredSeries.length === 0}
       />
 

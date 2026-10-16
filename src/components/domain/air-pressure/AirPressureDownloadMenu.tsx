@@ -5,6 +5,8 @@ import styled from "styled-components";
 import { Download } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ExportFormatPicker } from "@/components/shared/ExportFormatPicker";
+import { ALL_FORMATS, isImageFormat, type ExportFormat } from "@/lib/export";
 import type { Station } from "@/types/domain";
 
 export function AirPressureDownloadMenu({
@@ -13,11 +15,14 @@ export function AirPressureDownloadMenu({
   disabled,
 }: {
   stations: Station[];
-  onDownload: (stationIds: string[]) => void;
+  onDownload: (stationIds: string[], format: ExportFormat) => void;
   disabled: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const [format, setFormat] = useState<ExportFormat>("csv");
+  // PNG/SVG mengekspor grafik yang sedang tampil — pilihan stasiun tidak relevan.
+  const imageMode = isImageFormat(format);
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
@@ -37,7 +42,7 @@ export function AirPressureDownloadMenu({
   }
 
   function handleSubmit() {
-    onDownload(checkedIds);
+    onDownload(checkedIds, format);
     setOpen(false);
   }
 
@@ -50,38 +55,48 @@ export function AirPressureDownloadMenu({
         </Trigger>
       </PopoverTrigger>
       <DownloadMenuContent align="end">
-        <SelectAllSection>
-          <CheckboxRow onClick={toggleAll}>
-            <Checkbox
-              checked={allChecked}
-              onCheckedChange={toggleAll}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <CheckboxLabel>Pilih Semua</CheckboxLabel>
-          </CheckboxRow>
-        </SelectAllSection>
+        <FormatSection>
+          <ExportFormatPicker formats={ALL_FORMATS} value={format} onChange={setFormat} />
+        </FormatSection>
 
         <Divider />
 
-        <StationListSection>
-          {stations.map((s) => (
-            <CheckboxRow key={s.id} onClick={() => toggleStation(s.id)}>
-              <Checkbox
-                checked={checkedIds.includes(s.id)}
-                onCheckedChange={() => toggleStation(s.id)}
-                onClick={(e) => e.stopPropagation()}
-              />
-              <CheckboxLabel>{s.nama}</CheckboxLabel>
-            </CheckboxRow>
-          ))}
-        </StationListSection>
+        {!imageMode && (
+          <>
+            <SelectAllSection>
+              <CheckboxRow onClick={toggleAll}>
+                <Checkbox
+                  checked={allChecked}
+                  onCheckedChange={toggleAll}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <CheckboxLabel>Pilih Semua</CheckboxLabel>
+              </CheckboxRow>
+            </SelectAllSection>
 
-        <Divider />
+            <Divider />
+
+            <StationListSection>
+              {stations.map((s) => (
+                <CheckboxRow key={s.id} onClick={() => toggleStation(s.id)}>
+                  <Checkbox
+                    checked={checkedIds.includes(s.id)}
+                    onCheckedChange={() => toggleStation(s.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <CheckboxLabel>{s.nama}</CheckboxLabel>
+                </CheckboxRow>
+              ))}
+            </StationListSection>
+
+            <Divider />
+          </>
+        )}
 
         <SubmitSection>
           <SubmitButton
             type="button"
-            disabled={checkedIds.length === 0}
+            disabled={!imageMode && checkedIds.length === 0}
             onClick={handleSubmit}
           >
             Unduh Data
@@ -131,6 +146,10 @@ const DownloadMenuContent = styled(PopoverContent)`
   border: none;
   border-radius: 16px;
   box-shadow: 0px 4px 26px rgba(0, 0, 0, 0.25);
+`;
+
+const FormatSection = styled.div`
+  padding: 16px;
 `;
 
 const SelectAllSection = styled.div`

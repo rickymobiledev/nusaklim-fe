@@ -6,7 +6,7 @@ import { useStations } from "@/hooks/use-stations";
 import { useWaterBalance } from "@/hooks/use-water-balance";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { buildWaterBalanceCsv } from "@/lib/water-balance-chart-utils";
-import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import { downloadTabular, type TabularFormat } from "@/lib/export";
 import { WaterBalanceFilters } from "./WaterBalanceFilters";
 import { WaterBalanceTable } from "./WaterBalanceTable";
 
@@ -30,11 +30,12 @@ export function WaterBalanceSection() {
   const series = data?.[0];
   const stationCode = stations.find((s) => s.id === selectedStationId)?.companyCode ?? "";
 
-  function handleDownload() {
+  function handleDownload(exportFormat: TabularFormat) {
     if (!series) return;
-    downloadCsvFile(
-      `keseimbangan-air_${year}.csv`,
+    void downloadTabular(
+      `keseimbangan-air_${year}`,
       buildWaterBalanceCsv(series, stationCode),
+      exportFormat,
     );
   }
 

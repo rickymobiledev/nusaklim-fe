@@ -21,8 +21,12 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildStationsCsv } from "@/lib/map-utils";
 import { getStationDotIcon } from "@/lib/map-marker-icon";
-import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
-import { downloadElementAsPng } from "@/lib/map-image";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapLegend } from "./MapLegend";
@@ -150,20 +154,18 @@ export function StationMap({
 
   const handlePrint = useCallback(() => window.print(), []);
 
-  const handleDownload = useCallback(() => {
-    downloadCsvFile(
-      `daftar-stasiun_${format(new Date(), "yyyy-MM-dd")}.csv`,
-      buildStationsCsv(stations),
-    );
-  }, [stations]);
-
-  const handleDownloadImage = useCallback(() => {
-    if (!wrapperRef.current) return;
-    void downloadElementAsPng(
-      wrapperRef.current,
-      `status-stasiun_${format(new Date(), "yyyy-MM-dd")}.png`,
-    );
-  }, []);
+  const handleDownload = useCallback(
+    (exportFormat: ExportFormat) => {
+      const basename = `daftar-stasiun_${format(new Date(), "yyyy-MM-dd")}`;
+      if (isImageFormat(exportFormat)) {
+        if (wrapperRef.current)
+          void downloadElementAsImage(wrapperRef.current, basename, exportFormat);
+        return;
+      }
+      void downloadTabular(basename, buildStationsCsv(stations), exportFormat);
+    },
+    [stations],
+  );
 
   return (
     <Wrapper ref={wrapperRef} $fullscreen={isFullscreen}>
@@ -172,7 +174,6 @@ export function StationMap({
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
-        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

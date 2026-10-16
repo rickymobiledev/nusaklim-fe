@@ -6,7 +6,7 @@ import { format, startOfYear } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { useStations } from "@/hooks/use-stations";
 import { useDrySpell } from "@/hooks/use-dry-spell";
-import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import { downloadTabular, type TabularFormat } from "@/lib/export";
 import { buildDrySpellCsv } from "@/lib/dry-spell-level";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { DrySpellFilters } from "./DrySpellFilters";
@@ -36,11 +36,15 @@ export function DrySpellSection() {
   const rows = data ?? [];
   const visibleRows = selectedStationId ? rows : [];
 
-  function handleDownload() {
+  function handleDownload(exportFormat: TabularFormat) {
     if (visibleRows.length === 0) return;
     const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
     const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
-    downloadCsvFile(`hari-tanpa-hujan_${from}_${to}.csv`, buildDrySpellCsv(visibleRows));
+    void downloadTabular(
+      `hari-tanpa-hujan_${from}_${to}`,
+      buildDrySpellCsv(visibleRows),
+      exportFormat,
+    );
   }
 
   return (

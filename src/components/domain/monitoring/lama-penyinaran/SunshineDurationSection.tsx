@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
@@ -9,7 +9,12 @@ import { useSunshineDuration } from "@/hooks/use-sunshine-duration";
 import { MonitoringDomainNav } from "@/components/domain/monitoring/MonitoringDomainNav";
 import { SunshineDurationFilters } from "./SunshineDurationFilters";
 import { Info } from "lucide-react";
-import { downloadCsvFile } from "@/lib/download-data-csv-utils";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import {
   buildSunshineDurationCsv,
   getBatasBawahJam,
@@ -20,6 +25,7 @@ import { SunshineDurationSummary } from "./SunshineDurationSummary";
 const DEFAULT_RANGE_DAYS = 7;
 
 export function SunshineDurationSection() {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [stationId, setStationId] = useState<string>();
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     const to = new Date();
@@ -42,14 +48,17 @@ export function SunshineDurationSection() {
   const rows = data ?? [];
   const visibleRows = selectedStationId ? rows : [];
 
-  function handleDownload() {
+  function handleDownload(exportFormat: ExportFormat) {
     if (visibleRows.length === 0) return;
     const from = dateRange.from ? format(dateRange.from, "yyyy-MM-dd") : "";
     const to = dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : "";
-    downloadCsvFile(
-      `lama-penyinaran_${from}_${to}.csv`,
-      buildSunshineDurationCsv(visibleRows),
-    );
+    const basename = `lama-penyinaran_${from}_${to}`;
+    if (isImageFormat(exportFormat)) {
+      if (chartRef.current)
+        void downloadElementAsImage(chartRef.current, basename, exportFormat);
+      return;
+    }
+    void downloadTabular(basename, buildSunshineDurationCsv(visibleRows), exportFormat);
   }
 
   return (
@@ -73,12 +82,14 @@ export function SunshineDurationSection() {
         downloadDisabled={rows.length === 0}
       />
 
-      <SunshineDurationChart
-        data={visibleRows}
-        isLoading={isLoading || isLoadingStations}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <SunshineDurationChart
+          data={visibleRows}
+          isLoading={isLoading || isLoadingStations}
+          isError={isError}
+          error={error}
+        />
+      </div>
 
       <SunshineDurationSummary data={visibleRows} />
 

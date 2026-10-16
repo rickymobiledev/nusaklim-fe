@@ -2,7 +2,8 @@
 
 import styled from "styled-components";
 import type { DateRange } from "react-day-picker";
-import { Download } from "lucide-react";
+import { DownloadFormatMenu } from "@/components/shared/DownloadFormatMenu";
+import { TABULAR_FORMATS, type TabularFormat } from "@/lib/export";
 import {
   Select,
   SelectContent,
@@ -45,7 +46,7 @@ export function DownloadDataFilters({
   onDateRangeChange: (range: DateRange | undefined) => void;
   granularity: DataGranularity;
   onGranularityChange: (granularity: DataGranularity) => void;
-  onDownload: () => void;
+  onDownload: (format: TabularFormat) => void;
   downloadDisabled: boolean;
 }) {
   return (
@@ -98,10 +99,11 @@ export function DownloadDataFilters({
         </Select>
       </Filters>
 
-      <DownloadButton type="button" onClick={onDownload} disabled={downloadDisabled}>
-        <Download size={24} />
-        Unduh Data
-      </DownloadButton>
+      <DownloadFormatMenu
+        formats={TABULAR_FORMATS}
+        onSelect={onDownload}
+        disabled={downloadDisabled}
+      />
     </Row>
   );
 }
@@ -173,39 +175,5 @@ const GranularityTrigger = styled(SelectTrigger)`
 
   & svg {
     color: #8b9c90;
-  }
-`;
-
-const DownloadButton = styled.button`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 12px 16px;
-  gap: 8px;
-
-  color: #175fe2;
-  background: #ffffff;
-  border: 1.5px solid #175fe2;
-  border-radius: 12px;
-
-  font-family: var(--font-body), sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-
-  ${media.desktop} {
-    align-self: auto;
-  }
-
-  &:hover {
-    background: #eff5ff;
-  }
-
-  &:disabled {
-    pointer-events: none;
-    opacity: 0.5;
   }
 `;

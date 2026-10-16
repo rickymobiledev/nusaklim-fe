@@ -7,6 +7,7 @@ import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
 import { RelativeHumidityDownloadMenu } from "./RelativeHumidityDownloadMenu";
+import type { ExportFormat } from "@/lib/export";
 
 export function RelativeHumidityFilters({
   stations,
@@ -24,7 +25,7 @@ export function RelativeHumidityFilters({
   onSelectedIdsChange: (ids: string[]) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onDownload: (stationIds: string[]) => void;
+  onDownload: (stationIds: string[], format: ExportFormat) => void;
   downloadDisabled: boolean;
 }) {
   const selectedStations = stations.filter((s) => selectedIds.includes(s.id));

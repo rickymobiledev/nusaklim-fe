@@ -14,7 +14,8 @@ import {
   DownloadDataPagination,
 } from "./DownloadDataTable";
 import { DataState } from "@/components/shared/DataState";
-import { buildDownloadDataCsv, downloadCsvFile } from "@/lib/download-data-csv-utils";
+import { buildDownloadDataCsv } from "@/lib/download-data-csv-utils";
+import { downloadTabular, type TabularFormat } from "@/lib/export";
 import type { DataGranularity, DownloadDataRow } from "@/types/domain";
 import { DownloadDataFilters } from "./DownloadDataFilters";
 
@@ -158,13 +159,14 @@ export function DownloadDataSection() {
     setPage(1);
   }
 
-  function handleDownload() {
+  function handleDownload(exportFormat: TabularFormat) {
     // `fullRows` SUDAH seluruh baris hasil filter (bukan cuma halaman
     // aktif) — tidak perlu fetch lagi, tinggal build CSV langsung.
     if (fullRows.length === 0) return;
-    downloadCsvFile(
-      `unduh-data_${dateFrom}_${dateTo}.csv`,
+    void downloadTabular(
+      `unduh-data_${dateFrom}_${dateTo}`,
       buildDownloadDataCsv(fullRows),
+      exportFormat,
     );
   }
 

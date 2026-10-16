@@ -21,8 +21,12 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildDrySpellCsv } from "@/lib/map-utils";
 import { getStationDotIcon } from "@/lib/map-marker-icon";
-import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
-import { downloadElementAsPng } from "@/lib/map-image";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { DrySpellLegend } from "./DrySpellLegend";
@@ -106,20 +110,18 @@ export function DrySpellMap({ rows }: { rows: StationDrySpell[] }) {
 
   const handlePrint = useCallback(() => window.print(), []);
 
-  const handleDownload = useCallback(() => {
-    downloadCsvFile(
-      `deret-hari-tidak-hujan_${format(new Date(), "yyyy-MM-dd")}.csv`,
-      buildDrySpellCsv(rows),
-    );
-  }, [rows]);
-
-  const handleDownloadImage = useCallback(() => {
-    if (!wrapperRef.current) return;
-    void downloadElementAsPng(
-      wrapperRef.current,
-      `deret-hari-tidak-hujan_${format(new Date(), "yyyy-MM-dd")}.png`,
-    );
-  }, []);
+  const handleDownload = useCallback(
+    (exportFormat: ExportFormat) => {
+      const basename = `deret-hari-tidak-hujan_${format(new Date(), "yyyy-MM-dd")}`;
+      if (isImageFormat(exportFormat)) {
+        if (wrapperRef.current)
+          void downloadElementAsImage(wrapperRef.current, basename, exportFormat);
+        return;
+      }
+      void downloadTabular(basename, buildDrySpellCsv(rows), exportFormat);
+    },
+    [rows],
+  );
 
   const maxDurasi = useMemo(() => {
     const values = rows
@@ -135,7 +137,6 @@ export function DrySpellMap({ rows }: { rows: StationDrySpell[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
-        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

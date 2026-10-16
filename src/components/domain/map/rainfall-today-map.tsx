@@ -18,8 +18,12 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildRainfallTodayCsv } from "@/lib/map-utils";
 import { getStationDotIcon } from "@/lib/map-marker-icon";
-import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
-import { downloadElementAsPng } from "@/lib/map-image";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { RainfallTodayLegend } from "./RainfallTodayLegend";
@@ -88,20 +92,18 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
 
   const handlePrint = useCallback(() => window.print(), []);
 
-  const handleDownload = useCallback(() => {
-    downloadCsvFile(
-      `curah-hujan-hari-ini_${format(new Date(), "yyyy-MM-dd")}.csv`,
-      buildRainfallTodayCsv(rows),
-    );
-  }, [rows]);
-
-  const handleDownloadImage = useCallback(() => {
-    if (!wrapperRef.current) return;
-    void downloadElementAsPng(
-      wrapperRef.current,
-      `curah-hujan-hari-ini_${format(new Date(), "yyyy-MM-dd")}.png`,
-    );
-  }, []);
+  const handleDownload = useCallback(
+    (exportFormat: ExportFormat) => {
+      const basename = `curah-hujan-hari-ini_${format(new Date(), "yyyy-MM-dd")}`;
+      if (isImageFormat(exportFormat)) {
+        if (wrapperRef.current)
+          void downloadElementAsImage(wrapperRef.current, basename, exportFormat);
+        return;
+      }
+      void downloadTabular(basename, buildRainfallTodayCsv(rows), exportFormat);
+    },
+    [rows],
+  );
 
   return (
     <Wrapper ref={wrapperRef} $fullscreen={isFullscreen}>
@@ -110,7 +112,6 @@ export function RainfallTodayMap({ rows }: { rows: StationRainfallToday[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
-        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

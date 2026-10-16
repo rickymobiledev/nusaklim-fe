@@ -17,8 +17,12 @@ import {
 } from "@/lib/indonesia-provinces";
 import { buildWaterDeficitCsv } from "@/lib/map-utils";
 import { getStationDotIcon } from "@/lib/map-marker-icon";
-import { downloadCsvFile } from "@/lib/air-pressure-chart-utils";
-import { downloadElementAsPng } from "@/lib/map-image";
+import {
+  downloadElementAsImage,
+  downloadTabular,
+  isImageFormat,
+  type ExportFormat,
+} from "@/lib/export";
 import { MapToolbar } from "./MapToolbar";
 import { MapZoomControls } from "./MapZoomControls";
 import { WaterDeficitLegend } from "./WaterDeficitLegend";
@@ -102,20 +106,18 @@ export function WaterDeficitMap({ rows }: { rows: StationWaterDeficit[] }) {
 
   const handlePrint = useCallback(() => window.print(), []);
 
-  const handleDownload = useCallback(() => {
-    downloadCsvFile(
-      `defisit-air_${format(new Date(), "yyyy-MM-dd")}.csv`,
-      buildWaterDeficitCsv(rows),
-    );
-  }, [rows]);
-
-  const handleDownloadImage = useCallback(() => {
-    if (!wrapperRef.current) return;
-    void downloadElementAsPng(
-      wrapperRef.current,
-      `defisit-air_${format(new Date(), "yyyy-MM-dd")}.png`,
-    );
-  }, []);
+  const handleDownload = useCallback(
+    (exportFormat: ExportFormat) => {
+      const basename = `defisit-air_${format(new Date(), "yyyy-MM-dd")}`;
+      if (isImageFormat(exportFormat)) {
+        if (wrapperRef.current)
+          void downloadElementAsImage(wrapperRef.current, basename, exportFormat);
+        return;
+      }
+      void downloadTabular(basename, buildWaterDeficitCsv(rows), exportFormat);
+    },
+    [rows],
+  );
 
   const maxDefisitAir = useMemo(() => {
     const values = rows.map((r) => r.defisitAir).filter((v): v is number => v !== null);
@@ -129,7 +131,6 @@ export function WaterDeficitMap({ rows }: { rows: StationWaterDeficit[] }) {
         onPrint={handlePrint}
         onToggleFullscreen={handleToggleFullscreen}
         onDownload={handleDownload}
-        onDownloadImage={handleDownloadImage}
       />
 
       <MapContainer

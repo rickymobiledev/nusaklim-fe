@@ -2,7 +2,8 @@
 
 import type { DateRange } from "react-day-picker";
 import styled from "styled-components";
-import { Download } from "lucide-react";
+import { DownloadFormatMenu } from "@/components/shared/DownloadFormatMenu";
+import { TABULAR_FORMATS, type TabularFormat } from "@/lib/export";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
@@ -24,7 +25,7 @@ export function DrySpellFilters({
   onStationIdChange: (stationId: string) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onDownload: () => void;
+  onDownload: (format: TabularFormat) => void;
   downloadDisabled: boolean;
 }) {
   return (
@@ -41,10 +42,11 @@ export function DrySpellFilters({
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
 
-      <DownloadButton type="button" onClick={onDownload} disabled={downloadDisabled}>
-        <Download size={20} />
-        Unduh Data
-      </DownloadButton>
+      <DownloadFormatMenu
+        formats={TABULAR_FORMATS}
+        onSelect={onDownload}
+        disabled={downloadDisabled}
+      />
     </Row>
   );
 }
@@ -74,33 +76,5 @@ const Filters = styled.div`
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
-  }
-`;
-
-const DownloadButton = styled.button`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 16px;
-  gap: 8px;
-
-  color: #175fe2;
-  background: #ffffff;
-  border: 1.5px solid #175fe2;
-  border-radius: 12px;
-
-  font-family: var(--font-body), sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-
-  &:hover {
-    background: #eff5ff;
-  }
-
-  &:disabled {
-    pointer-events: none;
-    opacity: 0.5;
   }
 `;

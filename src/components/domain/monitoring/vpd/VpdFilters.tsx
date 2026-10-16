@@ -2,7 +2,8 @@
 
 import type { DateRange } from "react-day-picker";
 import styled from "styled-components";
-import { Download } from "lucide-react";
+import { DownloadFormatMenu } from "@/components/shared/DownloadFormatMenu";
+import { ALL_FORMATS, type ExportFormat } from "@/lib/export";
 import { DateRangePicker } from "@/components/shared/DateRangePicker";
 import { StationSearchSelect } from "@/components/shared/StationSearchSelect";
 import { media } from "@/lib/breakpoints";
@@ -24,7 +25,7 @@ export function VpdFilters({
   onStationIdChange: (stationId: string) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onDownload: () => void;
+  onDownload: (format: ExportFormat) => void;
   downloadDisabled: boolean;
 }) {
   return (
@@ -41,10 +42,11 @@ export function VpdFilters({
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
       </Filters>
 
-      <DownloadButton type="button" onClick={onDownload} disabled={downloadDisabled}>
-        <Download size={20} />
-        Unduh Data
-      </DownloadButton>
+      <DownloadFormatMenu
+        formats={ALL_FORMATS}
+        onSelect={onDownload}
+        disabled={downloadDisabled}
+      />
     </Row>
   );
 }
@@ -72,35 +74,5 @@ const Filters = styled.div`
   ${media.desktop} {
     flex-direction: row;
     align-items: center;
-  }
-`;
-
-const DownloadButton = styled.button`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  height: 40px;
-  padding: 12px 16px;
-  gap: 8px;
-
-  color: #175fe2;
-  background: #ffffff;
-  border: 1.5px solid #175fe2;
-  border-radius: 12px;
-
-  font-family: var(--font-body), sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-
-  &:hover {
-    background: #eff5ff;
-  }
-
-  &:disabled {
-    pointer-events: none;
-    opacity: 0.5;
   }
 `;
