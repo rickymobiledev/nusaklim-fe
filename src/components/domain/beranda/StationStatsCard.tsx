@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import styled from "styled-components";
+import Link from "next/link";
+import styled, { css } from "styled-components";
 import { SkeletonBlock } from "@/components/shared/SkeletonBlock";
 import { useStations } from "@/hooks/use-stations";
 import { media } from "@/lib/breakpoints";
@@ -40,7 +41,7 @@ export function StationStatsCard() {
         </TextBlock>
       </Stat>
 
-      <Stat>
+      <StatLink href="/stasiun-aktif" aria-label="Lihat daftar stasiun aktif">
         <IconBadge $borderColor="#43B75D">
           <StatIcon src="/brand/station-active.png" alt="" width={70} height={70} />
         </IconBadge>
@@ -48,9 +49,9 @@ export function StationStatsCard() {
           <StatLabel>Stasiun Aktif</StatLabel>
           {isLoading ? <StatSkeleton /> : <StatValue>{stasiunAktif}</StatValue>}
         </TextBlock>
-      </Stat>
+      </StatLink>
 
-      <Stat>
+      <StatLink href="/stasiun-tidak-aktif" aria-label="Lihat daftar stasiun tidak aktif">
         <IconBadge $borderColor="#EE443F">
           <StatIcon src="/brand/station-inactive.png" alt="" width={70} height={70} />
         </IconBadge>
@@ -58,7 +59,7 @@ export function StationStatsCard() {
           <StatLabel>Tidak Aktif</StatLabel>
           {isLoading ? <StatSkeleton /> : <StatValue>{stasiunTidakAktif}</StatValue>}
         </TextBlock>
-      </Stat>
+      </StatLink>
     </Content>
   );
 }
@@ -77,7 +78,7 @@ const Content = styled.div`
   }
 `;
 
-const Stat = styled.div`
+const statStyle = css`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,6 +89,28 @@ const Stat = styled.div`
     flex-direction: row;
     justify-content: flex-start;
     gap: 12px;
+  }
+`;
+
+const Stat = styled.div`
+  ${statStyle}
+`;
+
+/* Stat yang bisa diklik → halaman daftar stasiun per status. */
+const StatLink = styled(Link)`
+  ${statStyle}
+  color: inherit;
+  text-decoration: none;
+  border-radius: 16px;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 4px;
   }
 `;
 
