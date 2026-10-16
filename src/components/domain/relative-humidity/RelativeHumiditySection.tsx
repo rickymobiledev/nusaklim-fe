@@ -85,12 +85,14 @@ export function RelativeHumiditySection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <RelativeHumidityChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <RelativeHumidityChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }

@@ -85,12 +85,14 @@ export function AirTemperatureSection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <AirTemperatureChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <AirTemperatureChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }

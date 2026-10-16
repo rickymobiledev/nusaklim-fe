@@ -85,12 +85,14 @@ export function RainfallSection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <RainfallChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <RainfallChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }

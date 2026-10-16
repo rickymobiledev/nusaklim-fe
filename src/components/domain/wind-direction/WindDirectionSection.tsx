@@ -85,12 +85,14 @@ export function WindDirectionSection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <WindDirectionChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <WindDirectionChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }

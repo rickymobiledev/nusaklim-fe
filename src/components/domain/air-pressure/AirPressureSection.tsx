@@ -84,12 +84,14 @@ export function AirPressureSection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <AirPressureChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <AirPressureChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }

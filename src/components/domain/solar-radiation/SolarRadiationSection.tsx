@@ -87,12 +87,14 @@ export function SolarRadiationSection() {
         downloadDisabled={coloredSeries.length === 0}
       />
 
-      <SolarRadiationChart
-        series={coloredSeries}
-        isLoading={isLoadingChart}
-        isError={isError}
-        error={error}
-      />
+      <div ref={chartRef}>
+        <SolarRadiationChart
+          series={coloredSeries}
+          isLoading={isLoadingChart}
+          isError={isError}
+          error={error}
+        />
+      </div>
     </Wrapper>
   );
 }
