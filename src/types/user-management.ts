@@ -64,9 +64,8 @@ export interface UpdateUserInput {
   companyId: string;
 }
 
-/** Pengguna Aghris — kontrak BE belum ada, bentuk mengikuti Figma
- *  (nama, NIP SAP, peran, perusahaan). Sementara dilayani mock, lihat
- *  `lib/api/aghris-users-client.ts`. */
+/** Pengguna Aghris — `GET /aghris_users` (lihat `lib/api/aghris-users-client.ts`).
+ *  `id` = `nik_sap` karena BE tidak mengirim id terpisah. */
 export interface AghrisUser {
   id: string;
   name: string;

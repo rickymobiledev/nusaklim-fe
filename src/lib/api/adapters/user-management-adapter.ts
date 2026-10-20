@@ -1,4 +1,4 @@
-import type { Company, ManagedUser, UserRoleOption } from "@/types/user-management";
+import type { AghrisUser, Company, ManagedUser, UserRoleOption } from "@/types/user-management";
 import type { UserRole } from "@/types/auth";
 
 /** Bentuk mentah `GET/POST/PUT /users` (dikonfirmasi curl langsung ke
@@ -50,6 +50,31 @@ export interface RawCompany {
 
 export function mapRawCompany(raw: RawCompany): Company {
   return { id: raw.id, code: raw.code, name: raw.name, imageUrl: raw.image_url };
+}
+
+/** Bentuk mentah `GET /aghris_users`. Tidak ada `id` maupun id peran —
+ *  `nik_sap` dipakai sebagai `id`, `roleId` dikosongkan (form Edit
+ *  mencocokkan peran lewat `roleName`). */
+export interface RawAghrisUser {
+  nik_sap: string;
+  name: string;
+  company_code: string;
+  company_name: string;
+  user_role_code: UserRole;
+  user_role_name: string;
+  image_url: string | null;
+}
+
+export function mapRawAghrisUser(raw: RawAghrisUser): AghrisUser {
+  return {
+    id: raw.nik_sap,
+    name: raw.name,
+    nipSap: raw.nik_sap,
+    imageUrl: raw.image_url,
+    roleId: "",
+    roleName: raw.user_role_name,
+    companyName: raw.company_name,
+  };
 }
 
 /** Bentuk mentah `GET /user_roles`. */

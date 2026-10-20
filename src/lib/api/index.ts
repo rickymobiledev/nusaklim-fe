@@ -104,6 +104,6 @@ export const userRolesApi: UserRolesApi = userRolesClient;
 // import Excel SEMENTARA mock di dalam `missing-data-client.ts`
 // (`TEMP_USE_MOCK_MISSING_IMPORT`), `POST /import/aws` belum punya contoh response.
 export const missingDataApi: MissingDataApi = missingDataClient;
-// Pengguna Aghris (admin-only) — SEMENTARA mock di dalam `aghris-users-client.ts`
-// (`TEMP_USE_MOCK_AGHRIS`), endpoint BE belum ada.
+// Pengguna Aghris (admin-only) — list real via `GET /aghris_users`; tambah/
+// ubah/hapus belum ada kontrak BE (lihat `aghris-users-client.ts`).
 export const aghrisUsersApi: AghrisUsersApi = aghrisUsersClient;
