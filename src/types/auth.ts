@@ -27,7 +27,29 @@ export interface BackendUserProfile {
   user_role_name?: string;
   company_code?: string;
   company_name?: string;
-  /** Dari endpoint baru — integer ID. */
-  user_role_id?: number;
+  /** Dari endpoint baru — backend kirim `user_role_id` sebagai string ("1"). */
+  user_role_id?: number | string;
   company_id?: number;
+  created_at?: string;
+  updated_at?: string;
+  user_role_created_at?: string;
+  user_role_updated_at?: string;
+  company_image_url?: string | null;
+  company_created_at?: string;
+  company_updated_at?: string;
+}
+
+/** Info profil tambahan yang disimpan di JWT/sesi selain field inti
+ *  (`id`, `name`, `email`, `image`, role, company). */
+export interface UserProfileExtra {
+  username: string;
+  userRoleId: string;
+  companyId: string;
+  companyImageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+  roleCreatedAt: string;
+  roleUpdatedAt: string;
+  companyCreatedAt: string;
+  companyUpdatedAt: string;
 }

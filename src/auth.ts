@@ -18,7 +18,7 @@ function mapProfileToUser(profile: BackendUserProfile) {
   const role: UserRole =
     profile.user_role_code ??
     (profile.user_role_id !== undefined
-      ? (ROLE_ID_MAP[profile.user_role_id] ?? "RESEARCHER")
+      ? (ROLE_ID_MAP[Number(profile.user_role_id)] ?? "RESEARCHER")
       : "RESEARCHER");
 
   return {
@@ -30,6 +30,17 @@ function mapProfileToUser(profile: BackendUserProfile) {
     roleName: profile.user_role_name ?? role,
     companyCode: profile.company_code ?? String(profile.company_id ?? ""),
     companyName: profile.company_name ?? "",
+    username: profile.username ?? "",
+    email: profile.email ?? null,
+    userRoleId: String(profile.user_role_id ?? ""),
+    companyId: String(profile.company_id ?? ""),
+    companyImageUrl: profile.company_image_url ?? "",
+    createdAt: profile.created_at ?? "",
+    updatedAt: profile.updated_at ?? "",
+    roleCreatedAt: profile.user_role_created_at ?? "",
+    roleUpdatedAt: profile.user_role_updated_at ?? "",
+    companyCreatedAt: profile.company_created_at ?? "",
+    companyUpdatedAt: profile.company_updated_at ?? "",
   };
 }
 
@@ -94,20 +105,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       // Saat login pertama kali, `user` berisi hasil authorize() di atas.
       if (user) {
+        token.userId = user.id as string;
         token.nikSap = user.nikSap;
         token.role = user.role;
         token.roleName = user.roleName;
         token.companyCode = user.companyCode;
         token.companyName = user.companyName;
+        token.username = user.username;
+        token.userRoleId = user.userRoleId;
+        token.companyId = user.companyId;
+        token.companyImageUrl = user.companyImageUrl;
+        token.createdAt = user.createdAt;
+        token.updatedAt = user.updatedAt;
+        token.roleCreatedAt = user.roleCreatedAt;
+        token.roleUpdatedAt = user.roleUpdatedAt;
+        token.companyCreatedAt = user.companyCreatedAt;
+        token.companyUpdatedAt = user.companyUpdatedAt;
       }
       return token;
     },
     async session({ session, token }) {
+      session.user.id = token.userId as string;
       session.user.nikSap = token.nikSap as string;
       session.user.role = token.role as UserRole;
       session.user.roleName = token.roleName as string;
       session.user.companyCode = token.companyCode as string;
       session.user.companyName = token.companyName as string;
+      session.user.username = token.username as string;
+      session.user.userRoleId = token.userRoleId as string;
+      session.user.companyId = token.companyId as string;
+      session.user.companyImageUrl = token.companyImageUrl as string;
+      session.user.createdAt = token.createdAt as string;
+      session.user.updatedAt = token.updatedAt as string;
+      session.user.roleCreatedAt = token.roleCreatedAt as string;
+      session.user.roleUpdatedAt = token.roleUpdatedAt as string;
+      session.user.companyCreatedAt = token.companyCreatedAt as string;
+      session.user.companyUpdatedAt = token.companyUpdatedAt as string;
       return session;
     },
   },

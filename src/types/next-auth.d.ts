@@ -1,19 +1,22 @@
 import type { DefaultSession } from "next-auth";
-import type { UserRole } from "./auth";
+import type { UserProfileExtra, UserRole } from "./auth";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     accessToken?: string;
     user: {
+      /** ID user dari backend (`data.id` login) — dipakai sbg `notifiable_id`. */
+      id: string;
       nikSap: string;
       role: UserRole;
       roleName: string;
       companyCode: string;
       companyName: string;
-    } & DefaultSession["user"];
+    } & UserProfileExtra &
+      DefaultSession["user"];
   }
 
-  interface User {
+  interface User extends UserProfileExtra {
     accessToken?: string;
     refreshToken?: string;
     nikSap: string;
@@ -25,9 +28,10 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
+  interface JWT extends UserProfileExtra {
     accessToken?: string;
     refreshToken?: string;
+    userId: string;
     nikSap: string;
     role: UserRole;
     roleName: string;
