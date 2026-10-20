@@ -32,10 +32,18 @@ type DisplayRow = {
 };
 
 // `size` di sini dipakai `DownloadDataTable` buat lebar kolom persis Figma
-// (No 40px, Tanggal 160px, 7 kolom metrik 170px) lewat `<colgroup>`.
+// (No 40px, Tanggal 180px, 7 kolom metrik 170px) lewat `<colgroup>`.
 const columns: ColumnDef<DisplayRow>[] = [
   { accessorKey: "no", header: "No", size: 40 },
-  { accessorKey: "tanggal", header: "Tanggal", size: 160 },
+  {
+    accessorKey: "tanggal",
+    header: "Tanggal",
+    size: 180,
+    // Tanggal + jam ("19/10/2026 05:00") tidak boleh pecah ke 2 baris.
+    cell: ({ getValue }) => (
+      <span style={{ whiteSpace: "nowrap" }}>{getValue<string>()}</span>
+    ),
+  },
   { accessorKey: "rerataTemperaturUdara", header: "Rerata Temperatur Udara", size: 170 },
   {
     accessorKey: "rerataKelembapanRelatif",
