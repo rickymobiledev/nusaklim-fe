@@ -111,15 +111,17 @@ export function DownloadDataSection() {
   // filter sekali per (stasiun, tanggal, granularitas), pagination di
   // bawah murni slice client-side supaya pindah halaman/ganti "Jumlah
   // data perbaris" tidak memicu fetch/loading lagi (permintaan user).
-  const { data, isLoading, isFetching, isError, error } = useDownloadData({
-    stationId,
-    dateFrom,
-    dateTo,
-    granularity,
-  });
+  // Granularitas periode (larut malam/pagi/siang/malam): pagination
+  // SERVER-SIDE — tiap pindah halaman/ganti page size fetch halaman baru.
+  const isServerPaged = granularity !== "harian" && granularity !== "10menit";
+
+  const { data, isLoading, isFetching, isError, error } = useDownloadData(
+    { stationId, dateFrom, dateTo, granularity },
+    isServerPaged ? { page, pageSize } : undefined,
+  );
 
   const fullRows = useMemo<DownloadDataRow[]>(() => data?.data ?? [], [data]);
-  const total = fullRows.length;
+  const total = isServerPaged ? (data?.meta?.total ?? 0) : fullRows.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   // Derived, BUKAN useEffect+setPage (ditolak lint react-hooks/set-state-in-effect)
   // — jaga-jaga kalau ganti filter bikin total baris menyusut di bawah
@@ -128,7 +130,8 @@ export function DownloadDataSection() {
 
   const rows = useMemo<DisplayRow[]>(() => {
     const start = (effectivePage - 1) * pageSize;
-    return fullRows.slice(start, start + pageSize).map((row, index) => ({
+    const pageRows = isServerPaged ? fullRows : fullRows.slice(start, start + pageSize);
+    return pageRows.map((row, index) => ({
       no: start + index + 1,
       tanggal: formatTanggal(row.tanggal, granularity),
       rerataTemperaturUdara: fmtNumber(row.rerataTemperatur, "°C"),
@@ -139,7 +142,7 @@ export function DownloadDataSection() {
       rerataKecepatanAngin: fmtNumber(row.rerataKecepatanAngin, "m/s"),
       arahMataAngin: row.arahMataAngin ?? "--",
     }));
-  }, [fullRows, effectivePage, pageSize, granularity]);
+  }, [fullRows, effectivePage, pageSize, granularity, isServerPaged]);
 
   function handleCompanyCodeChange(code: string) {
     setSelectedCompanyCode(code);

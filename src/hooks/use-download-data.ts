@@ -22,15 +22,22 @@ import { fetchJson } from "@/lib/api/client-fetch";
  *  halaman/ganti "Jumlah data perbaris" tidak memicu fetch/loading lagi. */
 export function useDownloadData(
   params: Omit<GetDownloadDataParams, "companyId" | "page" | "pageSize">,
+  /** Hanya diisi untuk granularitas periode (pagination SERVER-SIDE);
+   *  `undefined` = fetch semua baris, paginate di client. */
+  pagination?: { page: number; pageSize: number },
 ) {
   return useQuery({
-    queryKey: ["download-data", params],
+    queryKey: ["download-data", params, pagination],
     queryFn: () => {
       const qs = new URLSearchParams();
       if (params.stationId) qs.set("stationId", params.stationId);
       if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
       if (params.dateTo) qs.set("dateTo", params.dateTo);
       qs.set("granularity", params.granularity);
+      if (pagination) {
+        qs.set("page", String(pagination.page));
+        qs.set("pageSize", String(pagination.pageSize));
+      }
       return fetchJson<ApiListResponse<DownloadDataRow>>(`/api/download-data?${qs}`);
     },
     enabled: !!params.stationId && !!params.dateFrom && !!params.dateTo,

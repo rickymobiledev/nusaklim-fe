@@ -29,6 +29,18 @@ export interface RawWeatherPeriod {
   wind_direction: number | string | null;
 }
 
+/** Pagination Laravel di response (`meta`), hanya field yang dipakai. */
+export interface RawPeriodMeta {
+  total: number;
+  per_page: number | string;
+  current_page: number;
+}
+
+export interface RawPeriodPage {
+  rows: RawWeatherPeriod[];
+  meta?: RawPeriodMeta;
+}
+
 /** Request mentah ke `/weathers/{period}` untuk SATU device — dipakai
  *  `download-client.ts` untuk granularitas Pagi/Siang/Malam di halaman
  *  `/download-data`. Error SENGAJA tidak ditangkap/di-fallback di sini,
@@ -39,17 +51,21 @@ export async function fetchRawPeriod(
   start: Date,
   end: Date,
   companyId?: string,
-): Promise<RawWeatherPeriod[]> {
+  pagination?: { page: number; pageSize: number },
+): Promise<RawPeriodPage> {
   const client = createApiClient(companyId);
   const res = await client.get<{
     status: boolean;
     message: string;
     data: RawWeatherPeriod[];
+    meta?: RawPeriodMeta;
   }>(`/weathers/${period}`, {
     params: {
       device_id: deviceId,
       start_date: format(start, "yyyy-MM-dd"),
       end_date: format(end, "yyyy-MM-dd"),
+      page: pagination?.page,
+      per_page: pagination?.pageSize,
     },
   });
 
@@ -60,5 +76,5 @@ export async function fetchRawPeriod(
     );
   }
 
-  return res.data.data;
+  return { rows: res.data.data, meta: res.data.meta };
 }

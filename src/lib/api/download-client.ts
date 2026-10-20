@@ -89,25 +89,13 @@ async function fetchRows(
 ): Promise<DownloadDataRow[]> {
   if (granularity === "harian") {
     const raw = await fetchRawDaily(stationId, startDate, endDate, companyId);
-    // Descending — tanggal terbaru duluan, sesuai permintaan user (mulai
-    // dari "sekarang" mundur ke belakang), juga urutan asli yang memang
-    // dikembalikan backend.
-    return raw.map(mapDailyRow).sort((a, b) => b.tanggal.localeCompare(a.tanggal));
-  }
-
-  const period = PERIOD_ENDPOINT[granularity];
-  if (period) {
-    const raw = await fetchRawPeriod(period, stationId, startDate, endDate, companyId);
-    // Descending juga — sama alasannya seperti "harian" di atas.
-    return raw.map(mapPeriodRow).sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+    // Urutan default apa adanya dari API (tanpa sort di client).
+    return raw.map(mapDailyRow);
   }
 
   // "10menit": semua pembacaan mentah dipakai apa adanya.
   const raw = await fetchRawFilter(stationId, startDate, endDate, companyId);
-  return raw
-    .map((row) => ({ row, date: parseFilterDatetime(row.datetime) }))
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
-    .map(({ row }) => mapFilterRow(row));
+  return raw.map(mapFilterRow);
 }
 
 /** Implementasi `DownloadApi` — pola sama `air-temperature-client.ts`:
@@ -145,6 +133,30 @@ export const downloadClient: DownloadApi = {
     await stationApi.getStationDetail(params.stationId, params.companyId);
 
     try {
+      // Endpoint periode: pagination SERVER-SIDE — urutan & halaman dari BE.
+      const period = PERIOD_ENDPOINT[params.granularity];
+      if (period) {
+        const page = params.page ?? 1;
+        const pageSize = params.pageSize ?? 10;
+        const { rows: raw, meta } = await fetchRawPeriod(
+          period,
+          params.stationId,
+          new Date(params.dateFrom),
+          new Date(params.dateTo),
+          params.companyId,
+          { page, pageSize },
+        );
+        const data = raw.map(mapPeriodRow);
+        return {
+          data,
+          meta: {
+            page: meta?.current_page ?? page,
+            pageSize: Number(meta?.per_page) || pageSize,
+            total: meta?.total ?? data.length,
+          },
+        };
+      }
+
       const rows = await fetchRows(
         params.stationId,
         params.granularity,
