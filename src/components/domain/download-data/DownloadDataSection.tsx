@@ -55,12 +55,21 @@ const columns: ColumnDef<DisplayRow>[] = [
  *  `"dd-MM-yyyy HH:mm"` (dari `/weathers/filter`; satu baris = satu
  *  pembacaan mentah, jadi tampilkan jamnya juga). */
 function formatTanggal(tanggal: string, granularity: DataGranularity): string {
-  if (granularity !== "10menit") {
-    return format(parse(tanggal, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: id });
+  if (granularity === "10menit") {
+    return format(parse(tanggal, "dd-MM-yyyy HH:mm", new Date()), "dd/MM/yyyy HH:mm", {
+      locale: id,
+    });
   }
-  return format(parse(tanggal, "dd-MM-yyyy HH:mm", new Date()), "dd/MM/yyyy HH:mm", {
-    locale: id,
-  });
+  // Endpoint periode `_v2`/`late_night` → satu baris per jam,
+  // `"yyyy/MM/dd HH:mm"` (mis. "2026/10/19 05:00").
+  if (granularity !== "harian") {
+    const parsed = parse(tanggal, "yyyy/MM/dd HH:mm", new Date());
+    if (!Number.isNaN(parsed.getTime())) {
+      return format(parsed, "dd/MM/yyyy HH:mm", { locale: id });
+    }
+    return tanggal;
+  }
+  return format(parse(tanggal, "yyyy-MM-dd", new Date()), "dd/MM/yyyy", { locale: id });
 }
 
 // `maximumFractionDigits: 20` (batas maksimum Intl.NumberFormat) — supaya
