@@ -231,7 +231,7 @@ export function DownloadDataSection() {
               isFetching
                 ? "Memuat data..."
                 : !stationId || !dateFrom || !dateTo
-                  ? "Pilih regional, stasiun, dan rentang tanggal untuk melihat data."
+                  ? "Pilih company, stasiun, dan rentang tanggal untuk melihat data."
                   : "Data Tidak Tersedia"
             }
           >

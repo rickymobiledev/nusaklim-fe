@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   );
   if (!companyCode) {
     return NextResponse.json(
-      { code: "COMPANY_REQUIRED", message: "Pilih regional terlebih dahulu." },
+      { code: "COMPANY_REQUIRED", message: "Pilih company terlebih dahulu." },
       { status: 400 },
     );
   }
