@@ -2,12 +2,16 @@ import { format } from "date-fns";
 import { ApiError } from "@/types/api";
 import { createApiClient } from "./fetcher";
 
-/** Endpoint periode hari di backend: pagi (00:01–12:00), siang
- *  (12:01–18:00), malam (18:01–00:00). */
-export type WeatherPeriod = "morning" | "afternoon" | "evening";
+/** Endpoint periode hari di backend: larut malam (00:00–05:59), pagi
+ *  (06:00–11:59), siang (12:00–17:59), malam (18:00–23:59). */
+export type WeatherPeriod =
+  | "late_night"
+  | "morning_v2"
+  | "afternoon_v2"
+  | "evening_v2";
 
 /** Satu baris AGREGAT per hari per periode dari
- *  `GET /weathers/{morning|afternoon|evening}` — BUKAN pembacaan mentah
+ *  `GET /weathers/{late_night|morning_v2|afternoon_v2|evening_v2}` — BUKAN pembacaan mentah
  *  seperti `/weathers/filter` (`weather-filter-client.ts`). Dikonfirmasi lewat
  *  tes langsung ke backend asli: semua metrik NUMBER (bukan string),
  *  `datetime` cuma tanggal `"YYYY-MM-DD"` (tanpa jam), dan tidak ada

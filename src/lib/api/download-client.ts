@@ -71,11 +71,13 @@ function mapPeriodRow(row: RawWeatherPeriod): DownloadDataRow {
   };
 }
 
-/** Granularitas periode → endpoint backend (`/weathers/{morning|afternoon|evening}`). */
+/** Granularitas periode → endpoint backend
+ *  (`/weathers/{late_night|morning_v2|afternoon_v2|evening_v2}`). */
 const PERIOD_ENDPOINT: Partial<Record<DataGranularity, WeatherPeriod>> = {
-  pagi: "morning",
-  siang: "afternoon",
-  malam: "evening",
+  larut_malam: "late_night",
+  pagi: "morning_v2",
+  siang: "afternoon_v2",
+  malam: "evening_v2",
 };
 
 async function fetchRows(
