@@ -17,7 +17,10 @@ export const ROLE_ID_MAP: Record<number, UserRole> = {
  *  `company_id` (number), bukan `user_role_code`/`company_code` string.
  *  Semua field dibuat optional untuk fleksibilitas apabila endpoint berubah. */
 export interface BackendUserProfile {
-  id: string;
+  /** Login user biasa. Login Aghris TIDAK punya `id`, hanya `nik_sap`. */
+  id?: string;
+  /** Login Aghris. */
+  nik_sap?: string;
   name: string;
   username?: string;
   email?: string;

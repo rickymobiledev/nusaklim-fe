@@ -21,11 +21,15 @@ function mapProfileToUser(profile: BackendUserProfile) {
       ? (ROLE_ID_MAP[Number(profile.user_role_id)] ?? "RESEARCHER")
       : "RESEARCHER");
 
+  // Login Aghris cuma punya `nik_sap` (tanpa `id`) -> `nik_sap` jadi `id`
+  // sesi, sehingga `notifiable_id` otomatis berisi `nik_sap`.
+  const id = String(profile.id ?? profile.nik_sap ?? "");
+
   return {
-    id: profile.id,
+    id,
     name: profile.name,
     image: profile.image_url ?? null,
-    nikSap: profile.id,
+    nikSap: String(profile.nik_sap ?? profile.id ?? ""),
     role,
     roleName: profile.user_role_name ?? role,
     companyCode: profile.company_code ?? String(profile.company_id ?? ""),
