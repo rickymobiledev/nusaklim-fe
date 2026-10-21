@@ -12,11 +12,14 @@ export function MissingDataSummary({
   missingCount,
   affectedStationCount,
   isLoading = false,
+  canImport = false,
 }: {
   missingCount: number;
   affectedStationCount: number;
   /** Selama data dimuat, angka diganti skeleton (bukan "0" yang menyesatkan). */
   isLoading?: boolean;
+  /** Kartu Import File cuma untuk admin. */
+  canImport?: boolean;
 }) {
   return (
     <Row>
@@ -48,7 +51,7 @@ export function MissingDataSummary({
         </StatText>
       </StatCard>
 
-      <MissingDataImportCard />
+      {canImport && <MissingDataImportCard />}
     </Row>
   );
 }

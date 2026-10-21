@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { missingDataApi } from "@/lib/api";
 import { validateImportFile } from "@/lib/missing-data-import";
-import { requireAdmin, apiErrorResponse } from "@/lib/api/route-guard";
+import { requireRoles, apiErrorResponse } from "@/lib/api/route-guard";
 
 export async function POST(request: Request) {
-  const { user, unauthorized } = await requireAdmin();
+  const { user, unauthorized } = await requireRoles(["ADMINISTRATOR", "RESEARCHER"]);
   if (!user) return unauthorized;
 
   const form = await request.formData().catch(() => null);

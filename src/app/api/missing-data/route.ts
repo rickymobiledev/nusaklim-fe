@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { missingDataApi } from "@/lib/api";
-import { requireAdmin, resolveCompanyId, apiErrorResponse } from "@/lib/api/route-guard";
+import { requireRoles, resolveCompanyId, apiErrorResponse } from "@/lib/api/route-guard";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_PAGE_SIZE = 100;
@@ -16,7 +16,7 @@ function badRequest(message: string) {
  *  `pageSize`) SERVER-SIDE — diteruskan ke `GET /weathers/missing`. Station
  *  wajib; `companyId` ditentukan `resolveCompanyId()`, bukan dari query. */
 export async function GET(request: Request) {
-  const { user, unauthorized } = await requireAdmin();
+  const { user, unauthorized } = await requireRoles(["ADMINISTRATOR", "RESEARCHER"]);
   if (!user) return unauthorized;
 
   const { searchParams } = new URL(request.url);

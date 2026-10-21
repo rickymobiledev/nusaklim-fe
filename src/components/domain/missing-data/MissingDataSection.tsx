@@ -102,7 +102,7 @@ function toDisplayRow(row: MissingDataRow, no: number): DisplayRow {
   };
 }
 
-export function MissingDataSection() {
+export function MissingDataSection({ canImport = false }: { canImport?: boolean }) {
   const [selectedStationId, setSelectedStationId] = useState<string>();
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [page, setPage] = useState(1);
@@ -171,6 +171,7 @@ export function MissingDataSection() {
         missingCount={missingCount}
         affectedStationCount={affectedStationCount}
         isLoading={isTableLoading}
+        canImport={canImport}
       />
 
       <FilterAndTableGroup>

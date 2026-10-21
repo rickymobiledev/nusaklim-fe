@@ -71,6 +71,20 @@ export async function requireAdmin() {
   return { user, unauthorized: null };
 }
 
+/** Seperti `requireAdmin()` tapi untuk daftar role bebas (403 JSON kalau
+ *  role tidak termasuk). Pola return sama dengan `requireUser()`. */
+export async function requireRoles(roles: UserRole[]) {
+  const { user, unauthorized } = await requireUser();
+  if (!user) return { user: null, unauthorized };
+  if (!roles.includes(user.role)) {
+    return {
+      user: null,
+      unauthorized: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    };
+  }
+  return { user, unauthorized: null };
+}
+
 /** Satu tempat konversi `ApiError` (dari `lib/api/*`) jadi response JSON —
  *  dipakai di blok `catch` tiap Route Handler. */
 export function apiErrorResponse(error: unknown) {

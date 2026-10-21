@@ -52,8 +52,10 @@ export type NavItem = {
  *  "Lainnya" (admin-only) dropdown-nya redesign: untuk ADMIN "Ramalan Cuaca"
  *  ada di dalam dropdown ini (menghindari dobel di drawer mobile yang
  *  flatten `children`), sedangkan role selain admin dapat pill top-level
- *  "Ramalan Cuaca" sendiri (item `roles` non-admin di bawah), + "Missing Data"
- *  (`/missing-data`, admin-only) + "Manajemen" (sudah ada). `/forecast` juga
+ *  "Ramalan Cuaca" sendiri (item `roles` non-admin di bawah; admin dapat di
+ *  dropdown) + "Manajemen" (sudah ada, admin-only). "Missing Data"
+ *  (`/missing-data`) hanya ADMINISTRATOR (di dropdown) & RESEARCHER (pill
+ *  top-level), termasuk Import File. `/forecast` juga
  *  bisa diakses langsung via URL / kartu Ramalan Cuaca di Beranda —
  *  `EXTRA_TITLES["/forecast"]` di bawah menjaga title/breadcrumb. */
 export const NAV_ITEMS: NavItem[] = [
@@ -66,6 +68,12 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/forecast",
     icon: ForecastIcon,
     roles: ["RESEARCHER", "VIEWER_ANPER", "VIEWER_HOLDING"],
+  },
+  {
+    label: "Missing Data",
+    href: "/missing-data",
+    icon: MissingDataIcon,
+    roles: ["RESEARCHER"],
   },
   {
     label: "Lainnya",
