@@ -14,8 +14,8 @@ import { media } from "@/lib/breakpoints";
 import { IMPORT_FILE_EXTENSIONS, validateImportFile } from "@/lib/missing-data-import";
 
 /** Kartu "Import File" (Figma "Frame 98") — pilih file Excel (.xlsx/.xls,
- *  maks 5 MB) lalu Import. Link "Unduh template" disabled sampai URL
- *  template dari BE ada. */
+ *  maks 5 MB) lalu Import. Link "Unduh template" mengunduh
+ *  `public/templates/form-import-missing-data.xlsx`. */
 export function MissingDataImportCard() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -62,10 +62,8 @@ export function MissingDataImportCard() {
             : "Format File : .xlsx, .xls (Maksimal Size 5 MB)"}
         </Hint>
         <TemplateLink
-          type="button"
-          disabled
-          title="Template belum tersedia"
-          aria-label="Unduh template file import data (belum tersedia)"
+          href="/templates/form-import-missing-data.xlsx"
+          download="form-import-missing-data.xlsx"
         >
           <ImportIcon size={20} color="#175FE2" />
           Unduh template file import data
@@ -173,24 +171,16 @@ const Hint = styled.span`
   overflow-wrap: anywhere;
 `;
 
-const TemplateLink = styled.button`
+const TemplateLink = styled.a`
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
   gap: 4px;
-  padding: 0;
-  border: none;
-  background: transparent;
   font-family: var(--font-body), sans-serif;
   font-size: 13px;
   line-height: 20px;
   color: #175fe2;
   cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const Actions = styled.div`
