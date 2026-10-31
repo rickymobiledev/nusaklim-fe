@@ -25,12 +25,16 @@ export function useCompanies() {
 export function useCreateCompany() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: CreateCompanyInput) =>
-      fetchJson<ApiItemResponse<Company>>("/api/user-management/companies", {
+    mutationFn: (input: CreateCompanyInput) => {
+      const form = new FormData();
+      form.append("name", input.name);
+      form.append("code", input.code);
+      form.append("image", input.image, input.image.name);
+      return fetchJson<ApiItemResponse<Company>>("/api/user-management/companies", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      }),
+        body: form,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COMPANIES_QUERY_KEY });
       toast.success("Perusahaan berhasil ditambahkan.");
@@ -46,7 +50,7 @@ export function useUpdateCompany() {
       fetchJson<ApiItemResponse<Company>>(`/api/user-management/companies/${input.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: input.name, code: input.code }),
+        body: JSON.stringify({ name: input.name }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COMPANIES_QUERY_KEY });

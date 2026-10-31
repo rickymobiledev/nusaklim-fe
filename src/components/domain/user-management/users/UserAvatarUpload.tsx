@@ -6,17 +6,21 @@ import { ImageIcon, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
 import { AVATAR_ACCEPT, validateAvatarFile } from "@/lib/user-avatar";
 
-/** Avatar bulat + tombol "Unggah Foto". TODO: file BELUM dikirim ke BE —
- *  `POST/PUT /users` belum punya field foto; sambungkan setelah kontrak BE
- *  jelas. Untuk sekarang cuma validasi + preview lokal. */
+/** Avatar bulat + tombol "Unggah Foto". Tanpa `onChange` cuma validasi +
+ *  preview lokal (file BELUM dikirim ke BE untuk pengguna/stasiun); kalau
+ *  `onChange` diisi, file valid diteruskan ke pemanggil. */
 export function UserAvatarUpload({
   initialUrl,
   alt = "Foto pengguna",
   uploadLabel = "Unggah Foto",
+  onChange,
+  disabled = false,
 }: {
   initialUrl?: string | null;
   alt?: string;
   uploadLabel?: string;
+  onChange?: (file: File) => void;
+  disabled?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -38,6 +42,7 @@ export function UserAvatarUpload({
       return;
     }
     setPreviewUrl(URL.createObjectURL(file));
+    onChange?.(file);
   }
 
   const shownUrl = previewUrl ?? initialUrl ?? null;
@@ -53,7 +58,7 @@ export function UserAvatarUpload({
         )}
       </Circle>
       <Side>
-        <UploadButton type="button" onClick={() => inputRef.current?.click()}>
+        <UploadButton type="button" disabled={disabled} onClick={() => inputRef.current?.click()}>
           <UploadCloud size={24} strokeWidth={1.5} />
           {uploadLabel}
         </UploadButton>
@@ -119,6 +124,11 @@ const UploadButton = styled.button`
   font-weight: 600;
   line-height: 16px;
   color: #175fe2;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const Hint = styled.p`

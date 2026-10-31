@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type { CreateCompanyInput } from "@/types/user-management";
 import { companiesApi } from "@/lib/api";
 import { requireAdmin, apiErrorResponse } from "@/lib/api/route-guard";
 
@@ -42,10 +41,10 @@ export async function PUT(
   const id = parseId((await params).id);
   if (id === null) return INVALID_ID();
 
-  const body = (await request.json().catch(() => ({}))) as Partial<CreateCompanyInput>;
-  if (!body.name?.trim() || !body.code?.trim()) {
+  const body = (await request.json().catch(() => ({}))) as { name?: string };
+  if (!body.name?.trim()) {
     return NextResponse.json(
-      { code: "COMPANY_INVALID_INPUT", message: "Semua field wajib diisi." },
+      { code: "COMPANY_INVALID_INPUT", message: "Nama perusahaan wajib diisi." },
       { status: 400 },
     );
   }
@@ -54,7 +53,6 @@ export async function PUT(
     const result = await companiesApi.updateCompany({
       id,
       name: body.name.trim(),
-      code: body.code.trim(),
     });
     return NextResponse.json(result);
   } catch (error) {

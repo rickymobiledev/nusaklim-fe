@@ -15,23 +15,23 @@ import type { CompaniesApi } from "./companies-api";
  *  company-scoped. */
 const client = createApiClient();
 
-/** SEMENTARA: kontrak BE untuk tambah/ubah/hapus perusahaan belum ada, jadi
- *  mutasi dimock in-memory sebagai OVERLAY di atas hasil `GET /companies`
- *  yang tetap real (pola sama `TEMP_USE_MOCK_AGHRIS`). Set `false` HANYA
- *  setelah cabang real di bawah diimplementasi. Overlay hilang saat server
- *  restart. */
-const TEMP_USE_MOCK_COMPANIES = true;
+interface Envelope {
+  status: boolean;
+  message: string;
+}
 
-const NOT_IMPLEMENTED = new ApiError(
-  "COMPANY_NOT_IMPLEMENTED",
-  "Endpoint tambah/ubah/hapus perusahaan belum tersedia.",
-);
+function toApiError(err: unknown, code: string): ApiError {
+  if (err instanceof ApiError) return err;
+  return new ApiError(
+    code,
+    extractBackendErrorMessage(err) ??
+      "Gagal terhubung ke server. Periksa koneksi internet.",
+  );
+}
 
-let mockCreated: Company[] = [];
-const mockUpdated = new Map<number, Company>();
-const mockDeleted = new Set<number>();
-// Jauh di atas ID asli supaya tidak bentrok.
-let nextMockId = 900001;
+function assertOk(body: Envelope, code: string, fallback: string) {
+  if (!body.status) throw new ApiError(code, body.message || fallback);
+}
 
 export async function fetchRealCompanies(): Promise<Company[]> {
   try {
@@ -50,67 +50,75 @@ export async function fetchRealCompanies(): Promise<Company[]> {
 
     return res.data.data.map(mapRawCompany);
   } catch (err) {
-    if (err instanceof ApiError) throw err;
-    throw new ApiError(
-      "COMPANY_FETCH_FAILED",
-      extractBackendErrorMessage(err) ??
-        "Gagal terhubung ke server. Periksa koneksi internet.",
-    );
+    throw toApiError(err, "COMPANY_FETCH_FAILED");
   }
 }
 
 export const companiesClient: CompaniesApi = {
   async getCompanies(): Promise<ApiListResponse<Company>> {
-    const real = await fetchRealCompanies();
-    const companies = TEMP_USE_MOCK_COMPANIES
-      ? [
-          ...mockCreated,
-          ...real
-            .filter((c) => !mockDeleted.has(c.id))
-            .map((c) => mockUpdated.get(c.id) ?? c),
-        ]
-      : real;
+    const companies = await fetchRealCompanies();
     return {
       data: companies,
       meta: { page: 1, pageSize: companies.length, total: companies.length },
     };
   },
 
+  /** `POST /companies` — multipart: code, name, image (file). */
   async createCompany(input: CreateCompanyInput): Promise<ApiItemResponse<Company>> {
-    if (!TEMP_USE_MOCK_COMPANIES) throw NOT_IMPLEMENTED;
-    const created: Company = {
-      id: nextMockId++,
-      name: input.name,
-      code: input.code,
-      imageUrl: null,
-    };
-    mockCreated = [created, ...mockCreated];
-    return { data: created };
+    const form = new FormData();
+    form.append("code", input.code);
+    form.append("name", input.name);
+    form.append("image", input.image, input.image.name);
+
+    try {
+      const res = await client.post<Envelope>("/companies", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      assertOk(res.data, "COMPANY_CREATE_FAILED", "Gagal menambah perusahaan.");
+    } catch (err) {
+      throw toApiError(err, "COMPANY_CREATE_FAILED");
+    }
+
+    // Bentuk respons mutasi BE tidak diandalkan — ambil ulang dari GET.
+    const saved = (await fetchRealCompanies()).find((c) => c.code === input.code);
+    if (!saved) {
+      throw new ApiError("COMPANY_CREATE_FAILED", "Gagal menambah perusahaan.");
+    }
+    return { data: saved };
   },
 
+  /** `PUT /companies` — multipart: id (integer), name. */
   async updateCompany(input: UpdateCompanyInput): Promise<ApiItemResponse<Company>> {
-    if (!TEMP_USE_MOCK_COMPANIES) throw NOT_IMPLEMENTED;
-    const created = mockCreated.find((c) => c.id === input.id);
-    const existing =
-      created ?? (await fetchRealCompanies()).find((c) => c.id === input.id);
-    if (!existing) {
-      throw new ApiError("COMPANY_NOT_FOUND", "Perusahaan tidak ditemukan.");
+    const form = new FormData();
+    form.append("id", String(input.id));
+    form.append("name", input.name);
+
+    try {
+      const res = await client.put<Envelope>("/companies", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      assertOk(res.data, "COMPANY_UPDATE_FAILED", "Gagal mengubah perusahaan.");
+    } catch (err) {
+      throw toApiError(err, "COMPANY_UPDATE_FAILED");
     }
-    const updated: Company = { ...existing, name: input.name, code: input.code };
-    if (created) {
-      mockCreated = mockCreated.map((c) => (c.id === input.id ? updated : c));
-    } else {
-      mockUpdated.set(input.id, updated);
+
+    const saved = (await fetchRealCompanies()).find((c) => c.id === input.id);
+    if (!saved) {
+      throw new ApiError("COMPANY_UPDATE_FAILED", "Gagal mengubah perusahaan.");
     }
-    return { data: updated };
+    return { data: saved };
   },
 
+  /** `DELETE /companies` — x-www-form-urlencoded: id. */
   async deleteCompany(id: number): Promise<void> {
-    if (!TEMP_USE_MOCK_COMPANIES) throw NOT_IMPLEMENTED;
-    if (mockCreated.some((c) => c.id === id)) {
-      mockCreated = mockCreated.filter((c) => c.id !== id);
-      return;
+    try {
+      const res = await client.delete<Envelope>("/companies", {
+        data: new URLSearchParams({ id: String(id) }).toString(),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      assertOk(res.data, "COMPANY_DELETE_FAILED", "Gagal menghapus perusahaan.");
+    } catch (err) {
+      throw toApiError(err, "COMPANY_DELETE_FAILED");
     }
-    mockDeleted.add(id);
   },
 };

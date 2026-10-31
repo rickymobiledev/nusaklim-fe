@@ -2,27 +2,15 @@ import { ApiError } from "@/types/api";
 import type { ApiItemResponse, ApiListResponse } from "@/types/api";
 import type { Station } from "@/types/domain";
 import type { CreateStationInput, UpdateStationInput } from "@/types/user-management";
-import { companiesClient } from "./companies-client";
 import { mapAdminDeviceToStation, type RawAdminDevice } from "./adapters/station-adapter";
 import { extractBackendErrorMessage } from "./backend-error";
 import { createApiClient } from "./fetcher";
 import type { StationsAdminApi } from "./stations-admin-api";
 
-/** SEMENTARA: kontrak BE untuk tambah/ubah/hapus stasiun belum ada, jadi
- *  mutasi dimock in-memory sebagai OVERLAY di atas hasil
- *  `GET /devices` (via fetcher admin) yang tetap real (pola sama `TEMP_USE_MOCK_COMPANIES`).
- *  Set `false` HANYA setelah cabang real diimplementasi. Overlay hilang saat
- *  server restart. */
-const TEMP_USE_MOCK_STATIONS = true;
-
-const NOT_IMPLEMENTED = new ApiError(
-  "STATION_NOT_IMPLEMENTED",
-  "Endpoint tambah/ubah/hapus stasiun belum tersedia.",
-);
-
-let mockCreated: Station[] = [];
-const mockUpdated = new Map<string, Station>();
-const mockDeleted = new Set<string>();
+interface BackendEnvelope {
+  status: boolean;
+  message: string;
+}
 
 /** Manajemen Stasiun SENGAJA hit `GET /devices` (punya `elevation`), bukan
  *  `/devices/status` yang dipakai `stationApi` untuk halaman lain. Company
@@ -30,11 +18,9 @@ const mockDeleted = new Set<string>();
  *  (`createApiClient(companyCode)` meng-inject `company_code`). */
 async function fetchRealStations(): Promise<Station[]> {
   try {
-    const res = await createApiClient().get<{
-      status: boolean;
-      message: string;
-      data: RawAdminDevice[];
-    }>("/devices");
+    const res = await createApiClient().get<
+      BackendEnvelope & { data: RawAdminDevice[] }
+    >("/devices");
     if (!res.data.status) {
       throw new ApiError(
         "STATION_FETCH_FAILED",
@@ -52,82 +38,95 @@ async function fetchRealStations(): Promise<Station[]> {
   }
 }
 
-async function resolveCompanyName(code: string): Promise<string> {
-  const companies = await companiesClient.getCompanies();
-  return companies.data.find((c) => c.code === code)?.name ?? code;
+/** Body `POST`/`PUT /devices` — `application/x-www-form-urlencoded`. */
+function toFormBody(input: CreateStationInput): URLSearchParams {
+  const body = new URLSearchParams();
+  body.set("id", input.id);
+  body.set("name", input.name);
+  body.set("brand", input.brand);
+  body.set("latitude", String(input.latitude));
+  body.set("longitude", String(input.longitude));
+  body.set("company_code", input.companyCode);
+  body.set("elevation", input.elevation == null ? "" : String(input.elevation));
+  return body;
+}
+
+async function mutateStation(
+  method: "post" | "put",
+  input: CreateStationInput,
+  failCode: string,
+  failMessage: string,
+): Promise<ApiItemResponse<Station>> {
+  try {
+    const res = await createApiClient().request<BackendEnvelope>({
+      method,
+      url: "/devices",
+      data: toFormBody(input),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    if (!res.data.status) {
+      throw new ApiError(failCode, res.data.message || failMessage);
+    }
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(
+      failCode,
+      extractBackendErrorMessage(err) ??
+        "Gagal terhubung ke server. Periksa koneksi internet.",
+    );
+  }
+
+  // Respons mutasi BE tidak diandalkan bentuknya — ambil ulang dari GET.
+  const saved = (await fetchRealStations()).find((s) => s.id === input.id);
+  if (!saved) throw new ApiError(failCode, failMessage);
+  return { data: saved };
 }
 
 export const stationsAdminClient: StationsAdminApi = {
   async getStations(): Promise<ApiListResponse<Station>> {
-    const real = await fetchRealStations();
-    const stations = TEMP_USE_MOCK_STATIONS
-      ? [
-          ...mockCreated,
-          ...real
-            .filter((s) => !mockDeleted.has(s.id))
-            .map((s) => mockUpdated.get(s.id) ?? s),
-        ]
-      : real;
+    const stations = await fetchRealStations();
     return {
       data: stations,
       meta: { page: 1, pageSize: stations.length, total: stations.length },
     };
   },
 
-  async createStation(input: CreateStationInput): Promise<ApiItemResponse<Station>> {
-    if (!TEMP_USE_MOCK_STATIONS) throw NOT_IMPLEMENTED;
-    const existing = await stationsAdminClient.getStations();
-    if (existing.data.some((s) => s.id === input.id)) {
-      throw new ApiError("STATION_ID_EXISTS", "ID stasiun sudah digunakan.");
-    }
-    const created: Station = {
-      id: input.id,
-      nama: input.name,
-      brand: input.brand,
-      companyCode: input.companyCode,
-      companyName: await resolveCompanyName(input.companyCode),
-      lat: input.latitude,
-      long: input.longitude,
-      elevation: input.elevation ?? null,
-      status: "off",
-      sinkronisasiTerakhir: null,
-    };
-    mockCreated = [created, ...mockCreated];
-    return { data: created };
+  createStation(input: CreateStationInput): Promise<ApiItemResponse<Station>> {
+    return mutateStation(
+      "post",
+      input,
+      "STATION_CREATE_FAILED",
+      "Gagal menambah stasiun.",
+    );
   },
 
-  async updateStation(input: UpdateStationInput): Promise<ApiItemResponse<Station>> {
-    if (!TEMP_USE_MOCK_STATIONS) throw NOT_IMPLEMENTED;
-    const created = mockCreated.find((s) => s.id === input.id);
-    const existing =
-      created ?? (await fetchRealStations()).find((s) => s.id === input.id);
-    if (!existing) {
-      throw new ApiError("STATION_NOT_FOUND", "Stasiun tidak ditemukan.");
-    }
-    const updated: Station = {
-      ...existing,
-      nama: input.name,
-      brand: input.brand,
-      companyCode: input.companyCode,
-      companyName: await resolveCompanyName(input.companyCode),
-      lat: input.latitude,
-      long: input.longitude,
-      elevation: input.elevation ?? null,
-    };
-    if (created) {
-      mockCreated = mockCreated.map((s) => (s.id === input.id ? updated : s));
-    } else {
-      mockUpdated.set(input.id, updated);
-    }
-    return { data: updated };
+  updateStation(input: UpdateStationInput): Promise<ApiItemResponse<Station>> {
+    return mutateStation(
+      "put",
+      input,
+      "STATION_UPDATE_FAILED",
+      "Gagal mengubah stasiun.",
+    );
   },
 
   async deleteStation(id: string): Promise<void> {
-    if (!TEMP_USE_MOCK_STATIONS) throw NOT_IMPLEMENTED;
-    if (mockCreated.some((s) => s.id === id)) {
-      mockCreated = mockCreated.filter((s) => s.id !== id);
-      return;
+    try {
+      const res = await createApiClient().delete<BackendEnvelope>("/devices", {
+        data: { id },
+      });
+      if (!res.data.status) {
+        throw new ApiError(
+          "STATION_DELETE_FAILED",
+          res.data.message || "Gagal menghapus stasiun.",
+        );
+      }
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        "STATION_DELETE_FAILED",
+        extractBackendErrorMessage(err) ??
+          "Gagal terhubung ke server. Periksa koneksi internet.",
+      );
     }
-    mockDeleted.add(id);
   },
 };

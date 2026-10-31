@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -26,8 +26,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 /** Form Tambah/Edit Perusahaan — sesuai Figma (struktur mengikuti
- *  `aghris-users/AghrisUserFormPage.tsx`). Logo HANYA validasi + preview
- *  lokal (kontrak upload BE belum ada, TODO sama seperti foto pengguna). */
+ *  `aghris-users/AghrisUserFormPage.tsx`). Logo wajib saat Tambah; saat Edit
+ *  hanya nama yang bisa diubah (`PUT /companies` cuma menerima `id` & `name`). */
 export function CompanyFormPage({
   mode,
   companyId,
@@ -80,6 +80,8 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
   const createCompany = useCreateCompany();
   const updateCompany = useUpdateCompany();
   const isSubmitting = createCompany.isPending || updateCompany.isPending;
+  const [image, setImage] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | undefined>();
 
   const {
     register,
@@ -96,11 +98,15 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
 
   function onSubmit(values: FormValues) {
     if (mode === "create") {
-      createCompany.mutate(values, { onSuccess: goToList });
+      if (!image) {
+        setImageError("Logo perusahaan wajib diunggah");
+        return;
+      }
+      createCompany.mutate({ ...values, image }, { onSuccess: goToList });
       return;
     }
     if (!company) return;
-    updateCompany.mutate({ id: company.id, ...values }, { onSuccess: goToList });
+    updateCompany.mutate({ id: company.id, name: values.name }, { onSuccess: goToList });
   }
 
   return (
@@ -110,7 +116,13 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
           initialUrl={company?.imageUrl}
           alt="Logo perusahaan"
           uploadLabel="Unggah Logo"
+          disabled={mode === "edit"}
+          onChange={(file) => {
+            setImage(file);
+            setImageError(undefined);
+          }}
         />
+        {imageError && <ImageError role="alert">{imageError}</ImageError>}
 
         <UserFormField
           id="name"
@@ -125,6 +137,7 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
           label="Kode Perusahaan"
           placeholder="e.g. N001"
           error={errors.code?.message}
+          disabled={mode === "edit"}
           {...register("code")}
         />
       </Fields>
@@ -221,6 +234,14 @@ const Fields = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+`;
+
+const ImageError = styled.p`
+  margin: 0;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #d92d20;
 `;
 
 const Actions = styled.div`

@@ -15,14 +15,17 @@ export interface Company {
   imageUrl: string | null;
 }
 
-/** Form Tambah/Edit Perusahaan. Logo BELUM ikut (kontrak upload BE belum ada). */
+/** Form Tambah Perusahaan. `image` = logo (wajib di BE saat tambah). */
 export interface CreateCompanyInput {
   name: string;
   code: string;
+  image: File;
 }
 
-export interface UpdateCompanyInput extends CreateCompanyInput {
+/** `PUT /companies` hanya menerima `id` & `name` (kode & logo tidak bisa diubah). */
+export interface UpdateCompanyInput {
   id: number;
+  name: string;
 }
 
 export interface UserRoleOption {

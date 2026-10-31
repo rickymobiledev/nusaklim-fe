@@ -97,7 +97,7 @@ export const notificationApi: NotificationApi = notificationClient;
 // `GET /user_roles`, dikonfirmasi curl langsung ke backend asli).
 export const usersApi: UsersApi = usersClient;
 export const companiesApi: CompaniesApi = companiesClient;
-// Manajemen > Stasiun (admin-only): daftar real, CRUD SEMENTARA mock.
+// Manajemen > Stasiun (admin-only): GET/POST/PUT/DELETE `/devices` real.
 export const stationsAdminApi: StationsAdminApi = stationsAdminClient;
 export const userRolesApi: UserRolesApi = userRolesClient;
 // Domain "Missing Data" (admin-only) — daftar real (`GET /weathers/missing`),

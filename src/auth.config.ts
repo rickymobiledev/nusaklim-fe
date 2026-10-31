@@ -44,8 +44,9 @@ export const authConfig: NextAuthConfig = {
         return isLoggedIn ? Response.redirect(new URL("/", request.nextUrl)) : true;
       }
 
-      // Semua route lain wajib login.
-      return isLoggedIn;
+      // Semua route lain wajib login. Redirect manual ke /login (tanpa
+      // `?callbackUrl=`) — kalau return false, NextAuth menambahkannya otomatis.
+      return isLoggedIn || Response.redirect(new URL("/login", request.nextUrl));
     },
   },
   providers: [], // provider sesungguhnya didaftarkan di auth.ts
