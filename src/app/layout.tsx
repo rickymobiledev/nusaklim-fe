@@ -38,7 +38,7 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Monitoring Cuaca — PT Riset Perkebunan Nusantara",
+  title: "Nusaklim — PT Riset Perkebunan Nusantara",
   description: "Dashboard monitoring stasiun cuaca & ramalan cuaca perkebunan",
 };
 

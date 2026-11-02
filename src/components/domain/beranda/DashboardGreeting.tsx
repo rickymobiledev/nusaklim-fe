@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import styled from "styled-components";
@@ -7,13 +8,19 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 
 export function DashboardGreeting() {
   const { user } = useCurrentUser();
-  const now = new Date();
-  const tanggalJam = `${format(now, "EEEE, d MMMM yyyy, HH:mm", { locale: id })} WIB`;
+  // `now` diisi setelah mount supaya HTML server == render pertama client
+  // (waktu server ≠ waktu/zona browser → hydration error #418).
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => setNow(new Date()), []);
+
+  const tanggalJam = now
+    ? `${format(now, "EEEE, d MMMM yyyy, HH:mm", { locale: id })} WIB`
+    : " ";
 
   return (
     <Wrapper>
-      <DateTimeText suppressHydrationWarning>{tanggalJam}</DateTimeText>
-      <GreetingLine>Selamat {getGreetingByHour(now.getHours())},</GreetingLine>
+      <DateTimeText>{tanggalJam}</DateTimeText>
+      <GreetingLine>Selamat {now ? getGreetingByHour(now.getHours()) : ""},</GreetingLine>
       <NameLine>{user?.name ?? "Guest"}</NameLine>
     </Wrapper>
   );
