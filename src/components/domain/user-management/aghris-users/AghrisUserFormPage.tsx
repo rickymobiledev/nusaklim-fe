@@ -31,7 +31,7 @@ const LIST_HREF = "/user-management/aghris-users";
 
 const schema = z.object({
   nipSap: z.string().trim().min(1, "NIK SAP wajib diisi"),
-  roleId: z.string().min(1, "Peran wajib dipilih"),
+  roleCode: z.string().min(1, "Peran wajib dipilih"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -102,9 +102,7 @@ function AghrisUserForm({
   const updateUser = useUpdateAghrisUser();
   const isSubmitting = createUser.isPending || updateUser.isPending;
 
-  // Data mock awal belum punya `roleId` — cocokkan lewat nama peran.
-  const initialRoleId =
-    user?.roleId || roles.find((r) => r.name === user?.roleName)?.id || "";
+  const initialRoleCode = user?.roleCode ?? "";
 
   const {
     register,
@@ -113,7 +111,7 @@ function AghrisUserForm({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { nipSap: user?.nipSap ?? "", roleId: initialRoleId },
+    defaultValues: { nipSap: user?.nipSap ?? "", roleCode: initialRoleCode },
   });
 
   function goToList() {
@@ -137,6 +135,7 @@ function AghrisUserForm({
           label="NIK SAP"
           placeholder="e.g. 2365236"
           inputMode="numeric"
+          readOnly={mode === "edit"}
           error={errors.nipSap?.message}
           {...register("nipSap")}
         />
@@ -145,15 +144,15 @@ function AghrisUserForm({
           <FieldLabel>Peran</FieldLabel>
           <Controller
             control={control}
-            name="roleId"
+            name="roleCode"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <FormSelectTrigger $invalid={!!errors.roleId}>
+                <FormSelectTrigger $invalid={!!errors.roleCode}>
                   <SelectValue placeholder="Pilih Peran" />
                 </FormSelectTrigger>
                 <SelectContent>
                   {roles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
+                    <SelectItem key={role.id} value={role.code}>
                       {role.name}
                     </SelectItem>
                   ))}
@@ -161,7 +160,7 @@ function AghrisUserForm({
               </Select>
             )}
           />
-          {errors.roleId && <FieldError>{errors.roleId.message}</FieldError>}
+          {errors.roleCode && <FieldError>{errors.roleCode.message}</FieldError>}
         </Field>
       </Fields>
 

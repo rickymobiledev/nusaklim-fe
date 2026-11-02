@@ -10,15 +10,57 @@ import { mapRawAghrisUser, type RawAghrisUser } from "./adapters/user-management
 import { extractBackendErrorMessage } from "./backend-error";
 import type { AghrisUsersApi } from "./aghris-users-api";
 
-/** `GET /aghris_users` — daftar pengguna Aghris. Kontrak tambah/ubah/hapus
- *  BELUM ada, jadi ketiganya masih melempar `AGHRIS_NOT_IMPLEMENTED`. */
+/** `GET/POST/PUT/DELETE /aghris_users` — tidak company-scoped. Body
+ *  create/update/delete WAJIB urlencoded (create & update: `nik_sap`,
+ *  `user_role_code`; delete: `nik_sap`), pola sama `users-client.ts`. */
 const client = createApiClient();
 
-function notImplemented(): never {
-  throw new ApiError(
-    "AGHRIS_NOT_IMPLEMENTED",
-    "Endpoint tambah/ubah/hapus Pengguna Aghris belum tersedia.",
-  );
+const FORM_HEADERS = { "Content-Type": "application/x-www-form-urlencoded" };
+
+async function saveAghrisUser(
+  method: "post" | "put",
+  input: { nipSap: string; roleCode: string },
+  errorCode: string,
+  fallbackMessage: string,
+): Promise<ApiItemResponse<AghrisUser>> {
+  try {
+    const res = await client[method]<{
+      status: boolean;
+      message: string;
+      data?: RawAghrisUser;
+    }>(
+      "/aghris_users",
+      new URLSearchParams({
+        nik_sap: input.nipSap,
+        user_role_code: input.roleCode,
+      }).toString(),
+      { headers: FORM_HEADERS },
+    );
+    if (!res.data.status) {
+      throw new ApiError(errorCode, res.data.message || fallbackMessage);
+    }
+    // Daftar di-refetch setelah mutasi; data balikan BE tidak dijamin lengkap.
+    return {
+      data: mapRawAghrisUser(
+        res.data.data ?? {
+          nik_sap: input.nipSap,
+          name: "",
+          company_code: "",
+          company_name: "",
+          user_role_code: input.roleCode as RawAghrisUser["user_role_code"],
+          user_role_name: "",
+          image_url: null,
+        },
+      ),
+    };
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(
+      errorCode,
+      extractBackendErrorMessage(err) ??
+        "Gagal terhubung ke server. Periksa koneksi internet.",
+    );
+  }
 }
 
 export const aghrisUsersClient: AghrisUsersApi = {
@@ -54,18 +96,39 @@ export const aghrisUsersClient: AghrisUsersApi = {
   },
 
   async createAghrisUser(
-    _input: CreateAghrisUserInput,
+    input: CreateAghrisUserInput,
   ): Promise<ApiItemResponse<AghrisUser>> {
-    return notImplemented();
+    return saveAghrisUser("post", input, "AGHRIS_CREATE_FAILED", "Gagal menambahkan pengguna Aghris.");
   },
 
   async updateAghrisUser(
-    _input: UpdateAghrisUserInput,
+    input: UpdateAghrisUserInput,
   ): Promise<ApiItemResponse<AghrisUser>> {
-    return notImplemented();
+    return saveAghrisUser("put", input, "AGHRIS_UPDATE_FAILED", "Gagal memperbarui pengguna Aghris.");
   },
 
-  async deleteAghrisUser(_id: string): Promise<void> {
-    return notImplemented();
+  async deleteAghrisUser(id: string): Promise<void> {
+    try {
+      const res = await client.delete<{ status: boolean; message: string }>(
+        "/aghris_users",
+        {
+          data: new URLSearchParams({ nik_sap: id }).toString(),
+          headers: FORM_HEADERS,
+        },
+      );
+      if (!res.data.status) {
+        throw new ApiError(
+          "AGHRIS_DELETE_FAILED",
+          res.data.message || "Gagal menghapus pengguna Aghris.",
+        );
+      }
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(
+        "AGHRIS_DELETE_FAILED",
+        extractBackendErrorMessage(err) ??
+          "Gagal terhubung ke server. Periksa koneksi internet.",
+      );
+    }
   },
 };

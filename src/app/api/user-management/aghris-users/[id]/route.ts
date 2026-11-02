@@ -31,7 +31,7 @@ export async function PUT(
   const body = (await request.json().catch(() => ({}))) as Partial<
     Omit<UpdateAghrisUserInput, "id">
   >;
-  if (!body.nipSap?.trim() || !body.roleId) {
+  if (!body.nipSap?.trim() || !body.roleCode) {
     return NextResponse.json(
       { code: "AGHRIS_INVALID_INPUT", message: "Semua field wajib diisi." },
       { status: 400 },
@@ -42,7 +42,7 @@ export async function PUT(
     const result = await aghrisUsersApi.updateAghrisUser({
       id,
       nipSap: body.nipSap.trim(),
-      roleId: body.roleId,
+      roleCode: body.roleCode,
     });
     return NextResponse.json(result);
   } catch (error) {

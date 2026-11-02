@@ -74,21 +74,20 @@ export interface AghrisUser {
   name: string;
   nipSap: string;
   imageUrl: string | null;
-  /** Kosong untuk data mock awal — form Edit mencocokkan lewat `roleName`. */
-  roleId: string;
+  roleCode: string;
   roleName: string;
   companyName: string;
 }
 
 export interface CreateAghrisUserInput {
   nipSap: string;
-  roleId: string;
+  roleCode: string;
 }
 
 export interface UpdateAghrisUserInput {
   id: string;
   nipSap: string;
-  roleId: string;
+  roleCode: string;
 }
 
 /** Form Tambah/Edit Stasiun (Manajemen > Stasiun). Foto BELUM ikut (kontrak upload BE belum ada). */

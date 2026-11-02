@@ -57,8 +57,7 @@ export function mapRawCompany(raw: RawCompany): Company {
 }
 
 /** Bentuk mentah `GET /aghris_users`. Tidak ada `id` maupun id peran —
- *  `nik_sap` dipakai sebagai `id`, `roleId` dikosongkan (form Edit
- *  mencocokkan peran lewat `roleName`). */
+ *  `nik_sap` dipakai sebagai `id`. */
 export interface RawAghrisUser {
   nik_sap: string;
   name: string;
@@ -75,7 +74,7 @@ export function mapRawAghrisUser(raw: RawAghrisUser): AghrisUser {
     name: raw.name ?? "",
     nipSap: raw.nik_sap != null ? String(raw.nik_sap) : "",
     imageUrl: raw.image_url,
-    roleId: "",
+    roleCode: raw.user_role_code ?? "",
     roleName: raw.user_role_name ?? "",
     companyName: raw.company_name ?? "",
   };

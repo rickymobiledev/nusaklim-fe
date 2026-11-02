@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   if (!user) return unauthorized;
 
   const body = (await request.json().catch(() => ({}))) as Partial<CreateAghrisUserInput>;
-  if (!body.nipSap?.trim() || !body.roleId) {
+  if (!body.nipSap?.trim() || !body.roleCode) {
     return NextResponse.json(
       { code: "AGHRIS_INVALID_INPUT", message: "Semua field wajib diisi." },
       { status: 400 },
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   try {
     const result = await aghrisUsersApi.createAghrisUser({
       nipSap: body.nipSap.trim(),
-      roleId: body.roleId,
+      roleCode: body.roleCode,
     });
     return NextResponse.json(result);
   } catch (error) {
