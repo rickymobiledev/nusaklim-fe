@@ -23,16 +23,20 @@ export interface RawManagedUser {
 
 export function mapRawUser(raw: RawManagedUser): ManagedUser {
   return {
-    id: raw.id,
-    name: raw.name,
-    username: raw.username,
-    email: raw.email,
+    id: String(raw.id),
+    name: raw.name ?? "",
+    username: raw.username ?? "",
+    email: raw.email ?? "",
     imageUrl: raw.image_url,
-    role: { id: raw.user_role_id, code: raw.user_role_code, name: raw.user_role_name },
+    role: {
+      id: raw.user_role_id != null ? String(raw.user_role_id) : "",
+      code: raw.user_role_code,
+      name: raw.user_role_name ?? "",
+    },
     company: {
       id: raw.company_id,
-      code: raw.company_code,
-      name: raw.company_name,
+      code: raw.company_code ?? "",
+      name: raw.company_name ?? "",
       imageUrl: raw.company_image_url,
     },
     createdAt: raw.created_at,
@@ -67,13 +71,13 @@ export interface RawAghrisUser {
 
 export function mapRawAghrisUser(raw: RawAghrisUser): AghrisUser {
   return {
-    id: raw.nik_sap,
-    name: raw.name,
-    nipSap: raw.nik_sap,
+    id: String(raw.nik_sap),
+    name: raw.name ?? "",
+    nipSap: raw.nik_sap != null ? String(raw.nik_sap) : "",
     imageUrl: raw.image_url,
     roleId: "",
-    roleName: raw.user_role_name,
-    companyName: raw.company_name,
+    roleName: raw.user_role_name ?? "",
+    companyName: raw.company_name ?? "",
   };
 }
 

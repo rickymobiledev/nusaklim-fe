@@ -37,10 +37,10 @@ export function AghrisUsersSection() {
     if (!term) return allUsers;
     return allUsers.filter(
       (u) =>
-        u.name.toLowerCase().includes(term) ||
-        u.nipSap.toLowerCase().includes(term) ||
-        u.roleName.toLowerCase().includes(term) ||
-        u.companyName.toLowerCase().includes(term),
+        (u.name ?? "").toLowerCase().includes(term) ||
+        (u.nipSap ?? "").toLowerCase().includes(term) ||
+        (u.roleName ?? "").toLowerCase().includes(term) ||
+        (u.companyName ?? "").toLowerCase().includes(term),
     );
   }, [allUsers, searchTerm]);
 
