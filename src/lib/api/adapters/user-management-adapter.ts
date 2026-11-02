@@ -88,5 +88,5 @@ export interface RawUserRole {
 }
 
 export function mapRawUserRole(raw: RawUserRole): UserRoleOption {
-  return { id: raw.id, code: raw.code, name: raw.name };
+  return { id: String(raw.id), code: raw.code, name: raw.name };
 }
