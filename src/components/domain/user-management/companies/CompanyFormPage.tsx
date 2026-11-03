@@ -26,8 +26,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 /** Form Tambah/Edit Perusahaan — sesuai Figma (struktur mengikuti
- *  `aghris-users/AghrisUserFormPage.tsx`). Logo wajib saat Tambah; saat Edit
- *  hanya nama yang bisa diubah (`PUT /companies` cuma menerima `id` & `name`). */
+ *  `aghris-users/AghrisUserFormPage.tsx`). Logo wajib saat Tambah, opsional saat
+ *  Edit (kode tidak bisa diubah). */
 export function CompanyFormPage({
   mode,
   companyId,
@@ -106,7 +106,7 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
       return;
     }
     if (!company) return;
-    updateCompany.mutate({ id: company.id, name: values.name }, { onSuccess: goToList });
+    updateCompany.mutate({ id: company.id, name: values.name, image }, { onSuccess: goToList });
   }
 
   return (
@@ -116,7 +116,6 @@ function CompanyForm({ mode, company }: { mode: "create" | "edit"; company?: Com
           initialUrl={company?.imageUrl}
           alt="Logo perusahaan"
           uploadLabel="Unggah Logo"
-          disabled={mode === "edit"}
           onChange={(file) => {
             setImage(file);
             setImageError(undefined);

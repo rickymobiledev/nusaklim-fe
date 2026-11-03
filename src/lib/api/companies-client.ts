@@ -87,11 +87,12 @@ export const companiesClient: CompaniesApi = {
     return { data: saved };
   },
 
-  /** `PUT /companies` — multipart: id (integer), name. */
+  /** `PUT /companies` — multipart: id (integer), name, image (file, opsional). */
   async updateCompany(input: UpdateCompanyInput): Promise<ApiItemResponse<Company>> {
     const form = new FormData();
     form.append("id", String(input.id));
     form.append("name", input.name);
+    if (input.image) form.append("image", input.image, input.image.name);
 
     try {
       const res = await client.put<Envelope>("/companies", form, {

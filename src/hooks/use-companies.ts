@@ -46,12 +46,15 @@ export function useCreateCompany() {
 export function useUpdateCompany() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateCompanyInput) =>
-      fetchJson<ApiItemResponse<Company>>(`/api/user-management/companies/${input.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: input.name }),
-      }),
+    mutationFn: (input: UpdateCompanyInput) => {
+      const form = new FormData();
+      form.append("name", input.name);
+      if (input.image) form.append("image", input.image, input.image.name);
+      return fetchJson<ApiItemResponse<Company>>(
+        `/api/user-management/companies/${input.id}`,
+        { method: "PUT", body: form },
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COMPANIES_QUERY_KEY });
       toast.success("Data perusahaan berhasil diperbarui.");

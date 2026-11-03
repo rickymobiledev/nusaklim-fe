@@ -22,10 +22,11 @@ export interface CreateCompanyInput {
   image: File;
 }
 
-/** `PUT /companies` hanya menerima `id` & `name` (kode & logo tidak bisa diubah). */
+/** `PUT /companies` menerima `id`, `name`, dan `image` (opsional; kode tidak bisa diubah). */
 export interface UpdateCompanyInput {
   id: number;
   name: string;
+  image?: File | null;
 }
 
 export interface UserRoleOption {

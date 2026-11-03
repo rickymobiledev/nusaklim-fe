@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validateAvatarFile } from "@/lib/user-avatar";
 import { companiesApi } from "@/lib/api";
 import { requireAdmin, apiErrorResponse } from "@/lib/api/route-guard";
 
@@ -41,10 +42,17 @@ export async function PUT(
   const id = parseId((await params).id);
   if (id === null) return INVALID_ID();
 
-  const body = (await request.json().catch(() => ({}))) as { name?: string };
-  if (!body.name?.trim()) {
+  const form = await request.formData().catch(() => null);
+  const name = String(form?.get("name") ?? "").trim();
+  const file = form?.get("image");
+  const image = file instanceof File && file.size > 0 ? file : null;
+  const imageError = image ? validateAvatarFile(image) : null;
+  if (!name || imageError) {
     return NextResponse.json(
-      { code: "COMPANY_INVALID_INPUT", message: "Nama perusahaan wajib diisi." },
+      {
+        code: "COMPANY_INVALID_INPUT",
+        message: imageError ?? "Nama perusahaan wajib diisi.",
+      },
       { status: 400 },
     );
   }
@@ -52,7 +60,8 @@ export async function PUT(
   try {
     const result = await companiesApi.updateCompany({
       id,
-      name: body.name.trim(),
+      name,
+      image,
     });
     return NextResponse.json(result);
   } catch (error) {
