@@ -26,7 +26,6 @@ import {
 import { STATION_BRANDS } from "@/constants";
 import { media } from "@/lib/breakpoints";
 import type { Station } from "@/types/domain";
-import { UserAvatarUpload } from "../users/UserAvatarUpload";
 import { Field, FieldError, FieldLabel, UserFormField } from "../users/UserFormField";
 
 const LIST_HREF = "/user-management/stations";
@@ -62,8 +61,7 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-/** Form Tambah/Edit Stasiun (struktur mengikuti `companies/CompanyFormPage.tsx`).
- *  Foto HANYA validasi + preview lokal — kontrak upload BE belum ada. */
+/** Form Tambah/Edit Stasiun (struktur mengikuti `companies/CompanyFormPage.tsx`). */
 export function StationFormPage({
   mode,
   stationId,
@@ -160,8 +158,6 @@ function StationForm({ mode, station }: { mode: "create" | "edit"; station?: Sta
   return (
     <Panel onSubmit={handleSubmit(onSubmit)} noValidate>
       <Fields>
-        <UserAvatarUpload alt="Foto stasiun" uploadLabel="Unggah Foto" />
-
         <UserFormField
           id="name"
           label="Nama Stasiun"
