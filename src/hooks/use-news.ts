@@ -19,7 +19,16 @@ export function useNews() {
   return useQuery({
     queryKey: ["news"],
     queryFn: () => fetchJson<ApiListResponse<NewsItem>>("/api/news"),
-    select: (res) => res.data,
+    // Featured selalu di depan (kartu besar Beranda), sisanya terbaru dulu —
+    // jangan bergantung pada urutan dari API/cache.
+    select: (res) =>
+      [...res.data].sort((a, b) =>
+        a.isFeatured !== b.isFeatured
+          ? a.isFeatured
+            ? -1
+            : 1
+          : b.createdAt.localeCompare(a.createdAt),
+      ),
     staleTime: NEWS_STALE_MS,
   });
 }
