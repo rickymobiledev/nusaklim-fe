@@ -162,7 +162,7 @@ export function NewsList({
                 <Title>{item.title}</Title>
                 <BadgeRow>
                   <StatusBadge status={item.status} />
-                  {item.isFeatured && <FeaturedBadge>⭐ Featured</FeaturedBadge>}
+                  {item.isFeatured && <FeaturedBadge>Featured</FeaturedBadge>}
                 </BadgeRow>
               </TitleRow>
               {item.excerpt && <Excerpt>{item.excerpt}</Excerpt>}
@@ -405,11 +405,10 @@ const Badge = styled.span<{ $status: string }>`
           `}
 `;
 
-/** Badge is_featured — biru. */
+/** Badge is_featured — bentuk sama dengan `Badge` status, warna biru. */
 const FeaturedBadge = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 3px;
   padding: 2px 10px;
   border-radius: 999px;
   background: #dbeafe;
@@ -418,6 +417,7 @@ const FeaturedBadge = styled.span`
   font-size: 11px;
   font-weight: 600;
   line-height: 18px;
+  text-transform: capitalize;
 `;
 
 const Excerpt = styled.p`

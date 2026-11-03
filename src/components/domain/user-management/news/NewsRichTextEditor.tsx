@@ -26,7 +26,15 @@ export function NewsRichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ link: { openOnClick: false } }),
-      Image,
+      Image.configure({
+        resize: {
+          enabled: true,
+          directions: ["bottom-right", "bottom-left", "top-right", "top-left"],
+          minWidth: 60,
+          minHeight: 60,
+          alwaysPreserveAspectRatio: true,
+        },
+      }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       TextStyle,
       Color,

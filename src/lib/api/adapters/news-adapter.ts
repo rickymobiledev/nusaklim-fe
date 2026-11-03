@@ -16,7 +16,7 @@ export interface RawNewsItem {
   cover_image?: string | null;
   cover_image_url?: string | null;
   status?: string;
-  is_featured?: number;
+  is_featured?: number | string | boolean | null;
   created_at?: string;
 }
 
@@ -27,6 +27,11 @@ function stripHtml(html: string): string {
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Flag BE bisa datang sebagai 1/"1"/true — semuanya dianggap aktif. */
+function isTruthyFlag(v: RawNewsItem["is_featured"]): boolean {
+  return v === 1 || v === "1" || v === true || v === "true";
 }
 
 export function mapRawNewsItem(raw: RawNewsItem, fallbackId?: string): NewsItem {
@@ -43,7 +48,7 @@ export function mapRawNewsItem(raw: RawNewsItem, fallbackId?: string): NewsItem 
     coverImage: raw.cover_image_url || raw.cover_image || null,
     createdAt: raw.created_at ?? new Date().toISOString(),
     status: raw.status ?? "draft",
-    isFeatured: raw.is_featured === 1,
+    isFeatured: isTruthyFlag(raw.is_featured),
   };
 }
 
