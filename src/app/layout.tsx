@@ -37,9 +37,37 @@ const nunitoSans = Nunito_Sans({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://www.nusaklim.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Nusaklim — PT Riset Perkebunan Nusantara",
   description: "Dashboard monitoring stasiun cuaca & ramalan cuaca perkebunan",
+  applicationName: "Nusaklim",
+  // Google mensyaratkan favicon berukuran kelipatan 48px.
+  icons: {
+    icon: [
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/favicon-192.png",
+  },
+  openGraph: {
+    siteName: "Nusaklim",
+    title: "Nusaklim — PT Riset Perkebunan Nusantara",
+    type: "website",
+    url: SITE_URL,
+  },
+};
+
+/** Structured data agar Google menampilkan nama situs "Nusaklim" (bukan nusaklim.com). */
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Nusaklim",
+  alternateName: ["Nusaklim", "PT Riset Perkebunan Nusantara"],
+  url: `${SITE_URL}/`,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +77,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${plusJakartaSans.variable} ${nunitoSans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <StyledComponentsRegistry>
           <Providers>{children}</Providers>
         </StyledComponentsRegistry>
