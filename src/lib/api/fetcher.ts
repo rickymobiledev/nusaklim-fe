@@ -1,6 +1,7 @@
 import https from "node:https";
 import axios, { type AxiosInstance } from "axios";
 import { API_V2_URL } from "@/constants";
+import { getBackendAuthorization } from "@/lib/auth/access-token";
 
 /** Agent HTTPS di-share ACROSS semua `createApiClient()` call (module-level
  *  singleton, bukan dibuat ulang tiap request) — `keepAlive: true` supaya
@@ -44,6 +45,16 @@ export function createApiClient(companyCode?: string): AxiosInstance {
       "Content-Type": "application/json",
       "api-key": process.env.API_KEY ?? "",
     },
+  });
+
+  // `Authorization: Bearer <access_token>` dari sesi user yang sedang
+  // request — dibaca per-request (bukan saat instance dibuat) karena
+  // beberapa client dibuat sekali di level modul. Tanpa sesi (mis.
+  // forgot-password via `publicApi`) header tidak dikirim.
+  instance.interceptors.request.use(async (config) => {
+    const authorization = await getBackendAuthorization();
+    if (authorization) config.headers.set("Authorization", authorization);
+    return config;
   });
 
   if (companyCode) {

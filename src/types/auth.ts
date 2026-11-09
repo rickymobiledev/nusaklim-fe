@@ -42,6 +42,19 @@ export interface BackendUserProfile {
   company_updated_at?: string;
 }
 
+/** Response `POST /api/v2/authentications/login`. Token backend ada di
+ *  root envelope (sejajar `data`), bukan di dalam `data`. */
+export interface BackendLoginResponse {
+  status: boolean;
+  message?: string;
+  data: BackendUserProfile;
+  /** ISO 8601 dengan offset, mis. `2026-11-08T13:59:14+07:00`. */
+  expires_at?: string;
+  /** Biasanya `Bearer`. */
+  token_type?: string;
+  access_token?: string;
+}
+
 /** Info profil tambahan yang disimpan di JWT/sesi selain field inti
  *  (`id`, `name`, `email`, `image`, role, company). */
 export interface UserProfileExtra {

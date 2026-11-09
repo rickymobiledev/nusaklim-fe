@@ -19,6 +19,14 @@ export const sessionCookie = {
   },
 };
 
+/** `true` kalau access token backend sudah lewat `expires_at`. Token tanpa
+ *  `expires_at` (sesi lama sebelum field ini ada) dianggap belum expired. */
+export function isAccessTokenExpired(expiresAt: unknown): boolean {
+  if (typeof expiresAt !== "string" || !expiresAt) return false;
+  const ts = Date.parse(expiresAt);
+  return !Number.isNaN(ts) && ts <= Date.now();
+}
+
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
@@ -31,6 +39,11 @@ export const authConfig: NextAuthConfig = {
     sessionToken: sessionCookie,
   },
   callbacks: {
+    // Sesi ikut mati saat access token backend expired — return null
+    // membuat Auth.js menghapus cookie sesi (berlaku juga di proxy).
+    jwt({ token }) {
+      return isAccessTokenExpired(token.accessTokenExpiresAt) ? null : token;
+    },
     // Dipanggil oleh middleware untuk memutuskan apakah request boleh lanjut.
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;

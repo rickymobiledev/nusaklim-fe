@@ -19,6 +19,9 @@ declare module "next-auth" {
   interface User extends UserProfileExtra {
     accessToken?: string;
     refreshToken?: string;
+    tokenType?: string;
+    /** ISO 8601 dari `expires_at` login backend. */
+    accessTokenExpiresAt?: string;
     nikSap: string;
     role: UserRole;
     roleName: string;
@@ -31,6 +34,9 @@ declare module "next-auth/jwt" {
   interface JWT extends UserProfileExtra {
     accessToken?: string;
     refreshToken?: string;
+    tokenType?: string;
+    /** ISO 8601 dari `expires_at` login backend. */
+    accessTokenExpiresAt?: string;
     userId: string;
     nikSap: string;
     role: UserRole;

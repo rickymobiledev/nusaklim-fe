@@ -1,14 +1,15 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { authConfig } from "./auth.config";
+import { authConfig, isAccessTokenExpired } from "./auth.config";
 import { API_V2_URL } from "./constants";
 import { ROLE_ID_MAP } from "./types/auth";
-import type { BackendUserProfile, UserRole } from "./types/auth";
+import type { BackendLoginResponse, BackendUserProfile, UserRole } from "./types/auth";
 
 /**
- * Backend TIDAK mengeluarkan token/JWT sendiri — cuma balikin profil user.
- * Sesi yang dipakai app ini adalah JWT yang di-generate Auth.js sendiri
- * setelah verifikasi ke backend berhasil, bukan pass-through token dari backend.
+ * Login backend mengembalikan profil di `data` plus `access_token`,
+ * `token_type`, `expires_at` di root response. Token backend disimpan di
+ * JWT Auth.js (server-side, tidak diekspos ke session client) dan dipakai
+ * untuk revoke saat logout; sesi otomatis berakhir saat `expires_at` lewat.
  *
  * Response aktual `/authentications/login` mengembalikan `user_role_id` (int)
  * dan `company_id` (int). Fallback ke `user_role_code` / `company_code` string
@@ -87,7 +88,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!res.ok) return null;
 
-        let body: { status: boolean; message: string; data: BackendUserProfile };
+        let body: BackendLoginResponse;
         try {
           body = JSON.parse(text);
         } catch {
@@ -100,15 +101,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        return mapProfileToUser(body.data);
+        if (!body.access_token) {
+          console.error("[auth] login response tanpa access_token");
+          return null;
+        }
+
+        return {
+          ...mapProfileToUser(body.data),
+          accessToken: body.access_token,
+          tokenType: body.token_type ?? "Bearer",
+          accessTokenExpiresAt: body.expires_at,
+        };
       },
     }),
   ],
+  events: {
+    // Dipanggil Auth.js saat signOut() — revoke token di backend. Gagal
+    // revoke tidak menghalangi logout lokal (cookie sesi tetap dihapus).
+    async signOut(message) {
+      const token = "token" in message ? message.token : null;
+      if (!token?.accessToken) return;
+      try {
+        const res = await fetch(`${API_V2_URL}/authentications/logout`, {
+          method: "POST",
+          headers: {
+            "api-key": process.env.API_KEY ?? "",
+            Authorization: `${token.tokenType ?? "Bearer"} ${token.accessToken}`,
+            Accept: "application/json",
+          },
+        });
+        if (!res.ok) {
+          console.warn("[auth] logout BE HTTP", res.status, (await res.text()).slice(0, 300));
+        }
+      } catch (err) {
+        console.error("[auth] logout fetch error:", err);
+      }
+    },
+  },
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user }) {
       // Saat login pertama kali, `user` berisi hasil authorize() di atas.
       if (user) {
+        token.accessToken = user.accessToken;
+        token.tokenType = user.tokenType;
+        token.accessTokenExpiresAt = user.accessTokenExpiresAt;
         token.userId = user.id as string;
         token.nikSap = user.nikSap;
         token.role = user.role;
@@ -126,7 +163,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.companyCreatedAt = user.companyCreatedAt;
         token.companyUpdatedAt = user.companyUpdatedAt;
       }
-      return token;
+      return isAccessTokenExpired(token.accessTokenExpiresAt) ? null : token;
     },
     async session({ session, token }) {
       session.user.id = token.userId as string;
