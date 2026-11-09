@@ -1,6 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { authConfig, isAccessTokenExpired } from "./auth.config";
+import { authConfig } from "./auth.config";
+import {
+  forgetProbedToken,
+  isAccessTokenExpired,
+  validateSessionToken,
+} from "./lib/auth/session-probe";
 import { API_V2_URL } from "./constants";
 import { ROLE_ID_MAP } from "./types/auth";
 import type { BackendLoginResponse, BackendUserProfile, UserRole } from "./types/auth";
@@ -56,6 +61,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         identifier: { label: "Identifier", type: "text" },
         password: { label: "Password", type: "password" },
+        // Dikirim lewat signIn() (dilindungi token CSRF Auth.js), bukan
+        // endpoint terpisah — perbaikan VA-05.
+        rememberMe: { label: "Ingat Saya", type: "checkbox" },
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.password) return null;
@@ -111,6 +119,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           accessToken: body.access_token,
           tokenType: body.token_type ?? "Bearer",
           accessTokenExpiresAt: body.expires_at,
+          rememberMe: String(credentials.rememberMe) === "true",
         };
       },
     }),
@@ -121,6 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signOut(message) {
       const token = "token" in message ? message.token : null;
       if (!token?.accessToken) return;
+      forgetProbedToken(token.accessToken);
       try {
         const res = await fetch(`${API_V2_URL}/authentications/logout`, {
           method: "POST",
@@ -146,6 +156,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.accessToken = user.accessToken;
         token.tokenType = user.tokenType;
         token.accessTokenExpiresAt = user.accessTokenExpiresAt;
+        token.rememberMe = user.rememberMe === true;
+        token.authTime = Date.now();
+        token.lastActivity = token.authTime;
         token.userId = user.id as string;
         token.nikSap = user.nikSap;
         token.role = user.role;
@@ -162,8 +175,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.roleUpdatedAt = user.roleUpdatedAt;
         token.companyCreatedAt = user.companyCreatedAt;
         token.companyUpdatedAt = user.companyUpdatedAt;
+        // Token baru saja dikeluarkan backend — tidak perlu probe.
+        return isAccessTokenExpired(token.accessTokenExpiresAt) ? null : token;
       }
-      return isAccessTokenExpired(token.accessTokenExpiresAt) ? null : token;
+      // Request berikutnya: tolak kalau expired atau sudah di-revoke (VA-06).
+      return validateSessionToken(token);
     },
     async session({ session, token }) {
       session.user.id = token.userId as string;

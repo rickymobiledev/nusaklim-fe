@@ -46,22 +46,14 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       identifier: values.username,
       password: values.password,
+      // Menentukan batas sesi di server (lib/auth/session-probe.ts).
+      rememberMe: String(values.rememberMe),
       redirect: false,
     });
 
     if (!result || result.error) {
       setFormError("NIK SAP/Email/Username atau password salah.");
       return;
-    }
-
-    try {
-      await fetch("/api/auth/remember-me", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rememberMe: values.rememberMe }),
-      });
-    } catch {
-      // Best-effort — gagalnya penyesuaian durasi sesi tidak boleh menggagalkan login.
     }
 
     router.push("/");
