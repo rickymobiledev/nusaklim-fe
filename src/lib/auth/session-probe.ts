@@ -24,6 +24,8 @@ const PROBE_URL = `${process.env.API_BASE_URL ?? "http://localhost:8000"}/api/v2
  *  memanggil backend. Jendela ini = jeda maksimum token salinan masih
  *  diterima setelah logout di instance lain. */
 const ACTIVE_CACHE_TTL_MS = 10_000;
+/** Batas waktu probe — lewat dari ini dianggap gangguan backend (fail-open). */
+const PROBE_TIMEOUT_MS = 3_000;
 const MAX_CACHE_ENTRIES = 1_000;
 const activeUntil = new Map<string, number>();
 
@@ -38,6 +40,7 @@ async function isBackendTokenActive(authorization: string, accessToken: string) 
   if (cached && cached > now) return true;
 
   let status: number;
+  const startedAt = Date.now();
   try {
     const res = await fetch(PROBE_URL, {
       method: "GET",
@@ -47,12 +50,20 @@ async function isBackendTokenActive(authorization: string, accessToken: string) 
         Accept: "application/json",
       },
       cache: "no-store",
+      // Probe tidak boleh menahan /api/auth/session (login & tiap halaman).
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
     });
     status = res.status;
-    // Body tidak dipakai — buang supaya koneksi bisa dipakai ulang.
-    await res.body?.cancel().catch(() => {});
+    // Body tidak dipakai — buang tanpa ditunggu (jangan `await`, bisa menggantung).
+    void res.body?.cancel().catch(() => {});
   } catch (err) {
-    console.error("[auth] probe sesi gagal (fail-open):", err);
+    console.error(
+      `[auth] probe sesi gagal setelah ${Date.now() - startedAt}ms (fail-open):`,
+      err,
+    );
+    // Cache juga hasil fail-open supaya tiap navigasi tidak ikut tertahan
+    // PROBE_TIMEOUT_MS selama backend lambat.
+    activeUntil.set(accessToken, Date.now() + ACTIVE_CACHE_TTL_MS);
     return true;
   }
 
