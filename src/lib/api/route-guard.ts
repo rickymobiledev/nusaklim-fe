@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { ApiError } from "@/types/api";
+import { ApiError, UNAUTHENTICATED } from "@/types/api";
 import type { UserRole } from "@/types/auth";
 
 /** Bentuk `user` yang dibalikin `requireUser()` — dipakai Route Handler
@@ -88,6 +88,12 @@ export async function requireRoles(roles: UserRole[]) {
 /** Satu tempat konversi `ApiError` (dari `lib/api/*`) jadi response JSON —
  *  dipakai di blok `catch` tiap Route Handler. */
 export function apiErrorResponse(error: unknown) {
+  if (error instanceof ApiError && error.code === UNAUTHENTICATED) {
+    return NextResponse.json(
+      { error: "Unauthorized", code: error.code, message: error.message },
+      { status: 401 },
+    );
+  }
   if (error instanceof ApiError) {
     return NextResponse.json(
       { code: error.code, message: error.message },

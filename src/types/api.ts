@@ -29,6 +29,10 @@ export interface ApiErrorBody {
 
 /** Di-throw oleh implementasi mock/real kalau gagal — komponen UI cuma
  *  perlu tahu satu pola penanganan error di seluruh aplikasi. */
+/** Kode `ApiError` saat sesi/access token tidak valid lagi — dipetakan ke
+ *  HTTP 401 (route-guard) dan memicu redirect ke /login (client-fetch). */
+export const UNAUTHENTICATED = "UNAUTHENTICATED";
+
 export class ApiError extends Error {
   readonly code: string;
 

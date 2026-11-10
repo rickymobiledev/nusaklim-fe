@@ -1,6 +1,7 @@
 import https from "node:https";
-import axios, { type AxiosInstance } from "axios";
+import axios, { isAxiosError, type AxiosInstance } from "axios";
 import { API_V2_URL } from "@/constants";
+import { ApiError, UNAUTHENTICATED } from "@/types/api";
 import { getBackendAuthorization } from "@/lib/auth/access-token";
 
 /** Agent HTTPS di-share ACROSS semua `createApiClient()` call (module-level
@@ -67,6 +68,15 @@ export function createApiClient(companyCode?: string): AxiosInstance {
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
+      // Access token backend expired/di-revoke -> BE balas 401. Diubah jadi
+      // ApiError khusus supaya diteruskan apa adanya oleh blok catch tiap
+      // client (`if (err instanceof ApiError) throw err`) dan dipetakan ke
+      // HTTP 401 oleh `apiErrorResponse()` — client lalu redirect ke /login.
+      if (isAxiosError(error) && error.response?.status === 401) {
+        return Promise.reject(
+          new ApiError(UNAUTHENTICATED, "Sesi Anda telah berakhir. Silakan masuk kembali."),
+        );
+      }
       // Taruh error handling terpusat di sini: logging, dsb. Karena instance
       // ini sekarang cuma jalan di server (Route Handler), tidak ada lagi
       // redirect ke /login di sini — Route Handler pemanggil yang
